@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>测试文章</title>
+    <url>/2026/04/15/test-post/</url>
+    <content><![CDATA[<h1 id="测试文章"><a href="#测试文章" class="headerlink" title="测试文章"></a>测试文章</h1><p>这是一篇测试文章，用于验证Hexo博客的部署功能。</p>
+<h2 id="测试内容"><a href="#测试内容" class="headerlink" title="测试内容"></a>测试内容</h2><ul>
+<li>测试Markdown格式</li>
+<li>测试代码高亮</li>
+<li>测试部署功能</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">print(<span class="string">"Hello, Hexo!"</span>)</span><br></pre></td></tr></table></figure>
+
+<p>希望这篇文章能够成功部署到GitHub Pages。</p>
+]]></content>
+      <categories>
+        <category>测试</category>
+      </categories>
+      <tags>
+        <tag>测试</tag>
+        <tag>Hexo</tag>
+      </tags>
+  </entry>
+</search>
