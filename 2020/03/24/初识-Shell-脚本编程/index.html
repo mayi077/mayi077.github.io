@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
+  <link rel="mask-icon" href="/images/tu.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言：&amp;emsp;突然发现Linux下执行ca$1t flag命令时也可以正常访问，再加上以前做题时也有使用这些奇怪符号绕过的。得知是shell脚本相关得到那么我就来看看shell脚本吧。 什么是 Shell&amp;emsp; shell 是一个应用程序，这个应用程序提供了一个界面，可以使用户通过这个界面访问 Linux 内核的服务。&amp;emsp;我们常常说的Shell 其实更多的是指 Shell 脚本（">
+<meta property="og:type" content="article">
+<meta property="og:title" content="初识 Shell 脚本编程">
+<meta property="og:url" content="https://mayi077.github.io/2020/03/24/%E5%88%9D%E8%AF%86-Shell-%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B/index.html">
+<meta property="og:site_name" content="信安小蚂蚁">
+<meta property="og:description" content="前言：&amp;emsp;突然发现Linux下执行ca$1t flag命令时也可以正常访问，再加上以前做题时也有使用这些奇怪符号绕过的。得知是shell脚本相关得到那么我就来看看shell脚本吧。 什么是 Shell&amp;emsp; shell 是一个应用程序，这个应用程序提供了一个界面，可以使用户通过这个界面访问 Linux 内核的服务。&amp;emsp;我们常常说的Shell 其实更多的是指 Shell 脚本（">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pic.downk.cc/item/5e79bafa9dbe9d88c5d8bfae.jpg">
+<meta property="article:published_time" content="2020-03-24T08:08:19.000Z">
+<meta property="article:modified_time" content="2020-03-24T08:11:20.000Z">
+<meta property="article:author" content="信安小蚂蚁">
+<meta property="article:tag" content="基础积累">
+<meta property="article:tag" content="日常笔记">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pic.downk.cc/item/5e79bafa9dbe9d88c5d8bfae.jpg">
+
+<link rel="canonical" href="https://mayi077.github.io/2020/03/24/%E5%88%9D%E8%AF%86-Shell-%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>初识 Shell 脚本编程 | 信安小蚂蚁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">信安小蚂蚁</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right"></div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-主页">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
+
+  </li>
+        <li class="menu-item menu-item-归档">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-分类">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-标签">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-关于">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/03/24/%E5%88%9D%E8%AF%86-Shell-%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          初识 Shell 脚本编程
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-03-24 16:08:19 / 修改时间：16:11:20" itemprop="dateCreated datePublished" datetime="2020-03-24T16:08:19+08:00">2020-03-24</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%97%A5%E5%B8%B8%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index">
+                    <span itemprop="name">日常笔记</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>8 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="前言："><a href="#前言：" class="headerlink" title="前言："></a>前言：</h3><p>&emsp;突然发现Linux下执行ca$1t flag命令时也可以正常访问，再加上以前做题时也有使用这些奇怪符号绕过的。得知是shell脚本相关得到那么我就来看看shell脚本吧。</p>
+<h3 id="什么是-Shell"><a href="#什么是-Shell" class="headerlink" title="什么是 Shell"></a>什么是 Shell</h3><p>&emsp; shell 是一个应用程序，这个应用程序提供了一个界面，可以使用户通过这个界面访问 Linux 内核的服务。<br>&emsp;我们常常说的Shell 其实更多的是指 Shell 脚本（shell script），是一种为shell编写的脚本程序，一般文件后缀为<code>.sh</code><br>&emsp;其实Shell 编程跟 java、php 编程一样，只要有一个能编写代码的文本编辑器和一个能解释执行的脚本解释器就可以了。</p>
+<h3 id="Shell-运行的模式"><a href="#Shell-运行的模式" class="headerlink" title="Shell 运行的模式"></a>Shell 运行的模式</h3><p>&emsp;Shell 运行模式有 交互式和非交互式两种模式，我们日常接触的应该是交互式的。<br>&emsp;交互式：这种模式就和我们执行命令行一样，执行一条命令立马返回结果。<br>&emsp;非交互模式：在这种模式下，shell从文件或者管道中读取命令并执行。当 shell 解释器执行完文件中最后一个命令后，shell进程中止，并回到父进程。</p>
+<h3 id="第一个-Shell-脚本"><a href="#第一个-Shell-脚本" class="headerlink" title="第一个 Shell 脚本"></a>第一个 Shell 脚本</h3><h4 id="编写"><a href="#编写" class="headerlink" title="编写"></a>编写</h4><p>&emsp;打开文本编辑器，新建一个文件，扩展名为sh（sh代表shell），扩展名并不影响脚本执行，见名知意就好。如编写以下代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">#!&#x2F;bin&#x2F;sh</span><br><span class="line">mkdir mayi077</span><br><span class="line">cd  mayi077</span><br><span class="line">for ((i&#x3D;0; i&lt;3; i++)); do</span><br><span class="line">    touch test_$&#123;i&#125;.txt</span><br><span class="line">    echo &quot;shell很简单&quot; &gt;&gt; test_$&#123;i&#125;.txt</span><br><span class="line">done</span><br></pre></td></tr></table></figure>
+<p>解析代码：  </p>
+<ol>
+<li>第一行，“#!”是一个约定的标记，它告诉系统这个脚本需要什么解释器来执行。如果要查看系统中安装的shell，可以使用 <code>cat /etc/sehlls</code> 命令来查看。</li>
+<li>第二行,创建一个目录mayi077 第3行进入这个目录。</li>
+<li>第四行到最后，是一个循环语句循环3次每次创建一个test_${i}.txt 文件，其中${i}是变量。然后将那串字符输出重定向到 test_${i}.txt 文件中。其中 <code>&gt;&gt;</code> 和 <code>&gt;</code> 的区别就是将前者是追加写入后者是覆盖写入。</li>
+</ol>
+<h4 id="shell-脚本的运行"><a href="#shell-脚本的运行" class="headerlink" title="shell 脚本的运行"></a>shell 脚本的运行</h4><ol>
+<li>作为可执行程序，我们可以通过<code>ll</code>查看刚刚写入的文件是没有可执行权限的。我们使用 <code>chmod +x 1.sh</code>来给它加上执行权限，然后是使用<code>./1.sh</code>来执行。</li>
+<li>作为解释器参数，直接运行解析器，其参数就是shell脚本的文件名，我们使用<code>/bin/sh 1.sh</code> 即可以运行。</li>
+</ol>
+<h3 id="Shell-中的变量"><a href="#Shell-中的变量" class="headerlink" title="Shell 中的变量"></a>Shell 中的变量</h3><p>&emsp;Shell中的变量分为用户自定义变量,环境变量，位置参数变量和预定义变量。可以通过set命令查看系统中存在的所有变量,也可使用unset 来删除变量。<br>&emsp; 系统变量： 保存和系统操作环境相关的数据。HOME、PWD、SHELL、USER等等。<br>&emsp; 位置参数变量：主要用来向脚本中传递参数或数据，变量名不能自定义，变量作用固定。<br>&emsp; 预定义变量：是Bash中已经定义好的变量，变量名不能自定义，变量作用也是固定的。  </p>
+<h4 id="用户自定义变量"><a href="#用户自定义变量" class="headerlink" title="用户自定义变量"></a>用户自定义变量</h4><p>变量设置及赋值：<br>&emsp;和其它语言命名规则一致，值得注意的有：</p>
+<ul>
+<li>在bash中，变量的默认类型都是字符串型，如果要进行数值运算，则必须指定变量类型为数值型。</li>
+<li>变量用等号连接值，等号左右两侧不能有空格。</li>
+<li>变量的值如果有空格，需要使用单引号或者双引号包括。<br>如： 将一个命令的执行结果赋值给变量：  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">a&#x3D;&#96;ls -la&#96;   ##反引号，运行里面的命令，并把结果返回给变量</span><br><span class="line">a&#x3D;$(ls -la)   ## 等价于反引号</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<p>调用变量：<br>  &emsp;使用变量时只需要在变量名前加上 $ 符即可调用。</p>
+<h4 id="环境变量"><a href="#环境变量" class="headerlink" title="环境变量"></a>环境变量</h4><p>&emsp;用户自定义变量只在当前的shell中生效，而环境变量会在当前shell和其所有子shell中生效。如果把环境变量写入相应的配置文件，那么这个环境变量就会在所有的shell中生效。<br>定义修改环境变量的方法：<br>&emsp; 　export 变量名=变量值    &emsp;作用域：当前shell以及所有的子shell。  </p>
+<h4 id="位置参数变量"><a href="#位置参数变量" class="headerlink" title="位置参数变量"></a>位置参数变量</h4><ul>
+<li><code>$n</code>  n为数字，0代表命令本身，1-$9代表第一到第9个参数,十以上的参数需要用大括号包含，如${10}。</li>
+<li><code>$*</code> 代表接收所有的参数，将所有参数看作一个整体。以”12 … $n”的形式输出所有参数。</li>
+<li><code>$@</code> 代表接收的所有参数，将每个参数区别对待。以”1””2” … “$n” 的形式输出所有参数。</li>
+<li><code>$#</code> 代表接收的参数个数。  </li>
+</ul>
+<h4 id="预定义变量"><a href="#预定义变量" class="headerlink" title="预定义变量"></a>预定义变量</h4><ul>
+<li><code>$?</code>     最后一次执行的命令的返回状态。如果这个变量的值为 0，则证明上一条命令正确执行；如果这 个变量的值为非 0 (具体是哪个数由命令自己来决定)，则证明上一条命令执行错误</li>
+<li><code>$$</code>     当前进程的进程号（PID)</li>
+<li><code>$!</code>    后台运行的最后一个进程的进程号（PID)</li>
+</ul>
+<h3 id="流程控制"><a href="#流程控制" class="headerlink" title="流程控制"></a>流程控制</h3><h4 id="条件语句"><a href="#条件语句" class="headerlink" title="条件语句"></a>条件语句</h4><ol>
+<li>if 语句<ul>
+<li>如果中括号里的表达式为真，那么<code>then</code>和<code>fi</code>之间的代码会被执行。fi标志着条件代码块的结束。<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"># 写成一行</span><br><span class="line">if [[ 1 -eq 1 ]]; then echo &quot;1 -eq 1 result is: true&quot;; fi</span><br><span class="line"># Output: 1 -eq 1 result is: true</span><br><span class="line"></span><br><span class="line"># 写成多行</span><br><span class="line">if [[ &quot;abc&quot; -eq &quot;abc&quot; ]];</span><br><span class="line">then</span><br><span class="line">  echo &quot;&quot;abc&quot; -eq &quot;abc&quot; result is: true&quot;;</span><br><span class="line">fi</span><br><span class="line"># Output: abc -eq abc result is: true</span><br><span class="line">#貌似如果写成多行的话 分号 可有可无，因为根据换行已经可以区分了。</span><br><span class="line"># 也就是说换行和分号都可以用来做分界用</span><br></pre></td></tr></table></figure>
+值得注意的是<code>-eq</code>（==哪些也还是可用的，只是要了解下这种方式）：<br><a href="https://pic.downk.cc/item/5e79bafa9dbe9d88c5d8bfae.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e79bafa9dbe9d88c5d8bfae.jpg" alt=""></a></li>
+</ul>
+</li>
+<li>if…else :<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">if [[ 2 -ne 1 ]]; then</span><br><span class="line">  echo &quot;true&quot;</span><br><span class="line">else</span><br><span class="line">  echo &quot;false&quot;</span><br><span class="line">fi</span><br><span class="line"># Output: true</span><br></pre></td></tr></table></figure></li>
+<li>if elif else<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">x&#x3D;10</span><br><span class="line">y&#x3D;20</span><br><span class="line">if [[ $&#123;x&#125; &gt; $&#123;y&#125; ]]; then</span><br><span class="line">   echo &quot;$&#123;x&#125; &gt; $&#123;y&#125;&quot;</span><br><span class="line">elif [[ $&#123;x&#125; &lt; $&#123;y&#125; ]]; then</span><br><span class="line">   echo &quot;$&#123;x&#125; &lt; $&#123;y&#125;&quot;</span><br><span class="line">else</span><br><span class="line">   echo &quot;$&#123;x&#125; &#x3D; $&#123;y&#125;&quot;</span><br><span class="line">fi</span><br><span class="line"># Output: 10 &lt; 20</span><br></pre></td></tr></table></figure>
+
+
+</li>
+</ol>
+<h4 id="循环语句"><a href="#循环语句" class="headerlink" title="循环语句"></a>循环语句</h4><ol>
+<li>for<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">for arg in elem1 elem2 ... elemN</span><br><span class="line">do</span><br><span class="line">  ### 语句</span><br><span class="line">done</span><br></pre></td></tr></table></figure></li>
+<li>while<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">while [[ condition ]]</span><br><span class="line">do</span><br><span class="line">  ### 语句</span><br><span class="line">done</span><br></pre></td></tr></table></figure></li>
+<li>until 跟while循环正好相反。它跟while一样也需要检测一个测试条件，但不同的是，只要该条件为 假 就一直执行循环：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">x&#x3D;0</span><br><span class="line">until [[ $&#123;x&#125; -ge 5 ]]; do</span><br><span class="line">  echo $&#123;x&#125;</span><br><span class="line">  x&#x3D;&#96;expr $&#123;x&#125; + 1&#96;</span><br><span class="line">done</span><br><span class="line">#  Output:</span><br><span class="line">#  0</span><br><span class="line">#  1</span><br><span class="line">#  2</span><br><span class="line">#  3</span><br><span class="line">#  4</span><br></pre></td></tr></table></figure></li>
+<li>select 循环帮助我们组织一个用户菜单。它的语法几乎跟for循环一致：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">select answer in elem1 elem2 ... elemN</span><br><span class="line">do</span><br><span class="line">  ### 语句</span><br><span class="line">done</span><br></pre></td></tr></table></figure>
+
+
+</li>
+</ol>
+<h3 id="文件包含"><a href="#文件包含" class="headerlink" title="文件包含"></a>文件包含</h3><p>&emsp;可以使用source和.关键字，如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">source .&#x2F;function.sh</span><br><span class="line">. .&#x2F;function.sh</span><br></pre></td></tr></table></figure>
+<p>在bash里，source和.是等效的，他们都是读入function.sh的内容并执行其内容（类似PHP里的include），为了更好的可移植性，推荐使用第二种写法。 </p>
+<p>参考链接：<br><a href="https://github.com/qinjx/30min_guides/blob/master/shell.md" target="_blank" rel="noopener">【sehll脚本编程30分钟入门】</a><br><a href="https://www.cnblogs.com/jingmoxukong/p/7867397.html#11-%E4%BB%80%E4%B9%88%E6%98%AF-shell" target="_blank" rel="noopener">【一篇文章让你彻底掌握shell语言】</a></p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>信安小蚂蚁
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://mayi077.github.io/2020/03/24/%E5%88%9D%E8%AF%86-Shell-%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B/" title="初识 Shell 脚本编程">https://mayi077.github.io/2020/03/24/初识-Shell-脚本编程/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+     <div>
+       
+         ﻿<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+         
+      </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/" rel="tag"><i class="fa fa-tag"></i>基础积累</a>
+              <a href="/tags/%E6%97%A5%E5%B8%B8%E7%AC%94%E8%AE%B0/" rel="tag"><i class="fa fa-tag"></i>日常笔记</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/23/BJDCTF2020-Cookie-is-so-stable/" rel="prev" title="[BJDCTF2020]Cookie is so stable">
+      <i class="fa fa-chevron-left"></i> [BJDCTF2020]Cookie is so stable
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/03/25/HITCON-2017-SSRFme/" rel="next" title="[HITCON 2017]SSRFme">
+      [HITCON 2017]SSRFme <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#前言："><span class="nav-number">1.</span> <span class="nav-text">前言：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是-Shell"><span class="nav-number">2.</span> <span class="nav-text">什么是 Shell</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Shell-运行的模式"><span class="nav-number">3.</span> <span class="nav-text">Shell 运行的模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第一个-Shell-脚本"><span class="nav-number">4.</span> <span class="nav-text">第一个 Shell 脚本</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#编写"><span class="nav-number">4.1.</span> <span class="nav-text">编写</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#shell-脚本的运行"><span class="nav-number">4.2.</span> <span class="nav-text">shell 脚本的运行</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Shell-中的变量"><span class="nav-number">5.</span> <span class="nav-text">Shell 中的变量</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#用户自定义变量"><span class="nav-number">5.1.</span> <span class="nav-text">用户自定义变量</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#环境变量"><span class="nav-number">5.2.</span> <span class="nav-text">环境变量</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#位置参数变量"><span class="nav-number">5.3.</span> <span class="nav-text">位置参数变量</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#预定义变量"><span class="nav-number">5.4.</span> <span class="nav-text">预定义变量</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#流程控制"><span class="nav-number">6.</span> <span class="nav-text">流程控制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#条件语句"><span class="nav-number">6.1.</span> <span class="nav-text">条件语句</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#循环语句"><span class="nav-number">6.2.</span> <span class="nav-text">循环语句</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#文件包含"><span class="nav-number">7.</span> <span class="nav-text">文件包含</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
+      src="/images/1.jpg">
+  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23li6cOHoOwCcszzi9',
+      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
+      repo        : 'mayi077.github.io',
+      owner       : 'mayi077',
+      admin       : ['mayi077'],
+      id          : '63c21ee6744720a1c1147757f46502df',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

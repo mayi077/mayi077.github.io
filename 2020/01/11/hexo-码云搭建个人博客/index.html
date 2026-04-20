@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
+  <link rel="mask-icon" href="/images/tu.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言：不知什么时候开始就有了自己搭建个人博客的想法，但由于时间关系还是拖到了现在。看了些文章后感觉搭建个人博客也就那样应该很简单，但实际操作时却总会给我们意想不到的惊喜。于是乎我选择了记录这个过程，以免以后遇到相同问题不会解决。 一、我为什么选择hexo+码云来搭建自己的博客 选择hexo完全是因为我只对它有过些了解，且它有很多的主题可供选着。 选着码云因为码云作为国内网站，访问速度自然是比Git">
+<meta property="og:type" content="article">
+<meta property="og:title" content="hexo+码云搭建个人博客">
+<meta property="og:url" content="https://mayi077.github.io/2020/01/11/hexo-%E7%A0%81%E4%BA%91%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/index.html">
+<meta property="og:site_name" content="信安小蚂蚁">
+<meta property="og:description" content="前言：不知什么时候开始就有了自己搭建个人博客的想法，但由于时间关系还是拖到了现在。看了些文章后感觉搭建个人博客也就那样应该很简单，但实际操作时却总会给我们意想不到的惊喜。于是乎我选择了记录这个过程，以免以后遇到相同问题不会解决。 一、我为什么选择hexo+码云来搭建自己的博客 选择hexo完全是因为我只对它有过些了解，且它有很多的主题可供选着。 选着码云因为码云作为国内网站，访问速度自然是比Git">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pic.downk.cc/item/5e183e447f9a96fec1579d6b.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e183faf7f9a96fec157ddd0.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e1841cd7f9a96fec15825c9.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e1842317f9a96fec15832af.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e1842b87f9a96fec15843c3.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e18451c7f9a96fec1589818.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e1845fd7f9a96fec158b5c0.jpg">
+<meta property="og:image" content="https://i.loli.net/2020/01/11/2eb9qfaXyk5DRFH.png">
+<meta property="article:published_time" content="2020-01-11T07:59:06.000Z">
+<meta property="article:modified_time" content="2020-02-15T09:01:22.000Z">
+<meta property="article:author" content="信安小蚂蚁">
+<meta property="article:tag" content="其它">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pic.downk.cc/item/5e183e447f9a96fec1579d6b.jpg">
+
+<link rel="canonical" href="https://mayi077.github.io/2020/01/11/hexo-%E7%A0%81%E4%BA%91%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>hexo+码云搭建个人博客 | 信安小蚂蚁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">信安小蚂蚁</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right"></div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-主页">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
+
+  </li>
+        <li class="menu-item menu-item-归档">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-分类">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-标签">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-关于">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/01/11/hexo-%E7%A0%81%E4%BA%91%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          hexo+码云搭建个人博客
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-01-11 15:59:06" itemprop="dateCreated datePublished" datetime="2020-01-11T15:59:06+08:00">2020-01-11</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-02-15 17:01:22" itemprop="dateModified" datetime="2020-02-15T17:01:22+08:00">2020-02-15</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%85%B6%E5%AE%83%E7%9F%A5%E8%AF%86/" itemprop="url" rel="index">
+                    <span itemprop="name">其它知识</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>8 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>前言：不知什么时候开始就有了自己搭建个人博客的想法，但由于时间关系还是拖到了现在。看了些文章后感觉搭建个人博客也就那样应该很简单，但实际操作时却总会给我们意想不到的惊喜。于是乎我选择了记录这个过程，以免以后遇到相同问题不会解决。</p>
+<h4 id="一、我为什么选择hexo-码云来搭建自己的博客"><a href="#一、我为什么选择hexo-码云来搭建自己的博客" class="headerlink" title="一、我为什么选择hexo+码云来搭建自己的博客"></a>一、我为什么选择hexo+码云来搭建自己的博客</h4><ol>
+<li>选择hexo完全是因为我只对它有过些了解，且它有很多的主题可供选着。</li>
+<li>选着码云因为码云作为国内网站，访问速度自然是比Github快一些，且更容易被SEO收录提升博客的曝光率。</li>
+</ol>
+<h4 id="二、具体操作步骤"><a href="#二、具体操作步骤" class="headerlink" title="二、具体操作步骤"></a>二、具体操作步骤</h4><ol>
+<li>先安装好Git和Node.js。(很简单的，实在不会可以百度教程也多)</li>
+<li>接下来就可以安装我们的hexo了(全局安装)，可以使用cmd命令行，输入以下命令：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install -g hexo-cli</span><br></pre></td></tr></table></figure></li>
+<li>指定一个文件夹来存放网站文件（也就是网站的根目录）<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hexo init mayi077  #在这个地址里生成Hexo初始化文件</span><br><span class="line">cd mayi077  # 进入这个文件夹</span><br><span class="line">npm install  # 在文件夹内自动安装Hexo所依赖的各种模块（实际上我没有进行这一步）</span><br></pre></td></tr></table></figure>
+&emsp; 经过以上3步，Hexo就初始化成功了，下面我们进行一下本地测试.</li>
+<li>生成静态页面<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo generate    或使用缩写  hexo g</span><br></pre></td></tr></table></figure></li>
+<li>本地测试：开启服务器<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo server    或使用缩写   hexo  s</span><br></pre></td></tr></table></figure>
+&emsp;当返回如下代码时说明开启成功：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">INFO  Start processing</span><br><span class="line">INFO  Hexo is running at http:&#x2F;&#x2F;localhost:4000 . Press Ctrl+C to stop.</span><br></pre></td></tr></table></figure>
+&emsp;简单的5步，一个最原始的本地Hexo博客就已经搭建好了。浏览器输入<a href="http://localhost:4000" target="_blank" rel="noopener">http://localhost:4000</a> 就可以看到我们的博客。<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">node_modules：为hexo的插件目录，作用是利用此目录的插件生成</span><br><span class="line">对应功能的静态HTML等脚本代码。</span><br><span class="line">scaffolds：模版文件。可以在这里添加自己的layout，作为常用的新建模板使用。</span><br><span class="line">source：这个文件夹是放文章和图片等资源文件的。</span><br><span class="line">themes：存放主题的文件夹</span><br><span class="line">_config.yml：站点配置文件，很多全局配置都在这个文件中。</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h4 id="三、应用一个自己喜欢的主题"><a href="#三、应用一个自己喜欢的主题" class="headerlink" title="三、应用一个自己喜欢的主题"></a>三、应用一个自己喜欢的主题</h4><ol>
+<li>可以去官网 <a href="https://hexo.io/themes/" target="_blank" rel="noopener">https://hexo.io/themes/</a> 找一个自己喜欢的主题。(也可去其它途径寻找)</li>
+<li>将主题下到本地。可以在指定文夹内使用git clone 文件地址 也可以下载压缩包后进行解压。这里要求解压到网站根目录（D:/mayi077/themes）下的themes文件夹下。<br><img data-src="https://pic.downk.cc/item/5e183e447f9a96fec1579d6b.jpg" alt=""></li>
+<li>更改网站根目录下的_config.yml文件。将themes后面的改为自己主题文件夹的名称，注意前面有一个空格。<br><img data-src="https://pic.downk.cc/item/5e183faf7f9a96fec157ddd0.jpg" alt=""></li>
+<li>这就把主题应用成功了，然后就是改主题了，把主题的一些信息改成自己的，一些容易搞错的地方我们后面再仔细讲。</li>
+<li>运行<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hexo clean    ##清除缓存</span><br><span class="line">hexo s        ## 开启服务</span><br></pre></td></tr></table></figure>
+然后就可以进行查看了。  </li>
+</ol>
+<p><strong>注意： 更改主题里的配置文件不需要重启而更改网站根目录下的配置文件基本都需要重启服务</strong></p>
+<h4 id="四、部署到码云"><a href="#四、部署到码云" class="headerlink" title="四、部署到码云"></a>四、部署到码云</h4><ol>
+<li>首先就是注册一个码云账号，注意账号名，它将会影响你以后的域名。</li>
+<li>新建一个仓库，选择公开，选择 使用readme文件初始化这个仓库（名字随意其它默认）如图：<br><img data-src="https://pic.downk.cc/item/5e1841cd7f9a96fec15825c9.jpg" alt=""></li>
+<li>复制仓库链接，然后更改网站的配置文件（网站根目录下的_config.yml文件）<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">deploy:</span><br><span class="line">  type: git</span><br><span class="line">  repository: 复制的链接（注意前面有个空格）</span><br><span class="line">  branch: master</span><br></pre></td></tr></table></figure>
+<img data-src="https://pic.downk.cc/item/5e1842317f9a96fec15832af.jpg" alt=""><br><img data-src="https://pic.downk.cc/item/5e1842b87f9a96fec15843c3.jpg" alt=""></li>
+<li>使用 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hexo clean ##清除缓存</span><br><span class="line">hexo g     ##生成静态文件</span><br><span class="line">hexo d     ## 部署到码云</span><br></pre></td></tr></table></figure>
+第一次使用的话先：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-deployer-git --save  ##安装deployer</span><br></pre></td></tr></table></figure>
+再执行上面命令。<br>之后会弹出一个对话框，让我们输入码云的帐号和密码（我们可以配置网站的SSH，这样就不用每次都输入账号密码了）</li>
+<li>到码云上启用这个模块，服务-&gt;gitee pages 勾选强制使用HTTPS后点击启用服务即可（它会返回一个地址，那就是你的网站地址）<br><img data-src="https://pic.downk.cc/item/5e18451c7f9a96fec1589818.jpg" alt=""></li>
+<li>再到网站的配置文件里更改url为刚刚得到的网址，root后面改为仓库名如：<br><img data-src="https://pic.downk.cc/item/5e1845fd7f9a96fec158b5c0.jpg" alt=""></li>
+</ol>
+<h4 id="五、添加“分类”及“标签”"><a href="#五、添加“分类”及“标签”" class="headerlink" title="五、添加“分类”及“标签”"></a>五、添加“分类”及“标签”</h4><ol>
+<li>创建“分类”选项<br>打开命令行，进入博客所在文件夹。执行命令：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo new page categories</span><br></pre></td></tr></table></figure>
+&emsp;成功后会在source/categories/生成一个index.md文件添加type: “categories”到文件内容中，添加后是这样的：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">title: 文章分类</span><br><span class="line">date: 2017-05-27 13:47:40</span><br><span class="line">type: &quot;categories&quot;</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
+保存并关闭文件。  </li>
+</ol>
+<p><strong>接下来给文章添加“categories”属性</strong><br>&emsp;打开需要添加分类的文章，为其添加categories属性。<br>下方的categories: web前端表示添加这篇文章到“web前端”这个分类。<br>注意：hexo一篇文章只能属于一个分类，也就是说如果在“- web前端”下方添加“-xxx”，hexo不会产生两个分类，<br>而是把分类嵌套（即该文章属于 “- web前端”下的 “-xxx ”分类）。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">title: mayi077</span><br><span class="line">date: 2020-01-11 12:12:57</span><br><span class="line">categories: </span><br><span class="line">- web前端</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
+<p>&emsp;至此，成功给文章添加分类，点击首页的“分类”可以看到该分类下的所有文章。<br>当然，只有添加了categories: xxx的文章才会被收录到首页的“分类”中。<br>2. 创建“标签”选项<br> <strong>生成“标签”页并添加tpye属性</strong><br>打开命令行，进入博客所在文件夹。执行命令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo new page tags</span><br></pre></td></tr></table></figure>
+<p>&emsp;成功后会生成source/tags/index.md添加type: “tags”到内容中，添加后是这样的：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">title: mayi077</span><br><span class="line">date: 2020-01-11 12:47:40</span><br><span class="line">type: &quot;tags&quot;</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
+<p>&emsp;保存并关闭文件。<br>&emsp;<strong>给文章添加“tags”属性</strong><br>&emsp;打开需要添加标签的文章，为其添加tags属性。  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">title: mayi077</span><br><span class="line">date: 2020-01-11 12:12:57</span><br><span class="line">categories: </span><br><span class="line">- web前端</span><br><span class="line">tags:</span><br><span class="line">- jQuery</span><br><span class="line">- 表格</span><br><span class="line">- 表单验证</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
+<p>&emsp;至此，成功给文章添加分类，点击首页的“标签”可以看到该标签下的所有文章。当然，只有添加了tags: xxx的文章才会被收录到首页的“标签”中。</p>
+<h4 id="六、常见问题及解决方法"><a href="#六、常见问题及解决方法" class="headerlink" title="六、常见问题及解决方法"></a>六、常见问题及解决方法</h4><ol>
+<li>主题应用后无法正常显示。<br>这要看使用的主题具体的说明文件，看是否需要提前安装一些插件，安要求安装及可。</li>
+<li>更改主题的底端文字<br>首先我们找到这个主题的文件夹，进入layout –&gt; _partial –&gt; footer.swig 进入后进行对应的更改及可。</li>
+<li>添加新文章，使用如下代码：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo new &quot;文章名&quot;  ##新建一个文章在hexo所在目录 -&gt; source -&gt; _posts下</span><br></pre></td></tr></table></figure>
+&emsp;之后再找到该文件并进行相应的更改<br>&emsp;之后就是上传到码云上了。(当然在此之前先要在本地看看是否满意)<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hexo g   #生成静态页面文件</span><br><span class="line">hexo d   #发布到码云</span><br></pre></td></tr></table></figure>
+&emsp;<strong>到码云上更新如：</strong><br><img data-src="https://i.loli.net/2020/01/11/2eb9qfaXyk5DRFH.png" alt="图片.png"><br>&emsp;<strong>可能不会立即生效，需要稍微等等。</strong></li>
+<li>博客无法直接 上传图片，这里我推荐几个自己在用的图床网址<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">https:&#x2F;&#x2F;sm.ms&#x2F;</span><br><span class="line">https:&#x2F;&#x2F;www.superbed.cn&#x2F;</span><br><span class="line">需要用图片时可以先把图片上传然后复制起markdown链接里直接引用</span><br></pre></td></tr></table></figure></li>
+<li>文章中的链接需要是正确的否者可能会报错，也就是说注意链接前后的空格。</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>信安小蚂蚁
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://mayi077.github.io/2020/01/11/hexo-%E7%A0%81%E4%BA%91%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/" title="hexo+码云搭建个人博客">https://mayi077.github.io/2020/01/11/hexo-码云搭建个人博客/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+     <div>
+       
+         ﻿<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+         
+      </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%85%B6%E5%AE%83/" rel="tag"><i class="fa fa-tag"></i>其它</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/01/10/PHP%E5%87%BD%E6%95%B0%E9%BB%91%E9%AD%94%E6%B3%95%E5%B0%8F%E6%80%BB%E7%BB%93/" rel="prev" title="PHP函数黑魔法小总结">
+      <i class="fa fa-chevron-left"></i> PHP函数黑魔法小总结
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/01/12/burpsuit%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/" rel="next" title="burpsuit的基本使用">
+      burpsuit的基本使用 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#一、我为什么选择hexo-码云来搭建自己的博客"><span class="nav-number">1.</span> <span class="nav-text">一、我为什么选择hexo+码云来搭建自己的博客</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#二、具体操作步骤"><span class="nav-number">2.</span> <span class="nav-text">二、具体操作步骤</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#三、应用一个自己喜欢的主题"><span class="nav-number">3.</span> <span class="nav-text">三、应用一个自己喜欢的主题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#四、部署到码云"><span class="nav-number">4.</span> <span class="nav-text">四、部署到码云</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#五、添加“分类”及“标签”"><span class="nav-number">5.</span> <span class="nav-text">五、添加“分类”及“标签”</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#六、常见问题及解决方法"><span class="nav-number">6.</span> <span class="nav-text">六、常见问题及解决方法</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
+      src="/images/1.jpg">
+  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23li6cOHoOwCcszzi9',
+      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
+      repo        : 'mayi077.github.io',
+      owner       : 'mayi077',
+      admin       : ['mayi077'],
+      id          : '73134389c6d2cdeddffdeb2b01596098',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

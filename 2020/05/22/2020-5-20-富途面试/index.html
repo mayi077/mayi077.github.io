@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
+  <link rel="mask-icon" href="/images/tu.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="非常菜的一次回答（感觉环境还不错的可惜我实力不够，丧） 题目 什么是csrf其原理及防护方法。（多次面试问到） 现有一个web网站需要进行密码账户等信息的传送，但公司只支持http（信息未加密）我们改用什么方案来进行安全的传送。 ssrf和csrf区别。 现有一个被入侵了的Linux计算机，我们该如何锁定入侵者进行了哪些操作及它的ip。 给你一个ip（web站），你该如何拿到它的websehll。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="2020-5-20 富途面试">
+<meta property="og:url" content="https://mayi077.github.io/2020/05/22/2020-5-20-%E5%AF%8C%E9%80%94%E9%9D%A2%E8%AF%95/index.html">
+<meta property="og:site_name" content="信安小蚂蚁">
+<meta property="og:description" content="非常菜的一次回答（感觉环境还不错的可惜我实力不够，丧） 题目 什么是csrf其原理及防护方法。（多次面试问到） 现有一个web网站需要进行密码账户等信息的传送，但公司只支持http（信息未加密）我们改用什么方案来进行安全的传送。 ssrf和csrf区别。 现有一个被入侵了的Linux计算机，我们该如何锁定入侵者进行了哪些操作及它的ip。 给你一个ip（web站），你该如何拿到它的websehll。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pic.downk.cc/item/5ec7886cc2a9a83be5964c44.jpg">
+<meta property="article:published_time" content="2020-05-22T08:30:21.000Z">
+<meta property="article:modified_time" content="2020-05-22T08:37:30.000Z">
+<meta property="article:author" content="信安小蚂蚁">
+<meta property="article:tag" content="基础积累">
+<meta property="article:tag" content="面试">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pic.downk.cc/item/5ec7886cc2a9a83be5964c44.jpg">
+
+<link rel="canonical" href="https://mayi077.github.io/2020/05/22/2020-5-20-%E5%AF%8C%E9%80%94%E9%9D%A2%E8%AF%95/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>2020-5-20 富途面试 | 信安小蚂蚁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">信安小蚂蚁</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right"></div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-主页">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
+
+  </li>
+        <li class="menu-item menu-item-归档">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-分类">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-标签">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-关于">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/05/22/2020-5-20-%E5%AF%8C%E9%80%94%E9%9D%A2%E8%AF%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          2020-5-20 富途面试
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-05-22 16:30:21 / 修改时间：16:37:30" itemprop="dateCreated datePublished" datetime="2020-05-22T16:30:21+08:00">2020-05-22</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%85%B6%E5%AE%83%E7%9F%A5%E8%AF%86/" itemprop="url" rel="index">
+                    <span itemprop="name">其它知识</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>11 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>非常菜的一次回答（感觉环境还不错的可惜我实力不够，丧）</p>
+<h3 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h3><ol>
+<li><strong>什么是csrf其原理及防护方法。</strong>（多次面试问到）</li>
+<li>现有一个web网站需要进行密码账户等信息的传送，但公司只支持http（信息未加密）我们改用什么方案来进行安全的传送。</li>
+<li><strong>ssrf和csrf区别。</strong></li>
+<li>现有一个被入侵了的Linux计算机，我们该如何锁定入侵者进行了哪些操作及它的ip。</li>
+<li>给你一个ip（web站），你该如何拿到它的websehll。</li>
+<li>你如何修复一个存在漏洞的web站。</li>
+<li>tcp/ip有哪些层。</li>
+<li>http头部有哪些重要信息。</li>
+<li>http和https的区别。</li>
+<li><strong>xss的原理及防御。</strong>（多次问到）</li>
+<li>理解 DOM型XSS 。</li>
+<li>sql注入的原理、防御及分类。（多次问到）</li>
+<li>两个人往一张桌子上摆棋子，当桌子摆满时最后一个放棋子的胜，请问你怎么赢。<a id="more"></a>
+<h3 id="整理后的回答"><a href="#整理后的回答" class="headerlink" title="整理后的回答"></a>整理后的回答</h3></li>
+</ol>
+<h4 id="1、什么是csrf其原理及防护方法"><a href="#1、什么是csrf其原理及防护方法" class="headerlink" title="1、什么是csrf其原理及防护方法"></a>1、什么是csrf其原理及防护方法</h4><p><a href="https://www.cnblogs.com/lsj-info/p/9479755.html" target="_blank" rel="noopener">【参考链接】</a></p>
+<h5 id="什么是-csrf"><a href="#什么是-csrf" class="headerlink" title="什么是 csrf"></a>什么是 csrf</h5><p>csrf就是说，攻击者盗用你的身份，以你的名义发送恶意请求，而且对于服务器来说这个请求是完全合法的，但攻击者已经完成了所期待的操作。比如以你的名义发送邮件、发送消息、添加管理员，甚至是购买商品、转账等。  </p>
+<h5 id="CSRF攻击攻击原理及过程"><a href="#CSRF攻击攻击原理及过程" class="headerlink" title="CSRF攻击攻击原理及过程"></a>CSRF攻击攻击原理及过程</h5><ol>
+<li>用户A打开浏览器，访问受信任的网站B（B存在csrf漏洞）输入了用户名和密码。验证通过后 产生了 cookie 信息并返回给了浏览器，此时用户可以正常发送请求给B站点了。</li>
+<li>而如果用户没有退出网站B之前，在同一浏览器中又打开一个页面访问了我们事先准备好了的恶意网站C。C在接收到用户请求后返回一些攻击性代码，并发出一个请求访问存在ssrf漏洞的网站B。</li>
+<li>浏览器收到了恶意代码后，根据恶意网站C的请求在用户不知情的情况下携带Cookie信息向存在ssrf漏洞的B网站发出请求。而此时网站B不知道该请求是恶意网站C发送过来的，它会根据用户A的Cookie信息以用户A的权限处理该请求，从而导致来自网站C的恶意代码被执行。<br>（所以它通常和xss一起使用。）</li>
+</ol>
+<h5 id="防御CSRF攻击"><a href="#防御CSRF攻击" class="headerlink" title="防御CSRF攻击"></a>防御CSRF攻击</h5><h6 id="验证-HTTP-Referer-字段"><a href="#验证-HTTP-Referer-字段" class="headerlink" title="验证 HTTP Referer 字段"></a>验证 HTTP Referer 字段</h6><p>这种方法的缺点：</p>
+<ol>
+<li>安全性都依赖于第三方（即浏览器）某些浏览器，比如 IE6 或 FF2，已经有一些方法可以篡改 Referer 值。如果网站支持IE6就需要小心了。  </li>
+<li>还有就是有些组织的用户并不愿意提供referer给网站，担心把某些信息泄漏出去。</li>
+</ol>
+<h6 id="在请求地址中添加-token-并验证"><a href="#在请求地址中添加-token-并验证" class="headerlink" title="在请求地址中添加 token 并验证"></a>在请求地址中添加 token 并验证</h6><p>&emsp;在请求中放入黑客所不能伪造的信息，并且该信息不存在于 cookie 之中。可以在 HTTP 请求中以参数的形式加入一个随机产生的 token，并在服务器端建立一个拦截器来验证这个 token，如果请求中没有 token 或者 token 内容不正确，则认为可能是 CSRF 攻击而拒绝该请求。<br>缺点：</p>
+<ol>
+<li>难以保证token本身的安全。可能通过referer来得到token的值以发动csrf攻击。</li>
+<li>对每一个请求都加token很麻烦，需要在页面生成时使用js遍历整个dom，但对于页面加载之后生成的html代码还是需要手动添加。</li>
+</ol>
+<h6 id="在-HTTP-头中自定义属性并验证"><a href="#在-HTTP-头中自定义属性并验证" class="headerlink" title="在 HTTP 头中自定义属性并验证"></a>在 HTTP 头中自定义属性并验证</h6><p>&emsp;这种方法也是使用 token 并进行验证，和上一种方法不同的是，这里并不是把 token 以参数的形式置于 HTTP 请求之中，而是把它放到 HTTP 头中自定义的属性里。通过 XMLHttpRequest 这个类，可以一次性给所有该类请求加上 csrftoken 这个 HTTP 头属性，并把 token 值放入其中。这样解决了上种方法在请求中加入 token 的不便，同时，通过 XMLHttpRequest 请求的地址不会被记录到浏览器的地址栏，也不用担心 token 会透过 Referer 泄露到其他网站中去。<br>缺点：</p>
+<ol>
+<li>局限性大，不是所有请求都适合这个类（ XMLHttpRequest）发起。</li>
+<li>用户体验感差，无法前进、后退、刷新。</li>
+</ol>
+<h5 id="题外，CSRF漏洞检测"><a href="#题外，CSRF漏洞检测" class="headerlink" title="题外，CSRF漏洞检测"></a>题外，CSRF漏洞检测</h5><p>&emsp;最简单的方法就是抓取一个正常请求的数据包，去掉Referer字段后再重新提交，如果该提交还有效，那么基本上可以确定存在CSRF漏洞。<br>或者使用工具如：CSRFTester，其工具原理是：<br>抓取浏览器中访问过的所有连接以及表单信息，然后修改相应的信息重新提交，如果服务器接受了就说明存在csrf漏洞。</p>
+<h4 id="2、现有一个web网站需要进行密码账户等信息的传送，但公司只支持http（信息未加密）我们该用什么方案来进行安全的传送。"><a href="#2、现有一个web网站需要进行密码账户等信息的传送，但公司只支持http（信息未加密）我们该用什么方案来进行安全的传送。" class="headerlink" title="2、现有一个web网站需要进行密码账户等信息的传送，但公司只支持http（信息未加密）我们该用什么方案来进行安全的传送。"></a>2、现有一个web网站需要进行密码账户等信息的传送，但公司只支持http（信息未加密）我们该用什么方案来进行安全的传送。</h4><p><a href="https://blog.csdn.net/zeilaotian/article/details/102827621?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.nonecase&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.nonecase" target="_blank" rel="noopener">【参考链接 1】</a>   <a href="https://blog.csdn.net/jt521xlg/article/details/49717571" target="_blank" rel="noopener">【参考链接 2】</a>   </p>
+<p>可以理解题目为，普通 http 网络下数据的安全传输</p>
+<h5 id="解决数据抓包被窃取"><a href="#解决数据抓包被窃取" class="headerlink" title="解决数据抓包被窃取"></a>解决数据抓包被窃取</h5><p>为了防止黑客抓取我们的数据包窃取我们的账号密码，我们将账号密码加密。但是黑客还是可以重放我们账号密码进行攻击，此时我们加一个时间戳就可以了。   </p>
+<p>也就是：明文+时间戳—–&gt;加密——&gt;解密验证</p>
+<h5 id="解决数据包被篡改"><a href="#解决数据包被篡改" class="headerlink" title="解决数据包被篡改"></a>解决数据包被篡改</h5><p>为了防止例如，在充值过程中，我们的账号被篡改为别人的账户类似事件发生。我们可以 <strong>添加接口签名</strong>  ，客户端在发送用户名和账户信息时，添加一个接口签名。服务器在接受参数后，首先进行签名的验证。  </p>
+<p>怎样签名呢？通常使用sign，比如原链接请求的时候加一个sign参数，sign=md5(id=1)，服务器接受到请求，验证sign是否等于md5(id=1)，如果等于说明正常请求。这会有个弊端，假如规则被发现，那么就会被伪造，所以适当复杂一些，还是能够提高安全性的。</p>
+<h5 id="解决无法判断登入状态"><a href="#解决无法判断登入状态" class="headerlink" title="解决无法判断登入状态"></a>解决无法判断登入状态</h5><p>&emsp;http 是无状态的，也就是服务器无法自己判断两个请求是否有联系，那么登录之后，以后的接口怎么判断是否登录呢？   </p>
+<p><strong>解决办法</strong>：Token授权机制，用户使用用户名和密码登录之后，服务器返回给客户端一个token值，并在服务器中缓存此token值。在之后的请求业务中都带上这个token，服务器接受请求后进行token验证，token是带有 有效期 的若token已经失效或者不存在在，则说明请求无效。</p>
+<h4 id="3、ssrf和csrf区别。"><a href="#3、ssrf和csrf区别。" class="headerlink" title="3、ssrf和csrf区别。"></a>3、<strong>ssrf和csrf区别。</strong></h4><p> <a href="https://www.cnblogs.com/blacksunny/p/7478568.html" target="_blank" rel="noopener">【参考链接】</a>  </p>
+<p> <strong>csrf</strong>: 攻击者盗用了你的身份，以你的名义发送恶意请求。CSRF能够做的事情包括：以你的名义发送邮件，发消息，盗用你的账号，甚至于购买商品，转账。<br> <strong>发生条件</strong>： 1、登录受信任网站A，并在本地生成Cookie。2、在不登出A的情况下，访问危险网站B。</p>
+<p><strong>SSRF服务端请求伪造攻击</strong>：<br>&emsp;A网站，是一个所有人都可以访问的外网网站，B网站是一个他们内部的网站我们无法访问。我们普通用户只可以访问a网站，不能访问b网站。但是我们可以同过a网站做中间人，访问b网站，从而达到攻击b网站需求。</p>
+<h4 id="4、现有一个被入侵了的Linux计算机，我们该如何锁定入侵者进行了哪些操作及它的ip。"><a href="#4、现有一个被入侵了的Linux计算机，我们该如何锁定入侵者进行了哪些操作及它的ip。" class="headerlink" title="4、现有一个被入侵了的Linux计算机，我们该如何锁定入侵者进行了哪些操作及它的ip。"></a>4、现有一个被入侵了的Linux计算机，我们该如何锁定入侵者进行了哪些操作及它的ip。</h4><p><a href="https://www.cnblogs.com/ytssjbhy616/p/12782879.html" target="_blank" rel="noopener">【参考链接】</a><br>这里的记录不一定正确全面，先这么理解吧！</p>
+<ol>
+<li>使用<code>last</code> 查看登入本机的所有用户历史记录。</li>
+<li>进行 <code>netstat -an</code> 命令对系统开启的端口进行检查。</li>
+<li>使用<code>ps -ef</code> 和 <code>top</code> 等相关命令查看可疑进程。</li>
+<li>使用<code>ll /etc/passwd</code> 查看是否有更改添加用户。</li>
+<li>检查计划任务，通过<code>cat /etc/crontab</code>.</li>
+<li>检查开机自启，/etc/rc.local的内容。</li>
+</ol>
+<h4 id="5、给你一个ip（web站）-你该如何拿到它的websehll"><a href="#5、给你一个ip（web站）-你该如何拿到它的websehll" class="headerlink" title="5、给你一个ip（web站）, 你该如何拿到它的websehll"></a>5、给你一个ip（web站）, 你该如何拿到它的websehll</h4><p>我的理解就是问渗透的流程。<br>我的回答是：</p>
+<ol>
+<li>信息收集，进行whois查看注册者的邮箱姓名电话等信息。（<strong>但是whois是用需要用域名来查的</strong>），看看它开了哪些端口使用的中间件是否包含已知漏洞，遍历一下敏感目录，尝试着使用谷歌黑语法找到后台及敏感文件。</li>
+<li>接下来就漏洞扫描，看看界面有没有什么输入框，测试一下有没有xss或者sql注入。或者其它漏洞如文件包含、命令执行等等的漏洞。</li>
+<li>发现漏洞后就尽量利用漏洞拿到webshell。</li>
+<li>拿到webshell后，尽量的权限提升一下。</li>
+<li>日常记得日志清理。</li>
+<li>总结报告及修复方案（这点应该可以不讲）。<h4 id="6、你如何修复一个存在漏洞的web站。"><a href="#6、你如何修复一个存在漏洞的web站。" class="headerlink" title="6、你如何修复一个存在漏洞的web站。"></a>6、你如何修复一个存在漏洞的web站。</h4>其实我还是比较奇怪的，也没说什么漏洞。(:  </li>
+</ol>
+<p>我记得当时的回答是使用安全相关的产品，现在想想可以例举几个漏洞然后说说修复方法。   </p>
+<p>或者可以说说怎么找到这个漏洞。</p>
+<h4 id="7、tcp-ip有哪些层。"><a href="#7、tcp-ip有哪些层。" class="headerlink" title="7、tcp/ip有哪些层。"></a>7、tcp/ip有哪些层。</h4><p>这因该是很简单的题目了，而我当时紧张没答全。</p>
+<ol>
+<li>链路层</li>
+<li>网络层</li>
+<li>传输层</li>
+<li>应用层</li>
+</ol>
+<h4 id="8、http头部有哪些重要信息。"><a href="#8、http头部有哪些重要信息。" class="headerlink" title="8、http头部有哪些重要信息。"></a>8、http头部有哪些重要信息。</h4><p>自己总结的不一定对：</p>
+<ol>
+<li><strong>Referer:</strong>    表明这个请求发起的 源头，也就是从哪个页面发来的请求。</li>
+<li><strong>User-Agent</strong>:     是什么客户端发起的请求，经常用来做浏览器检测的userAgent。</li>
+<li><strong>Content-Type:</strong> 返回内容的媒体类型，如text/html。</li>
+<li><strong>Content-Encoding:</strong> 返回内容的编码，如gzip。</li>
+<li><strong>Content-Language:</strong> 返回内容的语言。</li>
+<li><strong>Accept-Language:</strong> 允许哪些语言。</li>
+<li><strong>X-Forwarded-For</strong>： 判断是哪个ip发起的请求。</li>
+<li><strong>Host:</strong> 请求的主机。</li>
+<li><strong>cookie</strong></li>
+<li><strong>Client-Ip:</strong> 客户端ip。 </li>
+</ol>
+<h4 id="9、http和https的区别。"><a href="#9、http和https的区别。" class="headerlink" title="9、http和https的区别。"></a>9、http和https的区别。</h4><p>https比http更安全。（有点敷衍哈）</p>
+<ol>
+<li>https协议需要到CA  证书，一般免费证书较少，因而需要一定费用。</li>
+<li>http是超文本传输协议，信息是明文传输，https则是具有安全性的<strong>ssl加密</strong>传输协议。</li>
+<li>它们用的连接方式不同，使用的端口也不同http是80端口而https是443端口。</li>
+<li>http的连接很简单，是无状态的。Https协议是由SSL+Http协议构建的可进行加密传输、身份认证的网络协议，比http协议安全。</li>
+<li>HTTP 页面响应速度比 HTTPS 快，主要是因为 HTTP 使用 TCP 三次握手建立连接，客户端和服务器需要交换 3 个包，而 HTTPS除了 TCP 的三个包，还要加上 ssl 握手需要的 9 个包，所以一共是 12 个包。 </li>
+<li>HTTPS 其实就是建构在 SSL/TLS 之上的 HTTP 协议，所以，要比较 HTTPS 比 HTTP 要更耗费服务器资源。</li>
+</ol>
+<h4 id="10、xss的原理及防御。"><a href="#10、xss的原理及防御。" class="headerlink" title="10、xss的原理及防御。"></a>10、<strong>xss的原理及防御。</strong></h4><h5 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h5><p>跨站脚本攻击，就是通过在css或者html里嵌入一些恶意的Javascript代码，从而实现恶意攻击的目的。</p>
+<h5 id="防护措施"><a href="#防护措施" class="headerlink" title="防护措施"></a>防护措施</h5><p> <strong>最普遍的做法是转义输入输出的内容，对于引号，尖括号，斜杠进行转义。</strong><br> 仅接受规定长度、规定的格式、预期内容，其余的一律过滤。  </p>
+<h4 id="11、怎么理解-DOM型XSS-。"><a href="#11、怎么理解-DOM型XSS-。" class="headerlink" title="11、怎么理解 DOM型XSS 。"></a>11、怎么理解 DOM型XSS 。</h4><p>先来了解一下dom，dom就是一个树状的模型，你可以编写Javascript代码根据dom一层一层的节点，去遍历/获取/修改对应的节点，对象，值。   </p>
+<p>DOM型XSS其实是一种特殊类型的反射型XSS，它是基于DOM文档对象模型的一种漏洞。  </p>
+<p>DOM型xss的实现过程都是在前台</p>
+<h4 id="12-sql注入的原理、防御及分类。"><a href="#12-sql注入的原理、防御及分类。" class="headerlink" title="12. sql注入的原理、防御及分类。"></a>12. sql注入的原理、防御及分类。</h4><p>sql注入的分类也是有蛮多种划分的有理即可，贴一张图吧。<br><a href="https://pic.downk.cc/item/5ec7886cc2a9a83be5964c44.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5ec7886cc2a9a83be5964c44.jpg" alt=""></a>  </p>
+<h5 id="sql注入原理"><a href="#sql注入原理" class="headerlink" title="sql注入原理"></a>sql注入原理</h5><p>插入恶意语句，就是说闭合前一句查询语句，构造恶意语句，恶意语句被代入SQL语句执行。</p>
+<h5 id="sql注入防御"><a href="#sql注入防御" class="headerlink" title="sql注入防御"></a>sql注入防御</h5><ol>
+<li><strong>制定黑名单</strong>：将常用的SQL注入字符写入到黑名单中。</li>
+<li><strong>限制查询长度</strong>：SQL注入过程中需要构造较长的SQL语句，但是效果不好以有绕过的方法。</li>
+<li><strong>限制查询类型</strong>：凡不符合该类型的提交就认为是非法请求。</li>
+<li><strong>白名单</strong></li>
+<li><strong>设置数据库权限</strong>：根据程序要求为特定的表设置特定的权限。</li>
+<li><strong>限制目录权限</strong>：</li>
+<li><strong>预编译、预处理</strong></li>
+<li><strong>数据库信息加密</strong></li>
+</ol>
+<h4 id="13-两个人往一张桌子上摆棋子，当桌子摆满时最后一个放棋子的胜，请问你怎么赢。"><a href="#13-两个人往一张桌子上摆棋子，当桌子摆满时最后一个放棋子的胜，请问你怎么赢。" class="headerlink" title="13. 两个人往一张桌子上摆棋子，当桌子摆满时最后一个放棋子的胜，请问你怎么赢。"></a>13. 两个人往一张桌子上摆棋子，当桌子摆满时最后一个放棋子的胜，请问你怎么赢。</h4><p>这题有意思了，感觉和脑筋急转弯是的 (:   </p>
+<p>答：我先放棋子，将第一个棋子放在中心点上。无论第二个人放在哪里，只要第一个人放在和那个棋子（中心）对称的地方就行了</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>信安小蚂蚁
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://mayi077.github.io/2020/05/22/2020-5-20-%E5%AF%8C%E9%80%94%E9%9D%A2%E8%AF%95/" title="2020-5-20 富途面试">https://mayi077.github.io/2020/05/22/2020-5-20-富途面试/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+     <div>
+       
+         ﻿<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+         
+      </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/" rel="tag"><i class="fa fa-tag"></i>基础积累</a>
+              <a href="/tags/%E9%9D%A2%E8%AF%95/" rel="tag"><i class="fa fa-tag"></i>面试</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/05/21/HarekazeCTF2019-encode-and-encode/" rel="prev" title="[HarekazeCTF2019]encode_and_encode">
+      <i class="fa fa-chevron-left"></i> [HarekazeCTF2019]encode_and_encode
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/07/12/sqli-labs%E7%9A%84%E5%AE%89%E8%A3%85/" rel="next" title="sqli_labs的安装">
+      sqli_labs的安装 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#题目"><span class="nav-number">1.</span> <span class="nav-text">题目</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#整理后的回答"><span class="nav-number">2.</span> <span class="nav-text">整理后的回答</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1、什么是csrf其原理及防护方法"><span class="nav-number">2.1.</span> <span class="nav-text">1、什么是csrf其原理及防护方法</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#什么是-csrf"><span class="nav-number">2.1.1.</span> <span class="nav-text">什么是 csrf</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#CSRF攻击攻击原理及过程"><span class="nav-number">2.1.2.</span> <span class="nav-text">CSRF攻击攻击原理及过程</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#防御CSRF攻击"><span class="nav-number">2.1.3.</span> <span class="nav-text">防御CSRF攻击</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#验证-HTTP-Referer-字段"><span class="nav-number">2.1.3.1.</span> <span class="nav-text">验证 HTTP Referer 字段</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#在请求地址中添加-token-并验证"><span class="nav-number">2.1.3.2.</span> <span class="nav-text">在请求地址中添加 token 并验证</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#在-HTTP-头中自定义属性并验证"><span class="nav-number">2.1.3.3.</span> <span class="nav-text">在 HTTP 头中自定义属性并验证</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#题外，CSRF漏洞检测"><span class="nav-number">2.1.4.</span> <span class="nav-text">题外，CSRF漏洞检测</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2、现有一个web网站需要进行密码账户等信息的传送，但公司只支持http（信息未加密）我们该用什么方案来进行安全的传送。"><span class="nav-number">2.2.</span> <span class="nav-text">2、现有一个web网站需要进行密码账户等信息的传送，但公司只支持http（信息未加密）我们该用什么方案来进行安全的传送。</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#解决数据抓包被窃取"><span class="nav-number">2.2.1.</span> <span class="nav-text">解决数据抓包被窃取</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#解决数据包被篡改"><span class="nav-number">2.2.2.</span> <span class="nav-text">解决数据包被篡改</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#解决无法判断登入状态"><span class="nav-number">2.2.3.</span> <span class="nav-text">解决无法判断登入状态</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3、ssrf和csrf区别。"><span class="nav-number">2.3.</span> <span class="nav-text">3、ssrf和csrf区别。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4、现有一个被入侵了的Linux计算机，我们该如何锁定入侵者进行了哪些操作及它的ip。"><span class="nav-number">2.4.</span> <span class="nav-text">4、现有一个被入侵了的Linux计算机，我们该如何锁定入侵者进行了哪些操作及它的ip。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5、给你一个ip（web站）-你该如何拿到它的websehll"><span class="nav-number">2.5.</span> <span class="nav-text">5、给你一个ip（web站）, 你该如何拿到它的websehll</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6、你如何修复一个存在漏洞的web站。"><span class="nav-number">2.6.</span> <span class="nav-text">6、你如何修复一个存在漏洞的web站。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7、tcp-ip有哪些层。"><span class="nav-number">2.7.</span> <span class="nav-text">7、tcp&#x2F;ip有哪些层。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#8、http头部有哪些重要信息。"><span class="nav-number">2.8.</span> <span class="nav-text">8、http头部有哪些重要信息。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#9、http和https的区别。"><span class="nav-number">2.9.</span> <span class="nav-text">9、http和https的区别。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#10、xss的原理及防御。"><span class="nav-number">2.10.</span> <span class="nav-text">10、xss的原理及防御。</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#原理"><span class="nav-number">2.10.1.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#防护措施"><span class="nav-number">2.10.2.</span> <span class="nav-text">防护措施</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#11、怎么理解-DOM型XSS-。"><span class="nav-number">2.11.</span> <span class="nav-text">11、怎么理解 DOM型XSS 。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#12-sql注入的原理、防御及分类。"><span class="nav-number">2.12.</span> <span class="nav-text">12. sql注入的原理、防御及分类。</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#sql注入原理"><span class="nav-number">2.12.1.</span> <span class="nav-text">sql注入原理</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#sql注入防御"><span class="nav-number">2.12.2.</span> <span class="nav-text">sql注入防御</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#13-两个人往一张桌子上摆棋子，当桌子摆满时最后一个放棋子的胜，请问你怎么赢。"><span class="nav-number">2.13.</span> <span class="nav-text">13. 两个人往一张桌子上摆棋子，当桌子摆满时最后一个放棋子的胜，请问你怎么赢。</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
+      src="/images/1.jpg">
+  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23li6cOHoOwCcszzi9',
+      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
+      repo        : 'mayi077.github.io',
+      owner       : 'mayi077',
+      admin       : ['mayi077'],
+      id          : 'a3b9761880556ec9fff77677ddf0b9cf',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

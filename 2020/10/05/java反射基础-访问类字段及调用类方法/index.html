@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
+  <link rel="mask-icon" href="/images/tu.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Class 类在学习 java 反射之前，我们先来看看 Class类。我们知道所有的 class 的本质都是一个数据类型。而 JVM 在第一次读取到一种class 类型时会将其加载进内存。每加载一种class，JVM都会为其创建一个Class类型的实例，并关联起来。这里我们需要注意 Class 它只是一个名字比较特殊的class类，我们可以理解它长这个样子: 123public final cla">
+<meta property="og:type" content="article">
+<meta property="og:title" content="java反射基础--访问类字段及调用类方法">
+<meta property="og:url" content="https://mayi077.github.io/2020/10/05/java%E5%8F%8D%E5%B0%84%E5%9F%BA%E7%A1%80-%E8%AE%BF%E9%97%AE%E7%B1%BB%E5%AD%97%E6%AE%B5%E5%8F%8A%E8%B0%83%E7%94%A8%E7%B1%BB%E6%96%B9%E6%B3%95/index.html">
+<meta property="og:site_name" content="信安小蚂蚁">
+<meta property="og:description" content="Class 类在学习 java 反射之前，我们先来看看 Class类。我们知道所有的 class 的本质都是一个数据类型。而 JVM 在第一次读取到一种class 类型时会将其加载进内存。每加载一种class，JVM都会为其创建一个Class类型的实例，并关联起来。这里我们需要注意 Class 它只是一个名字比较特殊的class类，我们可以理解它长这个样子: 123public final cla">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-10-05T06:20:23.000Z">
+<meta property="article:modified_time" content="2020-10-05T06:22:04.000Z">
+<meta property="article:author" content="信安小蚂蚁">
+<meta property="article:tag" content="基础积累">
+<meta property="article:tag" content="java反射">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://mayi077.github.io/2020/10/05/java%E5%8F%8D%E5%B0%84%E5%9F%BA%E7%A1%80-%E8%AE%BF%E9%97%AE%E7%B1%BB%E5%AD%97%E6%AE%B5%E5%8F%8A%E8%B0%83%E7%94%A8%E7%B1%BB%E6%96%B9%E6%B3%95/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>java反射基础--访问类字段及调用类方法 | 信安小蚂蚁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">信安小蚂蚁</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right"></div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-主页">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
+
+  </li>
+        <li class="menu-item menu-item-归档">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-分类">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-标签">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-关于">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/10/05/java%E5%8F%8D%E5%B0%84%E5%9F%BA%E7%A1%80-%E8%AE%BF%E9%97%AE%E7%B1%BB%E5%AD%97%E6%AE%B5%E5%8F%8A%E8%B0%83%E7%94%A8%E7%B1%BB%E6%96%B9%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          java反射基础--访问类字段及调用类方法
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-10-05 14:20:23 / 修改时间：14:22:04" itemprop="dateCreated datePublished" datetime="2020-10-05T14:20:23+08:00">2020-10-05</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/" itemprop="url" rel="index">
+                    <span itemprop="name">基础积累</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>6.9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>17 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="Class-类"><a href="#Class-类" class="headerlink" title="Class 类"></a>Class 类</h3><p>在学习 java 反射之前，我们先来看看 Class类。我们知道所有的 <code>class</code> 的本质都是一个数据类型。而 <code>JVM</code> 在第一次读取到一种<code>class</code> 类型时会将其加载进内存。每加载一种<code>class</code>，JVM都会为其创建一个<code>Class</code>类型的实例，并关联起来。这里我们需要注意 <strong>Class 它只是一个名字比较特殊的class类</strong>，我们可以理解它长这个样子:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public final class Class &#123;</span><br><span class="line">    private Class() &#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<a id="more"></a>
+<p>JVM为每个<strong>加载了的</strong>class都创建了对应的Class实例，并且这个实例中保存了该<code>class</code>的所有信息。也就是说，如果我们获取到了某个Class实例，我们就可以通过这个实例获取到对应的class所有信息。</p>
+<h3 id="如何获取到一个-class的-Class实例？"><a href="#如何获取到一个-class的-Class实例？" class="headerlink" title="如何获取到一个 class的 Class实例？"></a>如何获取到一个 class的 Class实例？</h3><p>示例代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">package test1;</span><br><span class="line">public class reflect &#123;</span><br><span class="line">	public static void main(String[] args) &#123;</span><br><span class="line">		Person p &#x3D; new Person();</span><br><span class="line">		&#x2F;*获取其Class实例处*&#x2F;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">class Person &#123;</span><br><span class="line">	private int age;</span><br><span class="line">	private int getAge() &#123;</span><br><span class="line">		return age;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里我们介绍三种：</p>
+<h4 id="一、直接通过一个class的静态变量来获取"><a href="#一、直接通过一个class的静态变量来获取" class="headerlink" title="一、直接通过一个class的静态变量来获取"></a>一、直接通过一个<code>class</code>的静态变量来获取</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Class cls &#x3D; Person.class;</span><br></pre></td></tr></table></figure>
+
+<h4 id="二、通过一个实例对象来获取，getClass"><a href="#二、通过一个实例对象来获取，getClass" class="headerlink" title="二、通过一个实例对象来获取，getClass()"></a>二、通过一个实例对象来获取，getClass()</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Class cls &#x3D; p.getClass();</span><br></pre></td></tr></table></figure>
+
+<h4 id="三、通过class的完整类名来获取，class-forName"><a href="#三、通过class的完整类名来获取，class-forName" class="headerlink" title="三、通过class的完整类名来获取，class.forName()"></a>三、通过class的完整类名来获取，class.forName()</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Class cls &#x3D; Class.forName(&quot;test1.Person&quot;);</span><br><span class="line">&#x2F;&#x2F; 完整路径包括包名以及类名</span><br></pre></td></tr></table></figure>
+
+<p>因为Class 实例在JVM中是唯一的，所以上述方法获取到的Class实例都是相等的（同一个实例）。</p>
+<h3 id="利用-Class-实例来进行访问类字段"><a href="#利用-Class-实例来进行访问类字段" class="headerlink" title="利用 Class 实例来进行访问类字段"></a>利用 Class 实例来进行访问类字段</h3><p>首先我们缕一缕思路，首先我们要获得这个Class实例，然后我们需要通过Class实例获得特定的field(字段)，最后通过指定方法进行修改查看，我们实例化的对象（p）的该field。<br>获取这个Class实例我们已经知道了，那我们该如何获取字段呢？</p>
+<h4 id="通过Class实例获取到-field"><a href="#通过Class实例获取到-field" class="headerlink" title="通过Class实例获取到 field"></a>通过Class实例获取到 field</h4><p>这里有四种方法：</p>
+<ul>
+<li>Field getField(name)：根据字段名获取某个public的field（包括父类）</li>
+<li>Field getDeclaredField(name)：根据字段名获取当前类的某个field（不包括父类）</li>
+<li>Field[] getFields()：获取所有public的field（包括父类）</li>
+<li>Field[] getDeclaredFields()：获取当前类的所有field（不包括父类）</li>
+</ul>
+<p>我一般使用最多的还是<code>getDeclaredField(name)</code> 因为它可以访问到private修饰的field。如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">package test1;</span><br><span class="line">import java.lang.reflect.Field;</span><br><span class="line"></span><br><span class="line">public class reflect &#123;</span><br><span class="line">	public static void main(String[] args) throws  NoSuchFieldException&#123;</span><br><span class="line">		Person p &#x3D; new Person();</span><br><span class="line">		&#x2F;*获取其Class实例处*&#x2F;</span><br><span class="line">		Class cls &#x3D; Person.class;</span><br><span class="line">		Field age &#x3D; cls.getDeclaredField(&quot;age&quot;);</span><br><span class="line">		System.out.print(age);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">class Person &#123;</span><br><span class="line">	private int age;</span><br><span class="line">	private int getAge() &#123;</span><br><span class="line">		return age;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">&#x2F;&#x2F; private int test1.Person.age</span><br></pre></td></tr></table></figure>
+<p>同时我们注意到，进行<code>Field</code> 赋值的时候我们需要导入一个<code>java.lang.reflect.Field</code> 包，并且使用<code>getDeclaredField</code> 我们需要捕获异常。</p>
+<h4 id="通过-Feild实例-来进行修改和查看字段"><a href="#通过-Feild实例-来进行修改和查看字段" class="headerlink" title="通过 Feild实例 来进行修改和查看字段"></a>通过 Feild实例 来进行修改和查看字段</h4><p>这里我们获取字段基本信息如：</p>
+<ul>
+<li>getName()：返回字段名称，例如，”name”；</li>
+<li>getType()：返回字段类型，也是一个Class实例，例如，String.class；</li>
+<li>getModifiers()：返回字段的修饰符，它是一个int，不同的bit表示不同的含义。</li>
+</ul>
+<p>但是我们用的更多的还是利用Feild实例来获取实例化的class值(这里的p)。<br>此时我们可以使用 get() 和set()方法。但是<strong>我们前面获取的是private修饰的</strong> 讲道理是不可以被我们调用的。但是我们利用反射，且在使用前加入<code>age.setAccessible(true);</code> 就可以访问。(当然，有办法设置为不能使用setAccessible)。那我们直接来看看代码吧：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">package test1;</span><br><span class="line">import java.lang.reflect.Field;</span><br><span class="line"></span><br><span class="line">public class reflect &#123;</span><br><span class="line"></span><br><span class="line">	public static void main(String[] args) throws  NoSuchFieldException, IllegalArgumentException, IllegalAccessException&#123;</span><br><span class="line">		Person p &#x3D; new Person();</span><br><span class="line">	   &#x2F;*主要代码*&#x2F;</span><br><span class="line">		Class cls &#x3D; Person.class;</span><br><span class="line">		Field age &#x3D; cls.getDeclaredField(&quot;age&quot;);</span><br><span class="line">		age.setAccessible(true);</span><br><span class="line">		age.set(p, 20);</span><br><span class="line">		Object r &#x3D; age.get(p);</span><br><span class="line">		System.out.print(r);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">class Person &#123;</span><br><span class="line">	private int age;</span><br><span class="line">	private int getAge() &#123;</span><br><span class="line">		return age;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里我们注意到，我们又throws一个异常一般我们根据idea或者eclipse自动添加捕获异常即可。</p>
+<h3 id="利用-Class-实例来调用类方法"><a href="#利用-Class-实例来调用类方法" class="headerlink" title="利用 Class 实例来调用类方法"></a>利用 Class 实例来调用类方法</h3><p>想要调用类方法和访问字段类似，首先我们需要根据Class实例获取到 Method对象。   </p>
+<h4 id="获取Method对象"><a href="#获取Method对象" class="headerlink" title="获取Method对象"></a>获取Method对象</h4><p>类似得到field一样，我们也有四种方法：</p>
+<ul>
+<li>Method getMethod(name, Class…)：获取某个public的Method（包括父类）</li>
+<li>Method getDeclaredMethod(name, Class…)：获取当前类的某个Method（不包括父类）</li>
+<li>Method[] getMethods()：获取所有public的Method（包括父类）<br>  Method[]</li>
+<li>getDeclaredMethods()：获取当前类的所有Method（不包括父类）</li>
+</ul>
+<p>这里我经常使用的是<code>getDeclaredMethod()</code><br>这里我们需要注意的是，前2个函数中都有2个参数，其中name是必须的而 Class 是根据对应函数中的定义而设置的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">package test1;</span><br><span class="line">import java.lang.reflect.Field;</span><br><span class="line">import java.lang.reflect.Method;</span><br><span class="line"></span><br><span class="line">public class reflect &#123;</span><br><span class="line"></span><br><span class="line">	public static void main(String[] args) throws   NoSuchMethodException, SecurityException&#123;</span><br><span class="line">		Person p &#x3D; new Person();</span><br><span class="line">	   &#x2F;*主要代码*&#x2F;</span><br><span class="line">		Class cls &#x3D; Person.class;</span><br><span class="line">		Method getAage &#x3D; cls.getDeclaredMethod(&quot;getAge&quot;);</span><br><span class="line">		System.out.println(getAage);</span><br><span class="line">		Method setAage &#x3D; cls.getDeclaredMethod(&quot;setAge&quot;,int.class);</span><br><span class="line">		System.out.println(setAage);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">class Person &#123;</span><br><span class="line">	private int age &#x3D; 112;</span><br><span class="line">	private void setAge(int age) &#123;</span><br><span class="line">		this.age &#x3D;age;</span><br><span class="line">	&#125;</span><br><span class="line">	private int getAge() &#123;</span><br><span class="line">		return age;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>同样这里我们也可以根据Method对象获取到一些基本信息，如：</p>
+<ul>
+<li>getName()：返回方法名称，例如：”getScore”；</li>
+<li>getReturnType()：返回方法返回值类型，也是一个Class实例，例如：String.class；</li>
+<li>getParameterTypes()：返回方法的参数类型，是一个Class数组，例如：{String.class, int.class}；</li>
+<li>getModifiers()：返回方法的修饰符，它是一个int，不同的bit表示不同的含义。</li>
+</ul>
+<p>但是，我们最想使用的还是调用指定函数</p>
+<h4 id="使用-invoke调用函数"><a href="#使用-invoke调用函数" class="headerlink" title="使用 invoke调用函数"></a>使用 invoke调用函数</h4><p>和Field类似，对于非public方法，我们虽然可以通过Class.getDeclaredMethod()获取该方法实例，但直接对其调用将得到一个IllegalAccessException。为了调用非public方法，我们通过Method.setAccessible(true)允许其调用：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">package test1;</span><br><span class="line">import java.lang.reflect.Field;</span><br><span class="line">import java.lang.reflect.InvocationTargetException;</span><br><span class="line">import java.lang.reflect.Method;</span><br><span class="line"></span><br><span class="line">public class reflect &#123;</span><br><span class="line"></span><br><span class="line">	public static void main(String[] args) throws   NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException&#123;</span><br><span class="line">		Person p &#x3D; new Person();</span><br><span class="line">	   &#x2F;*主要代码*&#x2F;</span><br><span class="line">		Class cls &#x3D; Person.class;</span><br><span class="line">		Method getAage &#x3D; cls.getDeclaredMethod(&quot;getAge&quot;);</span><br><span class="line">		getAage.setAccessible(true);</span><br><span class="line">		Object get &#x3D; getAage.invoke(p);</span><br><span class="line">		System.out.println(get);</span><br><span class="line">		Method setAage &#x3D; cls.getDeclaredMethod(&quot;setAge&quot;,int.class);</span><br><span class="line">		setAage.setAccessible(true);</span><br><span class="line">		setAage.invoke(p, 666);</span><br><span class="line">		get &#x3D; getAage.invoke(p);</span><br><span class="line">		System.out.println(get);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">class Person &#123;</span><br><span class="line">	private int age &#x3D; 112;</span><br><span class="line">	private void setAge(int age) &#123;</span><br><span class="line">		this.age &#x3D;age;</span><br><span class="line">	&#125;</span><br><span class="line">	private int getAge() &#123;</span><br><span class="line">		return age;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">&#x2F;&#x2F; 112</span><br><span class="line">&#x2F;&#x2F; 666</span><br></pre></td></tr></table></figure>
+
+<h4 id="多态"><a href="#多态" class="headerlink" title="多态"></a>多态</h4><p>这里顺便提一下，假如我们获取到一个父类的Class，然后getMethod作用于子类，且调用的方法子类有覆写。此时调用的是子类的方法。如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">package test1;</span><br><span class="line">import java.lang.reflect.Field;</span><br><span class="line">import java.lang.reflect.InvocationTargetException;</span><br><span class="line">import java.lang.reflect.Method;</span><br><span class="line"></span><br><span class="line">public class reflect &#123;</span><br><span class="line"></span><br><span class="line">	public static void main(String[] args) throws   NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException&#123;</span><br><span class="line">		Person1 p &#x3D; new Student();</span><br><span class="line">	   &#x2F;*主要代码*&#x2F;</span><br><span class="line">		Class cls &#x3D; Person1.class;</span><br><span class="line">		Method hello &#x3D; cls.getDeclaredMethod(&quot;hello&quot;);</span><br><span class="line">		hello.setAccessible(true);</span><br><span class="line">		hello.invoke(p);</span><br><span class="line"></span><br><span class="line">&#125;&#125;</span><br><span class="line"></span><br><span class="line">class Person1 &#123;</span><br><span class="line">    public void hello() &#123;</span><br><span class="line">        System.out.println(&quot;Person:hello&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">class Student extends Person1 &#123;</span><br><span class="line">    public void hello() &#123;</span><br><span class="line">        System.out.println(&quot;Student:hello&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">&#x2F;&#x2F; Student:hello</span><br></pre></td></tr></table></figure>
+
+<h3 id="调用构造方法"><a href="#调用构造方法" class="headerlink" title="调用构造方法"></a>调用构造方法</h3><p>我们通常使用<code>new</code>来创建实例，但是其实我们也可以利用反射来创建实例。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Person p &#x3D; Person.class.newInstance();</span><br></pre></td></tr></table></figure>
+<p>这里使用Class.newInstance，也是有局限的，要求只能是无参数构造方法。如果是有参或者不是public就无法这样来调用。<br>为了调用任意的构造方法，Java的反射API提供了Constructor对象，它包含一个构造方法的所有信息，可以创建一个实例。Constructor对象和Method非常类似，不同之处仅在于它是一个构造方法，并且，调用结果总是返回实例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">package test1;</span><br><span class="line">import java.lang.reflect.Constructor;</span><br><span class="line">import java.lang.reflect.InvocationTargetException;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">public class reflect &#123;</span><br><span class="line"></span><br><span class="line">	public static void main(String[] args) throws   NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InstantiationException, InvocationTargetException&#123;</span><br><span class="line">	   &#x2F;*主要代码*&#x2F;</span><br><span class="line">		Class cls &#x3D; Person.class;</span><br><span class="line">		Constructor cons &#x3D; cls.getDeclaredConstructor(int.class);</span><br><span class="line">		cons.setAccessible(true);</span><br><span class="line">		Person p &#x3D; (Person)cons.newInstance(20);</span><br><span class="line">		System.out.print(p.age);</span><br><span class="line">	</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">class Person &#123;</span><br><span class="line">	public int age;</span><br><span class="line">	</span><br><span class="line">	private void name() &#123;</span><br><span class="line">		</span><br><span class="line">	&#125; Person(int age) &#123;</span><br><span class="line">		&#x2F;&#x2F; TODO Auto-generated constructor stub</span><br><span class="line">	    this.age&#x3D;age;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">&#x2F;&#x2F; 20</span><br></pre></td></tr></table></figure>
+<p>好啦，这就先记到这里。  </p>
+<p><a href="https://www.liaoxuefeng.com/wiki/1252599548343744/1255945147512512" target="_blank" rel="noopener">【参考链接】</a></p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>信安小蚂蚁
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://mayi077.github.io/2020/10/05/java%E5%8F%8D%E5%B0%84%E5%9F%BA%E7%A1%80-%E8%AE%BF%E9%97%AE%E7%B1%BB%E5%AD%97%E6%AE%B5%E5%8F%8A%E8%B0%83%E7%94%A8%E7%B1%BB%E6%96%B9%E6%B3%95/" title="java反射基础--访问类字段及调用类方法">https://mayi077.github.io/2020/10/05/java反射基础-访问类字段及调用类方法/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+     <div>
+       
+         ﻿<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+         
+      </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/" rel="tag"><i class="fa fa-tag"></i>基础积累</a>
+              <a href="/tags/java%E5%8F%8D%E5%B0%84/" rel="tag"><i class="fa fa-tag"></i>java反射</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/09/24/%E8%AE%B0%E4%B8%80%E4%B8%AA-REQUEST-%E5%8F%82%E6%95%B0%E5%90%8D%E9%97%AE%E9%A2%98/" rel="prev" title="记一个 $ _REQUEST 参数名问题">
+      <i class="fa fa-chevron-left"></i> 记一个 $ _REQUEST 参数名问题
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/10/08/BJDCTF2020-EzPHP/" rel="next" title="[BJDCTF2020]EzPHP">
+      [BJDCTF2020]EzPHP <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Class-类"><span class="nav-number">1.</span> <span class="nav-text">Class 类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何获取到一个-class的-Class实例？"><span class="nav-number">2.</span> <span class="nav-text">如何获取到一个 class的 Class实例？</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#一、直接通过一个class的静态变量来获取"><span class="nav-number">2.1.</span> <span class="nav-text">一、直接通过一个class的静态变量来获取</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#二、通过一个实例对象来获取，getClass"><span class="nav-number">2.2.</span> <span class="nav-text">二、通过一个实例对象来获取，getClass()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#三、通过class的完整类名来获取，class-forName"><span class="nav-number">2.3.</span> <span class="nav-text">三、通过class的完整类名来获取，class.forName()</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#利用-Class-实例来进行访问类字段"><span class="nav-number">3.</span> <span class="nav-text">利用 Class 实例来进行访问类字段</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#通过Class实例获取到-field"><span class="nav-number">3.1.</span> <span class="nav-text">通过Class实例获取到 field</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#通过-Feild实例-来进行修改和查看字段"><span class="nav-number">3.2.</span> <span class="nav-text">通过 Feild实例 来进行修改和查看字段</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#利用-Class-实例来调用类方法"><span class="nav-number">4.</span> <span class="nav-text">利用 Class 实例来调用类方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#获取Method对象"><span class="nav-number">4.1.</span> <span class="nav-text">获取Method对象</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用-invoke调用函数"><span class="nav-number">4.2.</span> <span class="nav-text">使用 invoke调用函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#多态"><span class="nav-number">4.3.</span> <span class="nav-text">多态</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#调用构造方法"><span class="nav-number">5.</span> <span class="nav-text">调用构造方法</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
+      src="/images/1.jpg">
+  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23li6cOHoOwCcszzi9',
+      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
+      repo        : 'mayi077.github.io',
+      owner       : 'mayi077',
+      admin       : ['mayi077'],
+      id          : 'dabc681b7433e0952ee79e5139ccfd2a',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
+  <link rel="mask-icon" href="/images/tu.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="0x01 令牌窃取提权1、令牌及伪造令牌介绍&amp;emsp;令牌（Token)是指系统中的临时密钥,相当于账户和密码,用于决定是否允许当前请求及判断当前请求是属于哪个用户的。获得了令牌，就可以在不提供密码或其他凭证的情况下访问网络和系统资源。这些令牌将持续存在于系统中(除非系统重新启动)。&amp;emsp;令牌的最大特点是随机性和不可预测性。一般的攻击者或软件都无法将令牌猜测出来。  访问令牌（Access">
+<meta property="og:type" content="article">
+<meta property="og:title" content="权限提升之令牌窃取以及无凭证欺骗">
+<meta property="og:url" content="https://mayi077.github.io/2021/04/06/%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E4%B9%8B%E4%BB%A4%E7%89%8C%E7%AA%83%E5%8F%96%E4%BB%A5%E5%8F%8A%E6%97%A0%E5%87%AD%E8%AF%81%E6%AC%BA%E9%AA%97/index.html">
+<meta property="og:site_name" content="信安小蚂蚁">
+<meta property="og:description" content="0x01 令牌窃取提权1、令牌及伪造令牌介绍&amp;emsp;令牌（Token)是指系统中的临时密钥,相当于账户和密码,用于决定是否允许当前请求及判断当前请求是属于哪个用户的。获得了令牌，就可以在不提供密码或其他凭证的情况下访问网络和系统资源。这些令牌将持续存在于系统中(除非系统重新启动)。&amp;emsp;令牌的最大特点是随机性和不可预测性。一般的攻击者或软件都无法将令牌猜测出来。  访问令牌（Access">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://tva4.sinaimg.cn/large/006Glg0Bgy1gpa3yogql5j30qf0cuabm.jpg">
+<meta property="og:image" content="https://tva4.sinaimg.cn/large/006Glg0Bgy1gpa805siaxj30pl0g9wio.jpg">
+<meta property="article:published_time" content="2021-04-06T11:11:17.000Z">
+<meta property="article:modified_time" content="2021-04-06T11:12:25.000Z">
+<meta property="article:author" content="信安小蚂蚁">
+<meta property="article:tag" content="内网学习">
+<meta property="article:tag" content="权限提升">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tva4.sinaimg.cn/large/006Glg0Bgy1gpa3yogql5j30qf0cuabm.jpg">
+
+<link rel="canonical" href="https://mayi077.github.io/2021/04/06/%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E4%B9%8B%E4%BB%A4%E7%89%8C%E7%AA%83%E5%8F%96%E4%BB%A5%E5%8F%8A%E6%97%A0%E5%87%AD%E8%AF%81%E6%AC%BA%E9%AA%97/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>权限提升之令牌窃取以及无凭证欺骗 | 信安小蚂蚁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">信安小蚂蚁</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right"></div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-主页">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
+
+  </li>
+        <li class="menu-item menu-item-归档">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-分类">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-标签">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-关于">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2021/04/06/%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E4%B9%8B%E4%BB%A4%E7%89%8C%E7%AA%83%E5%8F%96%E4%BB%A5%E5%8F%8A%E6%97%A0%E5%87%AD%E8%AF%81%E6%AC%BA%E9%AA%97/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          权限提升之令牌窃取以及无凭证欺骗
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-04-06 19:11:17 / 修改时间：19:12:25" itemprop="dateCreated datePublished" datetime="2021-04-06T19:11:17+08:00">2021-04-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%86%85%E7%BD%91%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">内网学习</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>11 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="0x01-令牌窃取提权"><a href="#0x01-令牌窃取提权" class="headerlink" title="0x01 令牌窃取提权"></a>0x01 令牌窃取提权</h2><h3 id="1、令牌及伪造令牌介绍"><a href="#1、令牌及伪造令牌介绍" class="headerlink" title="1、令牌及伪造令牌介绍"></a>1、令牌及伪造令牌介绍</h3><p>&emsp;令牌（Token)是指系统中的临时密钥,相当于账户和密码,用于决定是否允许当前请求及判断当前请求是属于哪个用户的。获得了令牌，就可以在不提供密码或其他凭证的情况下访问网络和系统资源。这些令牌将持续存在于系统中(除非系统重新启动)。<br>&emsp;令牌的最大特点是随机性和不可预测性。一般的攻击者或软件都无法将令牌猜测出来。</p>
+<ul>
+<li>访问令牌（Access Token )代表访问控制操作主休的系统对象。</li>
+<li>密保令牌(Security Token )也叫作认证令牌或者硬件令牌，是一种用于实现计算机身份校验的物理设备，例如U盾。</li>
+<li>会话令牌(SessionToken)是交互会话中唯一的身份标识符。   </li>
+</ul>
+<p>伪造令牌攻击的核心是Kerberos协议, Kerberos是一种网络认证协议，其设计目标是通过密钥系统为客户机/服务器应用程序提供强大的认证服务。Kerberos协议的工作机制如下图所示</p>
+<a id="more"></a>
+<p><img data-src="//tva4.sinaimg.cn/large/006Glg0Bgy1gpa3yogql5j30qf0cuabm.jpg" alt="kerberos工作机制"><br>客户端请求证书的过程如下：</p>
+<ol>
+<li>客户端向认证服务器发送请求,要求得到证书。</li>
+<li>认证服务器收到请求后，将包含客户端密钥的加密证书发送给客户端。该证书包含服务器Ticket(包含由服务器密钥加密的客户机身份和一份会话密钥)和一个临时加密密钥(又称为会话密钥，Session Key)。当然，认证服务器也会向服务器发送一份该证书，使服务器能够验证登录的客户端的身份。</li>
+<li>客户端将Ticket传送给服务器。如果服务器确认该客户端的身份，就允许它登录服务器。</li>
+</ol>
+<p>客户端登录服务器后,攻击者就能通过入侵服务器来窃取客户端的令牌。</p>
+<h3 id="2、假冒令牌"><a href="#2、假冒令牌" class="headerlink" title="2、假冒令牌"></a>2、假冒令牌</h3><p>假设已经获取到了目标机器的meterpreter Shell ，首先输入 ‘use incoginto’，然后输入‘list_tokens -u’命令，列出可用的令牌。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">meterpreter &gt; use incognito </span><br><span class="line">meterpreter &gt; list_tokens -u</span><br></pre></td></tr></table></figure>
+<p>这里有两种类型的令牌:</p>
+<ol>
+<li>一种是Delegation Tokens，也就是授权令牌,它支持交互式登录(例如，可以通过远程桌面登录及访问);</li>
+<li>另一种是Impersonation Tokens，也就是模拟令牌，它支持非交互式的会话。</li>
+</ol>
+<p>令牌的数量其实取决于meterprcter shell的访问级别，假设已经获得了一个系统管理员的授权令牌,如果攻击者可以伪造这个令牌，便可以拥有它的权限。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">meterpreter &gt; impersonate_token WIN7\\q    </span><br><span class="line">#在incognito中调用inpersonate_token,假冒用户q进行测试，WIN7是机器名，q为用户名，中间需要\\隔开</span><br></pre></td></tr></table></figure>
+
+<h3 id="3、Rotten-Potato本地提权分析"><a href="#3、Rotten-Potato本地提权分析" class="headerlink" title="3、Rotten Potato本地提权分析"></a>3、Rotten Potato本地提权分析</h3><p>&emsp;如果目标系统中存在有效的令牌，可以通过Rotten Potato程序快速模拟用户令牌来实现权限的提升。首先输入“use incognito”命令，然后输入“list_tokens -u”命令,列出可用的令牌。</p>
+<p><a href="https://github.com/foxglovesec/RottenPotato" target="_blank" rel="noopener">【下载Rotten Potato】</a>  下载完成后，RottenPotato有一个rottenpotato.exe 可执行文件。执行如下命令可以将此文件上传到目标机器然后进行提权：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">meterpreter &gt; use incognito </span><br><span class="line">meterpreter &gt; list_tokens -u</span><br><span class="line">meterpreter &gt; upload &#x2F;home&#x2F;kali&#x2F;Downloads&#x2F;rottenpotato.exe</span><br><span class="line">meterpreter &gt; execute -HC -f rottenpotato.exe </span><br><span class="line">meterpreter &gt; impersonate_token &quot;NT AUTHORITY\SYSTEM&quot;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="4、添加域管理员"><a href="#4、添加域管理员" class="headerlink" title="4、添加域管理员"></a>4、添加域管理员</h3><p>在meterpreter会话中使用ps命令查找域管理进程，并使用migrate命令迁移到该进程，进入shell执行如下命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">net user sec 123456Bo &#x2F;ad &#x2F;domain    #添加域用户</span><br><span class="line">net group &quot;domain admins&quot; sec &#x2F;ad &#x2F;domain    #添加到域管理员组</span><br><span class="line">net group &quot;domain admins&quot; &#x2F;domain    #查看域管理员组</span><br></pre></td></tr></table></figure>
+<p>同样在meterpreter中可以使用incognito来模拟域管理员，然后通过迭代系统中所有可用的身份验证令牌来太添加域管理员（为测试）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">use incognito</span><br><span class="line">add_user 用户名 密码 -h 1.1.1.8</span><br><span class="line">add_group_user &quot;domain admins&quot; 用户名 -h 1.1.1.8</span><br></pre></td></tr></table></figure>
+
+<h3 id="5、Empire-下的令牌窃取"><a href="#5、Empire-下的令牌窃取" class="headerlink" title="5、Empire 下的令牌窃取"></a>5、Empire 下的令牌窃取</h3><p>&emsp;在Empire 下获取服务器权限后，可以使用内置的mimikatz工具获取系统密码。运行mimikatz，输入<code>creds</code>可以查看empire列举出来的密码。如果我们发现曾经有域用户登录此服务器我们可以使用<code>pth &lt;ID&gt;</code> ，这里的ID就是creds下的CredID，就能完成窃取高权限身份的令牌。<br>&emsp;同样使用ps命令查看当前是否有域用户的进程正在运行，随后使用steal_token获取这个令牌。   </p>
+<p><strong>获取令牌后，输入‘revtoself’命令，恢复令牌的权限。</strong></p>
+<h3 id="6、针对令牌窃取提权的防御措施"><a href="#6、针对令牌窃取提权的防御措施" class="headerlink" title="6、针对令牌窃取提权的防御措施"></a>6、针对令牌窃取提权的防御措施</h3><ul>
+<li>及时安装微软推送的补丁。</li>
+<li>对来路不明的或者有危险的软件，既不要在系统中使用，也不要在虚拟机中使用。</li>
+<li>对令牌的时效性进行限制，以防止散列值被破解后泄露有效的令牌信息。越敏感的数据，其令牌时效应该越短。如果每个操作都使用独立的令牌，就可以比较容易地定位泄露令牌的操作或环节。</li>
+<li>对于令牌,应采取加密存储及多重验证保护。</li>
+<li>使用加密链路SSL/TLS传输令牌，以防止被中间人窃听</li>
+</ul>
+<h2 id="0x02-无凭证条件下的权限获取"><a href="#0x02-无凭证条件下的权限获取" class="headerlink" title="0x02 无凭证条件下的权限获取"></a>0x02 无凭证条件下的权限获取</h2><p>在本节的实验中，假设已经进入目标网络，但没有获得任何凭证，使用（链路本地多播名称解析） 和NetBIOS欺骗攻击对目标网络进行渗透测试。</p>
+<h3 id="1、LLMNR-和-NetBIOS欺骗攻击的基本概念"><a href="#1、LLMNR-和-NetBIOS欺骗攻击的基本概念" class="headerlink" title="1、LLMNR 和 NetBIOS欺骗攻击的基本概念"></a>1、LLMNR 和 NetBIOS欺骗攻击的基本概念</h3><h4 id="1-、LLMNR：本地链路多播名称解析"><a href="#1-、LLMNR：本地链路多播名称解析" class="headerlink" title="(1)、LLMNR：本地链路多播名称解析"></a>(1)、LLMNR：本地链路多播名称解析</h4><p>&emsp;本地链路多播名称解析（LLMNR）是一种域名系统数据包格式。当局域网中的DNS服务器不可用时，DNS客户端会使用LLMNR解析本地网段中机器的名称，直到 DNS服务器恢复正常为止。从 Windows Vista版本开始支持LLMNR。LLMNR支持IPv6。<br>LLMNR的工作流程：</p>
+<ol>
+<li>DNS客户端在自己的内部名称缓存中查询名称。</li>
+<li>如果没有找到，主机将向主DNS发送名称查询请求。</li>
+<li>如果主DNS没有回应或者收到了错误的信息，主机会向备DNS发送查询请求。</li>
+<li>如果备DNS没有回应或者收到了错误的信息，将使用LLMNR进行解析。</li>
+<li>主机通过UDP协议向组播地址224.0.0.252的5355端口发送多播查询请求，以获取主机名所对应的P地址。查询范围仅限于本地子网。</li>
+<li>本地子网中所有支持 LLMNR 的主机在收到查询请求后，会对比自己的主机名。如果不同,就丢弃;如果相同，就向查询主机发送包含自己IP地址的单播信息。</li>
+</ol>
+<h4 id="2-、NetBIOS-网络协议"><a href="#2-、NetBIOS-网络协议" class="headerlink" title="(2)、NetBIOS 网络协议"></a>(2)、NetBIOS 网络协议</h4><p>&emsp;NetBIOS是一种网络协议，一般用在由十几台计算机组成的局域网中（根据NetBIOS协议广播获得计算机名称，并将其解析为相应的IP地址)。在Windows NT 以后版本的所有操作系统中均可使用NetBIOS。但是,NetBIOS不支持IPv6。<br>NetBIOS 提供以下三种服务：</p>
+<ol>
+<li>NetBIOS-NS（名称服务):主要用于名称注册和解析，以启动会话和分发数据报。该服务需要使用域名服务器来注册NetBIOS 的名称，默认监听UDP137端口，也可以使用TCP137端口。</li>
+<li>Datagram Distribution Service（数据报分发服务):无连接服务。该服务负责错误检测和恢复，默认监听UDP 138端口。  </li>
+<li>Session Service(会话服务):允许两台计算机建立连接，允许电子邮件跨越多个数据包进行传输,提供错误检测和恢复机制。默认使用 TCP 139端口。</li>
+</ol>
+<h4 id="3-、Net-NTLM-Hash"><a href="#3-、Net-NTLM-Hash" class="headerlink" title="(3)、Net-NTLM Hash"></a>(3)、Net-NTLM Hash</h4><p>Net-NTLM Hash与 NTLM Hash不同。<br>&emsp;NTLM Hash是指Windows操作系统的Security Account Manager中保存的用户密码散列值。NTLM Hash通常保存在Windows的SAM文件或者NTDS.DIT数据库中,用于对访问资源的用户进行身份验证。<br>&emsp;Net-NTLM Hash是指在网络环境中经过NTLM认证的散列值。挑战/响应验证中的“响应”就包含Net-NTLM Hash。使用Responder抓取的通常就是Net-NTLM Hash。攻击者无法使用该散列值进行哈希传递攻击，只能在使用Hashcat等工具得到明文后进行横向移动攻击。</p>
+<h3 id="2、LLMNR-和-NetBIOS欺骗攻击分析"><a href="#2、LLMNR-和-NetBIOS欺骗攻击分析" class="headerlink" title="2、LLMNR 和 NetBIOS欺骗攻击分析"></a>2、LLMNR 和 NetBIOS欺骗攻击分析</h3><p>&emsp; 假设目标网络的 DNS服务器因发生故障而无法提供服务时，会退回使用 LLMNR和 NBT-NS进行计算机名解析。下面使用Responder 工具进行渗透测试。<br>&emsp; Responder 是监听 LLMNR和 NBT-NS协议的工具之一，能够抓取网络中所有的 LLMNR和NBT-NS 请求并进行响应,获取最初的账户凭证。<br>&emsp;Responder可以利用内置SMB认证服务器、MSSQL认证服务器、HTTP认证服务器、HTTPS认证服务器、LDAP认证服务器、DNS服务器、WPAD代理服务器,以及FTP、POP3、IMAP、SMTP等服务器，收集目标网络中计算机的凭据，还可以通过Multi-Relay 功能在目标系统中执行命令。   </p>
+<h4 id="1-下载并允许"><a href="#1-下载并允许" class="headerlink" title="(1) 下载并允许"></a>(1) 下载并允许</h4><p>Responder是使用Python语言编写的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone https:&#x2F;&#x2F;github.com&#x2F;SpiderLabs&#x2F;Responder.git</span><br></pre></td></tr></table></figure>
+<h4 id="2-进入监听模式"><a href="#2-进入监听模式" class="headerlink" title="(2) 进入监听模式"></a>(2) 进入监听模式</h4><p>进入目标网络后，如果没有获取任何目标系统的相关信息和重要凭证，可以开启Responder的监听模式。Responder只会对网络中的流量进行分析，不会主动响应任何请求。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">responder -I eth0</span><br></pre></td></tr></table></figure>
+<p><img data-src="//tva4.sinaimg.cn/large/006Glg0Bgy1gpa805siaxj30pl0g9wio.jpg" alt=""></p>
+<h4 id="3-渗透测试"><a href="#3-渗透测试" class="headerlink" title="(3) 渗透测试"></a>(3) 渗透测试</h4><p>&emsp;在使用 Responder对网络进行分析之后可以<strong>利用SMB协议</strong>获取目标网络中计算机的 Net-NTLM Hash。如果用户输入了错误的计算机名在DNS服务器上进行的名称查询操作将会失败，名称解析请求将被退回,使用NBT-NS和LLMNR进行解析。<br>&emsp;在渗透测试中，使用Responder 开启回应请求功能，Responder会自动回应客户端的请求并声明自己就是被输人了错误计算机名的那台机器(就是伪造成错的那台计算机)，然后尝试建立SMB连接。客户端项发送自已的Net-NTLM Hash进行身份验证，此时将得到目标机器的Net-NTLM Hash<br><a href="https://blog.csdn.net/qq_34640691/article/details/111589249" target="_blank" rel="noopener">【参考链接】</a> </p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>信安小蚂蚁
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://mayi077.github.io/2021/04/06/%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E4%B9%8B%E4%BB%A4%E7%89%8C%E7%AA%83%E5%8F%96%E4%BB%A5%E5%8F%8A%E6%97%A0%E5%87%AD%E8%AF%81%E6%AC%BA%E9%AA%97/" title="权限提升之令牌窃取以及无凭证欺骗">https://mayi077.github.io/2021/04/06/权限提升之令牌窃取以及无凭证欺骗/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+     <div>
+       
+         ﻿<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+         
+      </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%86%85%E7%BD%91%E5%AD%A6%E4%B9%A0/" rel="tag"><i class="fa fa-tag"></i>内网学习</a>
+              <a href="/tags/%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87/" rel="tag"><i class="fa fa-tag"></i>权限提升</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/04/06/msf%E5%9F%BA%E7%A1%80%E5%8F%8A%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/" rel="prev" title="msf基础及基本使用">
+      <i class="fa fa-chevron-left"></i> msf基础及基本使用
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/04/09/%E5%9F%9F%E5%86%85%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8/" rel="next" title="域内横向移动">
+      域内横向移动 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#0x01-令牌窃取提权"><span class="nav-number">1.</span> <span class="nav-text">0x01 令牌窃取提权</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1、令牌及伪造令牌介绍"><span class="nav-number">1.1.</span> <span class="nav-text">1、令牌及伪造令牌介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、假冒令牌"><span class="nav-number">1.2.</span> <span class="nav-text">2、假冒令牌</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3、Rotten-Potato本地提权分析"><span class="nav-number">1.3.</span> <span class="nav-text">3、Rotten Potato本地提权分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4、添加域管理员"><span class="nav-number">1.4.</span> <span class="nav-text">4、添加域管理员</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5、Empire-下的令牌窃取"><span class="nav-number">1.5.</span> <span class="nav-text">5、Empire 下的令牌窃取</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6、针对令牌窃取提权的防御措施"><span class="nav-number">1.6.</span> <span class="nav-text">6、针对令牌窃取提权的防御措施</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x02-无凭证条件下的权限获取"><span class="nav-number">2.</span> <span class="nav-text">0x02 无凭证条件下的权限获取</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1、LLMNR-和-NetBIOS欺骗攻击的基本概念"><span class="nav-number">2.1.</span> <span class="nav-text">1、LLMNR 和 NetBIOS欺骗攻击的基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-、LLMNR：本地链路多播名称解析"><span class="nav-number">2.1.1.</span> <span class="nav-text">(1)、LLMNR：本地链路多播名称解析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-、NetBIOS-网络协议"><span class="nav-number">2.1.2.</span> <span class="nav-text">(2)、NetBIOS 网络协议</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-、Net-NTLM-Hash"><span class="nav-number">2.1.3.</span> <span class="nav-text">(3)、Net-NTLM Hash</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、LLMNR-和-NetBIOS欺骗攻击分析"><span class="nav-number">2.2.</span> <span class="nav-text">2、LLMNR 和 NetBIOS欺骗攻击分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-下载并允许"><span class="nav-number">2.2.1.</span> <span class="nav-text">(1) 下载并允许</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-进入监听模式"><span class="nav-number">2.2.2.</span> <span class="nav-text">(2) 进入监听模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-渗透测试"><span class="nav-number">2.2.3.</span> <span class="nav-text">(3) 渗透测试</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
+      src="/images/1.jpg">
+  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23li6cOHoOwCcszzi9',
+      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
+      repo        : 'mayi077.github.io',
+      owner       : 'mayi077',
+      admin       : ['mayi077'],
+      id          : 'e417237aede2ed0f57d13c5d7a1fa4e8',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

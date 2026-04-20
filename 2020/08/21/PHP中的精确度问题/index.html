@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
+  <link rel="mask-icon" href="/images/tu.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="好几次做题遇到了这种利用数字的精确度来绕过的。但是还是时常忘记这个方法，这里记录下加深一下印象。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PHP中的精确度问题">
+<meta property="og:url" content="https://mayi077.github.io/2020/08/21/PHP%E4%B8%AD%E7%9A%84%E7%B2%BE%E7%A1%AE%E5%BA%A6%E9%97%AE%E9%A2%98/index.html">
+<meta property="og:site_name" content="信安小蚂蚁">
+<meta property="og:description" content="好几次做题遇到了这种利用数字的精确度来绕过的。但是还是时常忘记这个方法，这里记录下加深一下印象。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pic.downk.cc/item/5f3fcd63160a154a67f0592c.jpg">
+<meta property="article:published_time" content="2020-08-21T13:39:50.000Z">
+<meta property="article:modified_time" content="2020-08-21T13:47:25.000Z">
+<meta property="article:author" content="信安小蚂蚁">
+<meta property="article:tag" content="基础积累">
+<meta property="article:tag" content="骚操作">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pic.downk.cc/item/5f3fcd63160a154a67f0592c.jpg">
+
+<link rel="canonical" href="https://mayi077.github.io/2020/08/21/PHP%E4%B8%AD%E7%9A%84%E7%B2%BE%E7%A1%AE%E5%BA%A6%E9%97%AE%E9%A2%98/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>PHP中的精确度问题 | 信安小蚂蚁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">信安小蚂蚁</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right"></div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-主页">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
+
+  </li>
+        <li class="menu-item menu-item-归档">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-分类">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-标签">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-关于">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/08/21/PHP%E4%B8%AD%E7%9A%84%E7%B2%BE%E7%A1%AE%E5%BA%A6%E9%97%AE%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          PHP中的精确度问题
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-08-21 21:39:50 / 修改时间：21:47:25" itemprop="dateCreated datePublished" datetime="2020-08-21T21:39:50+08:00">2020-08-21</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/" itemprop="url" rel="index">
+                    <span itemprop="name">基础积累</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>12 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>好几次做题遇到了这种利用数字的精确度来绕过的。但是还是时常忘记这个方法，这里记录下加深一下印象。  </p>
+<a id="more"></a>
+<h3 id="理论"><a href="#理论" class="headerlink" title="理论"></a>理论</h3><p>&emsp;在PHP中进行浮点数的运算时，经常会出现一些和预期结果不一样的值，这是由于浮点数的精度有限。尽管取决于系统，PHP 通常使用 <code>IEEE 754</code> 双精度格式，则由于取整而导致的最大相对误差为 <code>1.11e-16</code>。非基本数学运算可能会给出更大误差，并且要考虑到进行复合运算时的误差传递。<br>&emsp;例如我们测试一下 <code>floor((0.1+0.7)*10);</code> 我们预期是输出8，可是<strong>实际结果是 7</strong>。这也证明了，以十进制可以精准表示的数，无论有多少尾数都不能被内部所使用的二进制精确表示，就是说不能在不丢失一点点精度的情况下转换为二进制的格式。<br>我们做的如下测试：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">$a&#x3D;0.10000000000001;   &#x2F;&#x2F;14位小数 注意注意如果前面的整数部分不为0，则会只精确到13为小数</span><br><span class="line">$b&#x3D;0.100000000000001;</span><br><span class="line">$c&#x3D;1.10000000000001;</span><br><span class="line">$d&#x3D;0.100000000000005;</span><br><span class="line">echo $a.&quot;\n&quot;;</span><br><span class="line">echo $b.&quot;\n&quot;;</span><br><span class="line">echo $c.&quot;\n&quot;;</span><br><span class="line">echo $d.&quot;\n&quot;;</span><br><span class="line">------------------------------</span><br><span class="line">0.10000000000001</span><br><span class="line">0.1</span><br><span class="line">1.1</span><br><span class="line">0.10000000000001</span><br></pre></td></tr></table></figure>
+<p>这里我们得出结论：<br>&emsp;<strong>当浮点型数据转化为字符型数据时</strong>（这里的echo就会使它转为str型），如果整数部分为0的话就有14位有效小数且是四舍五入（15位&gt;=5,14位进一）。当整数部分为非0时，这里有效小数位数就为13位，同时也是四舍五入。<strong>这里也需要注意下，转为字符串时如果后面全是0的话也会被省略，只保留一个小数位的0</strong><br>我们继续我们的测试，如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">$a&#x3D;0.10000000000000002;  &#x2F;&#x2F;17位小数，</span><br><span class="line">$b&#x3D;0.10000000000000001; &#x2F;&#x2F;</span><br><span class="line">$c&#x3D;0.100000000000000002; &#x2F;&#x2F;18位</span><br><span class="line">$d&#x3D;0.100000000000000003;</span><br><span class="line"></span><br><span class="line">echo $a.&quot;\n&quot;;</span><br><span class="line">echo $b.&quot;\n&quot;;</span><br><span class="line"></span><br><span class="line">if($a&#x3D;&#x3D;&#x3D;$b)</span><br><span class="line">    echo &quot;this is eq\n&quot;;</span><br><span class="line">else</span><br><span class="line">    echo &quot;this is nq\n&quot;;</span><br><span class="line"></span><br><span class="line">echo $c.&quot;\n&quot;;</span><br><span class="line">echo $d.&quot;\n&quot;;</span><br><span class="line"></span><br><span class="line">if($c&#x3D;&#x3D;&#x3D;$d)</span><br><span class="line">    echo &quot;this is eq\n&quot;;</span><br><span class="line">else</span><br><span class="line">    echo &quot;this is nq\n&quot;;</span><br><span class="line">----------------------------</span><br><span class="line">0.1</span><br><span class="line">0.1</span><br><span class="line">this is nq</span><br><span class="line">0.1</span><br><span class="line">0.1</span><br><span class="line">this is eq</span><br></pre></td></tr></table></figure>
+<p>这里我们可以看出，整数部分为0时 <strong>浮点逻辑运算时，会比较其17位小数</strong> 。  同时测试发现，如果整数部分非0会比较其16位小数。具体原因不太清楚应该是算法问题，如下有个奇怪的问题：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">if(0.100000000000000000000000000000000000000000000000000000000000&#x3D;&#x3D;0.10000000000000001)</span><br><span class="line">    echo &quot;true&quot;;</span><br><span class="line">&#x2F;&#x2F;但是下面却不相等</span><br><span class="line">if(0.100000000000000010000000000000000000000000000000000000000000&#x3D;&#x3D;0.10000000000000002)</span><br><span class="line">    echo &quot;true&quot;;</span><br><span class="line">else</span><br><span class="line">    echo &quot;false&quot;;</span><br></pre></td></tr></table></figure>
+<p>这边，以后使用的时候就尽量不要使用太长吧，实在需要就现场测试。</p>
+<h4 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h4><p>所以说了这么多，我们应该重视的点是，浮点数当字符串处理时和进行逻辑运算时所保留的位数不同，这就及其可能造成漏洞点。<br><strong>当字符串：</strong> 当整数部分为0时，保留14位有效小数且四舍五入。当整数部分不为0时，保留13位有效小数且四舍五入。<br><strong>进行逻辑运算：</strong>  当整数部分为0时，保留17位有效小数。当整数部分不为0时，保留16位有效小数且四舍五入。<br><strong>也就是说，我们赋值的时候可以赋值为整数部分为0的2个带有15位小数且最后一位不相等的数。来绕过类似逻辑:</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">if(md5($a)&#x3D;&#x3D;&#x3D;md5($b) &amp;&amp; $a!&#x3D;&#x3D;$b)</span><br><span class="line">    echo &quot;success!&quot;;</span><br></pre></td></tr></table></figure>
+<p>但然利用的payload只要通过上面的学习应该是可以千变万化的。<br><strong>注意，在小数位的前4位没有赋值一个非0数，则会进行科学计数法。</strong></p>
+<h4 id="而外补充整数"><a href="#而外补充整数" class="headerlink" title="而外补充整数"></a>而外补充整数</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">$a&#x3D;1234567891234567391;  &#x2F;&#x2F; 15位开始科学计数法表示,也就是说整数其实也是只精确到17位（并不是15位哟），后面的直接忽略。</span><br><span class="line">$b&#x3D;1234567891234567362;</span><br><span class="line">if($a&#x3D;&#x3D;&#x3D;$b)</span><br><span class="line">echo &quot;Come&quot;;</span><br><span class="line">----------------</span><br><span class="line">Come</span><br></pre></td></tr></table></figure>
+<p><strong>15位开始科学计数法表示,也就是说整数其实也是只精确到17位（并不是15位哟），后面的直接忽略。</strong></p>
+<h3 id="实操"><a href="#实操" class="headerlink" title="实操"></a>实操</h3><h4 id="Test-1"><a href="#Test-1" class="headerlink" title="Test 1"></a>Test 1</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">$a&#x3D;$_GET[a];</span><br><span class="line">if(intval($a)&#x3D;&#x3D;&#x3D;520)</span><br><span class="line">  if( strpos($a,&quot;2&quot;))</span><br><span class="line">  echo &quot;give you flag&quot;;</span><br></pre></td></tr></table></figure>
+<p>这题我们怎么绕过呢？除了编码绕过外，我们也可以利用今天的知识，精准度问题来进行绕过：<br>payload：<code>?a=519.9999999999999999999</code></p>
+<h4 id="Test-2"><a href="#Test-2" class="headerlink" title="Test 2"></a>Test 2</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">    error_reporting(0);</span><br><span class="line">    $flag &#x3D; &#39;flag&#123;1S_numer1c_Not_S4fe&#125;&#39;;</span><br><span class="line">    $id &#x3D; $_GET[&#39;id&#39;];</span><br><span class="line">    is_numeric($id)?die(&quot;Sorry....&quot;):NULL;    </span><br><span class="line">    if($id&gt;665)&#123;</span><br><span class="line">        echo $flag;</span><br><span class="line">    &#125; </span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>这题就简单了，payload:<code>?id=666mayi</code></p>
+<h4 id="test-3"><a href="#test-3" class="headerlink" title="test 3"></a>test 3</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">    $md51 &#x3D; md5(&#39;QNKCDZO&#39;);</span><br><span class="line">    $a &#x3D; @$_GET[&#39;a&#39;];</span><br><span class="line">    $md52 &#x3D; @md5($a);</span><br><span class="line">    if(isset($a))&#123;</span><br><span class="line">        if ($a !&#x3D; &#39;QNKCDZO&#39; &amp;&amp; $md51 &#x3D;&#x3D; $md52) &#123;</span><br><span class="line">            echo &quot;nctf&#123;*****************&#125;&quot;;</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            echo &quot;false!!!&quot;;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    else&#123;</span><br><span class="line">        echo &quot;please input a&quot;;</span><br><span class="line">    &#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>这题我们首先发现，md5(‘QNKCDZO’)它的值是一个0e开头的且后面没有其它字母，那么它就是把其当作科学计数法来进行计算了，0 * 10^n 都是为0,所以我们只需要md5值找到0e开头的就可如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">QNKCDZO	    0e830400451993494058024219903391</span><br><span class="line">240610708	0e462097431906509019562988736854</span><br><span class="line">aabg7XSs	0e087386482136013740957780965295</span><br><span class="line">aabC9RqS	0e041022518165728065344349536299</span><br><span class="line">s878926199a	0e54599327451770903432885584102</span><br></pre></td></tr></table></figure>
+<p>payload: <code>?a=240610708</code></p>
+<h4 id="Test-4"><a href="#Test-4" class="headerlink" title="Test 4"></a>Test 4</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">show_source(__FILE__);</span><br><span class="line">$flag &#x3D; &quot;xxxx&quot;;</span><br><span class="line">if(isset($_GET[&#39;time&#39;]))&#123; </span><br><span class="line">        if(!is_numeric($_GET[&#39;time&#39;]))&#123; </span><br><span class="line">                echo &#39;The time must be number.&#39;; </span><br><span class="line">        &#125;else if($_GET[&#39;time&#39;] &lt; 60 * 60 * 24 * 30 * 2)&#123; </span><br><span class="line">                        echo &#39;This time is too short.&#39;; </span><br><span class="line">        &#125;else if($_GET[&#39;time&#39;] &gt; 60 * 60 * 24 * 30 * 3)&#123; </span><br><span class="line">                        echo &#39;This time is too long.&#39;; </span><br><span class="line">        &#125;else&#123; </span><br><span class="line">                sleep((int)$_GET[&#39;time&#39;]); </span><br><span class="line">                echo $flag; </span><br><span class="line">        &#125; </span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>题目要求我们get传入一个time且它在（5184000，7776000）之间，随后又进行这么长的时间睡眠。这里注意有个 int 强制类型转换 ，我们利用上面说道的知识可以利用16进制或者科学计数法进行绕过。payload如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">?time&#x3D;6e6  &#x2F;&#x2F;需要我们等6秒</span><br><span class="line">?time&#x3D;0x4f1a01</span><br></pre></td></tr></table></figure>
+<h4 id="Test-5"><a href="#Test-5" class="headerlink" title="Test 5"></a>Test 5</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"> &lt;?php</span><br><span class="line">class trick&#123;</span><br><span class="line">    public $trick1;</span><br><span class="line">    public $trick2;</span><br><span class="line">    public function __destruct()&#123;</span><br><span class="line">        $this-&gt;trick1 &#x3D; (string)$this-&gt;trick1;</span><br><span class="line">        if(strlen($this-&gt;trick1) &gt; 5 || strlen($this-&gt;trick2) &gt; 5)&#123;</span><br><span class="line">            die(&quot;你太长了&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">        if($this-&gt;trick1 !&#x3D;&#x3D; $this-&gt;trick2 &amp;&amp; md5($this-&gt;trick1) &#x3D;&#x3D;&#x3D; md5($this-&gt;trick2) &amp;&amp; $this-&gt;trick1 !&#x3D; $this-&gt;trick2)&#123;</span><br><span class="line">            echo file_get_contents(&quot;&#x2F;flag&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">highlight_file(__FILE__);</span><br><span class="line">unserialize($_GET[&#39;trick&#39;]);</span><br></pre></td></tr></table></figure>
+<p>这题咋整？以前用过异常类来绕过，但是这边限制了长度，就是说异常类和硬碰撞都没用了。<br>这时就有我们今天讲的精准度的用武之地了。记住函数调用时基本是将其先转换为str类型，当然具体情况具体分析。<br>我们直接看图吧，经过上面的学习应该是好理解的：<br><a href="https://pic.downk.cc/item/5f3fcd63160a154a67f0592c.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5f3fcd63160a154a67f0592c.jpg" alt=""></a></p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>信安小蚂蚁
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://mayi077.github.io/2020/08/21/PHP%E4%B8%AD%E7%9A%84%E7%B2%BE%E7%A1%AE%E5%BA%A6%E9%97%AE%E9%A2%98/" title="PHP中的精确度问题">https://mayi077.github.io/2020/08/21/PHP中的精确度问题/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+     <div>
+       
+         ﻿<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+         
+      </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/" rel="tag"><i class="fa fa-tag"></i>基础积累</a>
+              <a href="/tags/%E9%AA%9A%E6%93%8D%E4%BD%9C/" rel="tag"><i class="fa fa-tag"></i>骚操作</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/08/18/%E7%BD%91%E9%BC%8E%E6%9D%AF2018-Unfinish/" rel="prev" title="[网鼎杯2018]Unfinish">
+      <i class="fa fa-chevron-left"></i> [网鼎杯2018]Unfinish
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/08/28/%E9%92%93%E9%B1%BC%E5%9F%8E-easyweb/" rel="next" title="钓鱼城--easyweb">
+      钓鱼城--easyweb <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#理论"><span class="nav-number">1.</span> <span class="nav-text">理论</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#结论"><span class="nav-number">1.1.</span> <span class="nav-text">结论</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#而外补充整数"><span class="nav-number">1.2.</span> <span class="nav-text">而外补充整数</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实操"><span class="nav-number">2.</span> <span class="nav-text">实操</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Test-1"><span class="nav-number">2.1.</span> <span class="nav-text">Test 1</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Test-2"><span class="nav-number">2.2.</span> <span class="nav-text">Test 2</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#test-3"><span class="nav-number">2.3.</span> <span class="nav-text">test 3</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Test-4"><span class="nav-number">2.4.</span> <span class="nav-text">Test 4</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Test-5"><span class="nav-number">2.5.</span> <span class="nav-text">Test 5</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
+      src="/images/1.jpg">
+  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23li6cOHoOwCcszzi9',
+      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
+      repo        : 'mayi077.github.io',
+      owner       : 'mayi077',
+      admin       : ['mayi077'],
+      id          : '517ddf1e2921da456923ef746f558c45',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

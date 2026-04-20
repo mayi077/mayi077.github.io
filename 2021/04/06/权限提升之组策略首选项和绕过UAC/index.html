@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
+  <link rel="mask-icon" href="/images/tu.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="0x01 组策略首选项提权1、组策略首选项提权简介&amp;emsp;SYSVOL是活动目录里面的一个用于存储域公共文件服务器副本的共享文件夹，在域中的所有域控制器之间进行复制。SYSVOL文件夹是在安装活动目录时自动创建的，主要用来存放登录脚本、组策略数据及其他域控制器需要的域信息等。SYSVOL在所有经过身份验证的域用户或者域信任用户具有读权限的活动目录的域范围内共享。整个SYsVOL目录在所有的域控">
+<meta property="og:type" content="article">
+<meta property="og:title" content="权限提升之组策略首选项和绕过UAC">
+<meta property="og:url" content="https://mayi077.github.io/2021/04/06/%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E4%B9%8B%E7%BB%84%E7%AD%96%E7%95%A5%E9%A6%96%E9%80%89%E9%A1%B9%E5%92%8C%E7%BB%95%E8%BF%87UAC/index.html">
+<meta property="og:site_name" content="信安小蚂蚁">
+<meta property="og:description" content="0x01 组策略首选项提权1、组策略首选项提权简介&amp;emsp;SYSVOL是活动目录里面的一个用于存储域公共文件服务器副本的共享文件夹，在域中的所有域控制器之间进行复制。SYSVOL文件夹是在安装活动目录时自动创建的，主要用来存放登录脚本、组策略数据及其他域控制器需要的域信息等。SYSVOL在所有经过身份验证的域用户或者域信任用户具有读权限的活动目录的域范围内共享。整个SYsVOL目录在所有的域控">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://tvax4.sinaimg.cn/large/006Glg0Bgy1gpa1pzbv4kj30qw0j774u.jpg">
+<meta property="article:published_time" content="2021-04-06T07:56:48.000Z">
+<meta property="article:modified_time" content="2021-04-06T07:58:07.000Z">
+<meta property="article:author" content="信安小蚂蚁">
+<meta property="article:tag" content="内网学习">
+<meta property="article:tag" content="权限提升">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tvax4.sinaimg.cn/large/006Glg0Bgy1gpa1pzbv4kj30qw0j774u.jpg">
+
+<link rel="canonical" href="https://mayi077.github.io/2021/04/06/%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E4%B9%8B%E7%BB%84%E7%AD%96%E7%95%A5%E9%A6%96%E9%80%89%E9%A1%B9%E5%92%8C%E7%BB%95%E8%BF%87UAC/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>权限提升之组策略首选项和绕过UAC | 信安小蚂蚁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">信安小蚂蚁</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right"></div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-主页">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
+
+  </li>
+        <li class="menu-item menu-item-归档">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-分类">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-标签">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-关于">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2021/04/06/%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E4%B9%8B%E7%BB%84%E7%AD%96%E7%95%A5%E9%A6%96%E9%80%89%E9%A1%B9%E5%92%8C%E7%BB%95%E8%BF%87UAC/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          权限提升之组策略首选项和绕过UAC
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-04-06 15:56:48 / 修改时间：15:58:07" itemprop="dateCreated datePublished" datetime="2021-04-06T15:56:48+08:00">2021-04-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%86%85%E7%BD%91%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">内网学习</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>11 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="0x01-组策略首选项提权"><a href="#0x01-组策略首选项提权" class="headerlink" title="0x01 组策略首选项提权"></a>0x01 组策略首选项提权</h2><h3 id="1、组策略首选项提权简介"><a href="#1、组策略首选项提权简介" class="headerlink" title="1、组策略首选项提权简介"></a>1、组策略首选项提权简介</h3><p>&emsp;SYSVOL是活动目录里面的一个用于存储域公共文件服务器副本的共享文件夹，在域中的所有域控制器之间进行复制。SYSVOL文件夹是在安装活动目录时自动创建的，主要用来存放登录脚本、组策略数据及其他域控制器需要的域信息等。SYSVOL在所有经过身份验证的域用户或者域信任用户具有读权限的活动目录的域范围内共享。整个SYsVOL目录在所有的域控制器中是自动同步和共享的，所有的域策略均存放在C:Windows\SYSVOL\DOMAIN\Policicsl目录中。<br>&emsp;在一般的域环境中，所有机器都是脚本化批量部署的，数据量通常很大。为了方便地对所有机器进行操作，网络管理员一般都会使用域策略来进行统一的配置和管理。大多数组织在创建域环境后，会要求加入域的计算机使用域用户密码进行登录验证。为了保证本地管理员密码的安全性，这些组织的网络管理员往往会修改本地管理员密码。<br>&emsp;但通过组策略统一修改的密码，虽然强度有所提高，但所有机器的本地管理员密码是相同的。攻击者获取了一台机器的本地管理员密码，就相当于获取了域中所有机器的本地管理员密码。<br>常见的组策略首选项（Group Policy Preferences，GPP)：</p>
+<ul>
+<li>映射驱动器（Drives.xml )。</li>
+<li>创建本地用户。</li>
+<li>数据源（DataSources.xml )</li>
+<li>打印机配置(Printers.xml )</li>
+<li>创建/更新服务(（Services.xml )</li>
+<li>计划任务（ScheduledTasks.xml )<a id="more"></a>  
+<h3 id="2、组策略首选项提权"><a href="#2、组策略首选项提权" class="headerlink" title="2、组策略首选项提权"></a>2、组策略首选项提权</h3></li>
+</ul>
+<h4 id="（1）、前提，管理员通过组策略统一修改过密码"><a href="#（1）、前提，管理员通过组策略统一修改过密码" class="headerlink" title="（1）、前提，管理员通过组策略统一修改过密码"></a>（1）、前提，管理员通过组策略统一修改过密码</h4><h4 id="（2）、获取组策略的凭证"><a href="#（2）、获取组策略的凭证" class="headerlink" title="（2）、获取组策略的凭证"></a>（2）、获取组策略的凭证</h4><p>&emsp; 管理员在域中新建一个组策略后，操作系统公日动在 SYSVOL 共享目录中生成一个 XML文件,该文件中保存了该组策略更新后的出调。该密码使用 AES-256加密算法，安全性还是比较高的。但是，2012年微软在官方网站公布了密码的私钥，因此保存在XML文件中的密码的安全性大大降低。任何域用户和域信仕的用尸均可对该共享目标进行访问，这就意味着，任何用户都可以访问保存在XML文件中的密码开将解密，从而域控中所有使用该账户/密码的本地管理员计算机。在SYSVOL中搜索,可以找到包含cpassword 的 XML文件。</p>
+<h5 id="手动查找cpassword"><a href="#手动查找cpassword" class="headerlink" title="手动查找cpassword"></a>手动查找cpassword</h5><ol>
+<li>浏览SYSVOL文件夹，获取相关文件。</li>
+<li>使用tpe命令直接搜索并访问xml文件：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">type \\dc\sysvol\pentest.com\Policies\&#123;31B2F340-016D-11D2-945F-00C04FB984F9&#125;\MACHINE\Preferences\Groups\Groups.xml    </span><br><span class="line">#cpassword采用AES-256加密，加密后用户名gpp为‘LdN1Ot2OIIjsc&#x2F;e+nROCMw&#39;</span><br><span class="line">python gpprefdecrypt.py LdN1Ot2OIIjsc&#x2F;e+nROCMw    #解密</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h5 id="使用powershell-获取cpassword"><a href="#使用powershell-获取cpassword" class="headerlink" title="使用powershell 获取cpassword"></a>使用powershell 获取cpassword</h5><p>&emsp;powersploit提供了Get-GPPPassword.ps1脚本，将脚本导入系统<br><code>PS: Get-GPPPassword</code></p>
+<h5 id="使用-Metasploit-查找cpassword"><a href="#使用-Metasploit-查找cpassword" class="headerlink" title="使用 Metasploit 查找cpassword"></a>使用 Metasploit 查找cpassword</h5><p>在metasploit中有一个自动查找cpassword的后渗透模块，<code>post/windows/gather/credentials/gpp</code>   </p>
+<h5 id="使用Empire-查找cpassword"><a href="#使用Empire-查找cpassword" class="headerlink" title="使用Empire 查找cpassword"></a>使用Empire 查找cpassword</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">usemodule privesc&#x2F;gpp</span><br><span class="line">info</span><br><span class="line">execute</span><br></pre></td></tr></table></figure>
+<p>除了Groups.xml还有几个组策略首选项文件中有可选的cpassword 属性，列举如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Services\Scrvices.xml</span><br><span class="line">scheduledTasks\ScheduledTasks.xml.</span><br><span class="line">Printers\Printers.xml</span><br><span class="line">Drives\Drives.xml</span><br><span class="line">DataSources\DataSources.xml</span><br></pre></td></tr></table></figure>
+<h3 id="3、组策略首选项提权的防御措施"><a href="#3、组策略首选项提权的防御措施" class="headerlink" title="3、组策略首选项提权的防御措施"></a>3、组策略首选项提权的防御措施</h3><p>&emsp;在用于管理组策略的计算机上安装KB2962486补丁,防止新的凭据被放置在组策略首选项中。微软在2014年修复了组策略首选项提权漏洞,使用的方法就是不再将密码保存在组策略首选项中。</p>
+<p>此外,需要对 Everyone 访问权限进行设置,具体如下</p>
+<ul>
+<li>设置共享文件夹SYSVOL的访问权限。</li>
+<li>将包含组策略密码的XML文件从SYsVOL目录中删除</li>
+<li>不要把密码放在所有域用户都有权访问的文件中</li>
+<li>如果需要更改域中机器的本地管理员密码，建议使用LAPS</li>
+</ul>
+<h2 id="0x02-绕过-UAC-提权分析及防范"><a href="#0x02-绕过-UAC-提权分析及防范" class="headerlink" title="0x02 绕过 UAC 提权分析及防范"></a>0x02 绕过 UAC 提权分析及防范</h2><p>&emsp; 如果计算机的操作系统版本是Windows Vista或更高,在权限不够的情况下,访问系统磁盘的根目录（例如C:) Windows目录、Program Files目录，以及读、写系统登录数据库(Registry)的程序等操作,都需要经讨UAC (User Account Control，用户账户控制）的认证才能进行。  </p>
+<h3 id="1、什么是-UAC"><a href="#1、什么是-UAC" class="headerlink" title="1、什么是 UAC"></a>1、什么是 UAC</h3><p>&emsp;UAC是微软为提高系统安全性在Windows Vista中引入的技术。UAC要求用户在执行可能影响计算机运行的操作或者在进行可能影响其他用户的设置之前,拥有相应的权限或者管理员密码。UAC在操作启动前对用户身份进行验证，以避免恶意软件和间谍软件在未经许可的情况下在计算机上进行安装操作或者对计算机设詈进行更改。<br>&emsp;在Windows Vista及更高版本的操作系统中，微软设置了安全控制策略,分为高、中、低三个等级。高等级的进程有管理员权限，中等级的进程有普通用户权限;低等级的进程，权限是有限的，以保证系统在受到安全威胁的损害最小。<br>需要UAC的授权才能进行的操作列举如下：</p>
+<ul>
+<li>配置Windows Update。</li>
+<li>增加/删除账户。</li>
+<li>更改账户类型。</li>
+<li>更改UAC的设置。</li>
+<li>安装ActiveX。</li>
+<li>安装/御载程序。</li>
+<li>安装设备驱动程序。</li>
+<li>将文件移动/复制到Program Files或Windows目录下。</li>
+<li>查看其他用户的文件夹。</li>
+</ul>
+<p><strong>UAC有如下四种设置要求：</strong></p>
+<ul>
+<li>始终通知:这是最严格的设置，每当有程序需要使用高级别的权限时都会提示本地用户。</li>
+<li>仅在程序试图更改我的计算机时通知我:这是UAC的默认设置。当本地 Windows程序要使用高级别的权限时，不会通知用户。但是，当第三方程序要使用高级别的权限时，会提示本地用户。</li>
+<li>仅在程序试图更改我的计算机时通知我（不降低桌面的亮度):与上一条设置的要求相同,但在提示用户时不降低桌面的亮度。</li>
+<li>从不提示：当用户为系统管理员时，所有程序都会以最高权限运行<br><img data-src="//tvax4.sinaimg.cn/large/006Glg0Bgy1gpa1pzbv4kj30qw0j774u.jpg" alt="UAC选项"></li>
+</ul>
+<h3 id="2、bypassuac-模块"><a href="#2、bypassuac-模块" class="headerlink" title="2、bypassuac 模块"></a>2、bypassuac 模块</h3><p>&emsp;假设获取了目标机器的Meterpreter shell ，当前权限为普通用户权限，现在尝试系统的System权限。<br>&emsp;首先，运行exploit/windows/local/bypassuac模块，获得一个新的meterpreter Shel。然后，执行“getsystem”命令。再次查看权限，发现已经绕过UAC,获得了Svstem权限。<br>&emsp;在使用bypassuac模块提权时,当前用户必须在管理员组中，且UAC必须为默认设置。 当bypassuac模块运行时，会在目标机上创建多个文件,这些文件会被杀毒软件识别。但因为<strong>exploit/windows/local/bypassuac_injecton</strong>模块直接运行在内存的反射DLL中,所以不会接触目标机器的硬盘,从而降低了被杀毒软件检测出来的概率。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">msf6 &gt; use exploit&#x2F;windows&#x2F;local&#x2F;bypassuac</span><br><span class="line">[*] Using configured payload windows&#x2F;x64&#x2F;meterpreter&#x2F;reverse_tcp</span><br></pre></td></tr></table></figure>
+
+<h3 id="3、RunAs-模块"><a href="#3、RunAs-模块" class="headerlink" title="3、RunAs 模块"></a>3、RunAs 模块</h3><p>&emsp;使用<code>exploit/windows/local/ask</code>模块，创建一个可执行文件，目标机器上会运行一个发起提升权限请求的程序，提示用户是否要继续运行，如果用户选择继续运行程序，就会返回一个高权限的meterpreter shell<br>&emsp;要想使用该模块提权，当前用户必须在管理员组或者知道管理员的密码，对UAC的设置无要求，在使用RunAs模块时，需要使用EXE:Custom选项创建一个可执行文件（需进行免杀处理）</p>
+<h3 id="4、Nishang中的Invoke-PsUACme模块"><a href="#4、Nishang中的Invoke-PsUACme模块" class="headerlink" title="4、Nishang中的Invoke-PsUACme模块"></a>4、Nishang中的Invoke-PsUACme模块</h3><p><code>/nishang/Escalation/Invoke-PsUACme.ps1</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\q\Desktop&gt; Import-Module .\Invoke-PsUACme.ps1</span><br><span class="line">PS C:\Users\q\Desktop&gt; Invoke-PsUACme -Verbose</span><br><span class="line">PS C:\Users\q\Desktop&gt; Invoke-PsUACme -method oobe -Verbose</span><br><span class="line">PS C:\Windows\temp&gt; Invoke-PsUACme -method oobe -Payload &quot;powershell -windowstyle hidden -e mypayload&quot;</span><br></pre></td></tr></table></figure>
+<p>&emsp;除此之外，可以使用-PayloadPath参数指定payload路径，使用-CustomDll64或-CustomDLL32参数，可以自定义DLL文件。</p>
+<h3 id="5、Empire中的bypassuac-模块"><a href="#5、Empire中的bypassuac-模块" class="headerlink" title="5、Empire中的bypassuac 模块"></a>5、Empire中的bypassuac 模块</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">1.bypassuac模块</span><br><span class="line">usemodule privesc&#x2F;bypassuac    #设置监听参数</span><br><span class="line">execute</span><br><span class="line"> </span><br><span class="line">2.bypassuac_wscript模块 (只使用win7)</span><br><span class="line">usemodule privesc&#x2F;bypassuac_wscript</span><br><span class="line">set Listener lab</span><br><span class="line">execute    #带*的角色提权成功</span><br></pre></td></tr></table></figure>
+
+<h3 id="6、针对绕过UAC提权的防御措施"><a href="#6、针对绕过UAC提权的防御措施" class="headerlink" title="6、针对绕过UAC提权的防御措施"></a>6、针对绕过UAC提权的防御措施</h3><p> &emsp;在企业网络环境中，防止绕过UAC的最好的方法是不让内网机器的使用者拥有本地管理员权限,从而降低系统遭受攻击的可能性。在家庭网络环境中，建议使用非管理员权限进行日常办公和娱乐等活动。使用本地管理员权限登录的用户，要将UAC设置为“始终通知”或者删除该用户的本地管理员权限(这样设置后,会像在 Windows Vista中一样,总是弹出警告)。另外，可以使用微软的EMET 或MalwareBytes来更好地防范0day漏洞。</p>
+<p> <a href="https://blog.csdn.net/qq_34640691/article/details/111589249#t19" target="_blank" rel="noopener">【参考链接】</a></p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>信安小蚂蚁
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://mayi077.github.io/2021/04/06/%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E4%B9%8B%E7%BB%84%E7%AD%96%E7%95%A5%E9%A6%96%E9%80%89%E9%A1%B9%E5%92%8C%E7%BB%95%E8%BF%87UAC/" title="权限提升之组策略首选项和绕过UAC">https://mayi077.github.io/2021/04/06/权限提升之组策略首选项和绕过UAC/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+     <div>
+       
+         ﻿<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+         
+      </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%86%85%E7%BD%91%E5%AD%A6%E4%B9%A0/" rel="tag"><i class="fa fa-tag"></i>内网学习</a>
+              <a href="/tags/%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87/" rel="tag"><i class="fa fa-tag"></i>权限提升</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/04/01/%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E4%B9%8B%E6%BA%A2%E5%87%BA%E5%92%8C%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE%E9%94%99%E8%AF%AF/" rel="prev" title="权限提升之溢出和系统配置错误">
+      <i class="fa fa-chevron-left"></i> 权限提升之溢出和系统配置错误
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/04/06/cobalt-strike-%E5%88%9D%E8%AF%86%E5%AE%89%E8%A3%85/" rel="next" title="cobalt strike 初识安装">
+      cobalt strike 初识安装 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#0x01-组策略首选项提权"><span class="nav-number">1.</span> <span class="nav-text">0x01 组策略首选项提权</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1、组策略首选项提权简介"><span class="nav-number">1.1.</span> <span class="nav-text">1、组策略首选项提权简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、组策略首选项提权"><span class="nav-number">1.2.</span> <span class="nav-text">2、组策略首选项提权</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#（1）、前提，管理员通过组策略统一修改过密码"><span class="nav-number">1.2.1.</span> <span class="nav-text">（1）、前提，管理员通过组策略统一修改过密码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#（2）、获取组策略的凭证"><span class="nav-number">1.2.2.</span> <span class="nav-text">（2）、获取组策略的凭证</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#手动查找cpassword"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">手动查找cpassword</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#使用powershell-获取cpassword"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">使用powershell 获取cpassword</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#使用-Metasploit-查找cpassword"><span class="nav-number">1.2.2.3.</span> <span class="nav-text">使用 Metasploit 查找cpassword</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#使用Empire-查找cpassword"><span class="nav-number">1.2.2.4.</span> <span class="nav-text">使用Empire 查找cpassword</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3、组策略首选项提权的防御措施"><span class="nav-number">1.3.</span> <span class="nav-text">3、组策略首选项提权的防御措施</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x02-绕过-UAC-提权分析及防范"><span class="nav-number">2.</span> <span class="nav-text">0x02 绕过 UAC 提权分析及防范</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1、什么是-UAC"><span class="nav-number">2.1.</span> <span class="nav-text">1、什么是 UAC</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、bypassuac-模块"><span class="nav-number">2.2.</span> <span class="nav-text">2、bypassuac 模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3、RunAs-模块"><span class="nav-number">2.3.</span> <span class="nav-text">3、RunAs 模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4、Nishang中的Invoke-PsUACme模块"><span class="nav-number">2.4.</span> <span class="nav-text">4、Nishang中的Invoke-PsUACme模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5、Empire中的bypassuac-模块"><span class="nav-number">2.5.</span> <span class="nav-text">5、Empire中的bypassuac 模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6、针对绕过UAC提权的防御措施"><span class="nav-number">2.6.</span> <span class="nav-text">6、针对绕过UAC提权的防御措施</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
+      src="/images/1.jpg">
+  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23li6cOHoOwCcszzi9',
+      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
+      repo        : 'mayi077.github.io',
+      owner       : 'mayi077',
+      admin       : ['mayi077'],
+      id          : 'aa259b4a4815b5d5cef7aa32801e63ea',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

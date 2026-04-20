@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
+  <link rel="mask-icon" href="/images/tu.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="漏洞代码1234567891011121314151617181920212223function getUser($id) &amp;#123;  global $config, $db;  if (!is_resource($db)) &amp;#123;    $db &#x3D; new MySQLi(      $config[&#39;dbhost&#39;],      $config[&#39;d">
+<meta property="og:type" content="article">
+<meta property="og:title" content="代码审计 -- parse_str函数缺陷">
+<meta property="og:url" content="https://mayi077.github.io/2020/05/01/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-parse-str%E5%87%BD%E6%95%B0%E7%BC%BA%E9%99%B7/index.html">
+<meta property="og:site_name" content="信安小蚂蚁">
+<meta property="og:description" content="漏洞代码1234567891011121314151617181920212223function getUser($id) &amp;#123;  global $config, $db;  if (!is_resource($db)) &amp;#123;    $db &#x3D; new MySQLi(      $config[&#39;dbhost&#39;],      $config[&#39;d">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-05-01T03:45:50.000Z">
+<meta property="article:modified_time" content="2020-05-01T03:46:21.000Z">
+<meta property="article:author" content="信安小蚂蚁">
+<meta property="article:tag" content="代码审计">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://mayi077.github.io/2020/05/01/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-parse-str%E5%87%BD%E6%95%B0%E7%BC%BA%E9%99%B7/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>代码审计 -- parse_str函数缺陷 | 信安小蚂蚁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">信安小蚂蚁</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right"></div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-主页">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
+
+  </li>
+        <li class="menu-item menu-item-归档">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-分类">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-标签">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-关于">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/05/01/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-parse-str%E5%87%BD%E6%95%B0%E7%BC%BA%E9%99%B7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          代码审计 -- parse_str函数缺陷
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-05-01 11:45:50 / 修改时间：11:46:21" itemprop="dateCreated datePublished" datetime="2020-05-01T11:45:50+08:00">2020-05-01</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/" itemprop="url" rel="index">
+                    <span itemprop="name">基础积累</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>12 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="漏洞代码"><a href="#漏洞代码" class="headerlink" title="漏洞代码"></a>漏洞代码</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">function getUser($id) &#123;</span><br><span class="line">  global $config, $db;</span><br><span class="line">  if (!is_resource($db)) &#123;</span><br><span class="line">    $db &#x3D; new MySQLi(</span><br><span class="line">      $config[&#39;dbhost&#39;],</span><br><span class="line">      $config[&#39;dbuser&#39;],</span><br><span class="line">      $config[&#39;dbpass&#39;],</span><br><span class="line">      $config[&#39;dbname&#39;]</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">  $sql &#x3D; &quot;SELECT username FROM users WHERE id &#x3D; ?&quot;;</span><br><span class="line">  $stmt &#x3D; $db-&gt;prepare($sql);</span><br><span class="line">  $stmt-&gt;bind_param(&#39;i&#39;, $id);</span><br><span class="line">  $stmt-&gt;bind_result($name);</span><br><span class="line">  $stmt-&gt;execute();</span><br><span class="line">  $stmt-&gt;fetch();</span><br><span class="line">  return $name;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">$var &#x3D; parse_url($_SERVER[&#39;HTTP_REFERER&#39;]);</span><br><span class="line">parse_str($var[&#39;query&#39;]);</span><br><span class="line">$currentUser &#x3D; getUser($id);</span><br><span class="line">echo &#39;&lt;h1&gt;&#39;.htmlspecialchars($currentUser).&#39;&lt;&#x2F;h1&gt;&#39;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="漏洞解析"><a href="#漏洞解析" class="headerlink" title="漏洞解析"></a>漏洞解析</h3><h4 id="parse-str"><a href="#parse-str" class="headerlink" title="parse_str"></a>parse_str</h4><p>先来看看定义：</p>
+<blockquote>
+<p>parse_str<br><strong>功能</strong> ：parse_str的作用就是解析字符串并且注册成变量，它在注册变量之前不会验证当前变量是否存在，所以会直接覆盖掉当前作用域中原有的变量。</p>
+<p>定义 ：void parse_str( string $encoded_string [, array &amp;$result ] )</p>
+<p>如果 encoded_string 是 URL 传入的查询字符串（query string），则将它解析为变量并设置到当前作用域（如果提供了 result 则会设置到该数组里 ）</p>
+</blockquote>
+<p>看了定义我们也能很快感受到它的漏洞点就是变量覆盖了。</p>
+<h4 id="PHP-SERVER-‘HTTP-REFERER’"><a href="#PHP-SERVER-‘HTTP-REFERER’" class="headerlink" title="PHP $_SERVER[‘HTTP_REFERER’]"></a>PHP $_SERVER[‘HTTP_REFERER’]</h4><p>PHP $_SERVER[‘HTTP_REFERER’]，它是获取当前页面的url。需要注意的是，$_SERVER[‘HTTP_REFERER’] 完全来源于浏览器。并不是所有的用户代理（浏览器）都会设置这个变量，而且有的还可以手工修改 HTTP_REFERER。因此，$_SERVER[‘HTTP_REFERER’] 是可以伪造的。<br><strong>$_SERVER[‘HTTP_REFERER’] 对 POST 表单访问也是有效的</strong><br>我们想办法提交类似 config[dbhost]=127.0.0.1 这样类型的数据，这样因此我们可以控制连接的数据库，导致网站出现错误显示。</p>
+<h3 id="CTF题目"><a href="#CTF题目" class="headerlink" title="CTF题目"></a>CTF题目</h3><p>index.php</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;index.php</span><br><span class="line">&lt;?php</span><br><span class="line">$a &#x3D; “hongri”;</span><br><span class="line">$id &#x3D; $_GET[&#39;id&#39;];</span><br><span class="line">@parse_str($id);</span><br><span class="line">if ($a[0] !&#x3D; &#39;QNKCDZO&#39; &amp;&amp; md5($a[0]) &#x3D;&#x3D; md5(&#39;QNKCDZO&#39;)) &#123;</span><br><span class="line">    echo &#39;&lt;a href&#x3D;&quot;upload.php&quot;&gt;flag is here&lt;&#x2F;a&gt;&#39;;</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>upload.php</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">header(&quot;Content-type:text&#x2F;html;charset&#x3D;utf-8&quot;);</span><br><span class="line">$referer &#x3D; $_SERVER[&#39;HTTP_REFERER&#39;];</span><br><span class="line">if(isset($referer)!&#x3D;&#x3D; false) &#123;</span><br><span class="line">    $savepath &#x3D; &quot;uploads&#x2F;&quot; . sha1($_SERVER[&#39;REMOTE_ADDR&#39;]) . &quot;&#x2F;&quot;;</span><br><span class="line">    if (!is_dir($savepath)) &#123;</span><br><span class="line">        $oldmask &#x3D; umask(0);</span><br><span class="line">        mkdir($savepath, 0777, true);</span><br><span class="line">        umask($oldmask);</span><br><span class="line">    &#125;</span><br><span class="line">    if ((@$_GET[&#39;filename&#39;]) &amp;&amp; (@$_GET[&#39;content&#39;])) &#123;</span><br><span class="line">        &#x2F;&#x2F;$fp &#x3D; fopen(&quot;$savepath&quot;.$_GET[&#39;filename&#39;], &#39;w&#39;);</span><br><span class="line">        $content &#x3D; &#39;HRCTF&#123;y0u_n4ed_f4st&#125;   by:l1nk3r&#39;;</span><br><span class="line">        file_put_contents(&quot;$savepath&quot; . $_GET[&#39;filename&#39;], $content);</span><br><span class="line">        $msg &#x3D; &#39;Flag is here,come on~ &#39; . $savepath . htmlspecialchars($_GET[&#39;filename&#39;]) . &quot;&quot;;</span><br><span class="line">        echo $msg;</span><br><span class="line">        usleep(100000);</span><br><span class="line">        $content &#x3D; &quot;Too slow!&quot;;</span><br><span class="line">        file_put_contents(&quot;$savepath&quot; . $_GET[&#39;filename&#39;], $content);</span><br><span class="line">    &#125;</span><br><span class="line">   print &lt;&lt;&lt;EOT</span><br><span class="line">&lt;form action&#x3D;&quot;&quot; method&#x3D;&quot;get&quot;&gt;</span><br><span class="line">&lt;div class&#x3D;&quot;form-group&quot;&gt;</span><br><span class="line">&lt;label for&#x3D;&quot;exampleInputEmail1&quot;&gt;Filename&lt;&#x2F;label&gt;</span><br><span class="line">&lt;input type&#x3D;&quot;text&quot; class&#x3D;&quot;form-control&quot; name&#x3D;&quot;filename&quot; id&#x3D;&quot;exampleInputEmail1&quot; placeholder&#x3D;&quot;Filename&quot;&gt;</span><br><span class="line">&lt;&#x2F;div&gt;</span><br><span class="line">&lt;div class&#x3D;&quot;form-group&quot;&gt;</span><br><span class="line">&lt;label for&#x3D;&quot;exampleInputPassword1&quot;&gt;Content&lt;&#x2F;label&gt;</span><br><span class="line">&lt;input type&#x3D;&quot;text&quot; class&#x3D;&quot;form-control&quot; name&#x3D;&quot;content&quot; id&#x3D;&quot;exampleInputPassword1&quot; placeholder&#x3D;&quot;Contont&quot;&gt;</span><br><span class="line">&lt;&#x2F;div&gt;</span><br><span class="line">&lt;button type&#x3D;&quot;submit&quot; class&#x3D;&quot;btn btn-default&quot;&gt;Submit&lt;&#x2F;button&gt;</span><br><span class="line">&lt;&#x2F;form&gt;</span><br><span class="line">EOT;</span><br><span class="line">&#125;</span><br><span class="line">else&#123;</span><br><span class="line">    echo &#39;you can not see this page&#39;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="CTF题解"><a href="#CTF题解" class="headerlink" title="CTF题解"></a>CTF题解</h3><h4 id="第一关"><a href="#第一关" class="headerlink" title="第一关"></a>第一关</h4><p>在index.php内有如下;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$id &#x3D; $_GET[&#39;id&#39;];</span><br><span class="line">@parse_str($id);</span><br><span class="line">if ($a[0] !&#x3D; &#39;QNKCDZO&#39; &amp;&amp; md5($a[0]) &#x3D;&#x3D; md5(&#39;QNKCDZO&#39;)) &#123;</span><br><span class="line">    echo &#39;&lt;a href&#x3D;&quot;upload.php&quot;&gt;flag is here&lt;&#x2F;a&gt;&#39;;</span><br></pre></td></tr></table></figure>
+<p>可想而知我们需要用变量覆盖，payload为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?id&#x3D;a[0]&#x3D;s878926199a</span><br></pre></td></tr></table></figure>
+<p>就会出来一个链接，点击就到了upload页面。如果我们直接访问upload会报错，因为有如下代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$referer &#x3D; $_SERVER[&#39;HTTP_REFERER&#39;];</span><br><span class="line">if(isset($referer)!&#x3D;&#x3D; false)</span><br></pre></td></tr></table></figure>
+<p>当我们是通过a标签链接过去的会自动带上refer字段。</p>
+<h4 id="第二关"><a href="#第二关" class="headerlink" title="第二关"></a>第二关</h4><p>我们看看uplaod主要代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">if ((@$_GET[&#39;filename&#39;]) &amp;&amp; (@$_GET[&#39;content&#39;])) &#123;</span><br><span class="line">        &#x2F;&#x2F;$fp &#x3D; fopen(&quot;$savepath&quot;.$_GET[&#39;filename&#39;], &#39;w&#39;);</span><br><span class="line">        $content &#x3D; &#39;HRCTF&#123;y0u_n4ed_f4st&#125;   by:l1nk3r&#39;;</span><br><span class="line">        file_put_contents(&quot;$savepath&quot; . $_GET[&#39;filename&#39;], $content);</span><br><span class="line">        $msg &#x3D; &#39;Flag is here,come on~ &#39; . $savepath . htmlspecialchars($_GET[&#39;filename&#39;]) . &quot;&quot;;</span><br><span class="line">        echo $msg;</span><br><span class="line">        usleep(100000);&#x2F;&#x2F;延迟</span><br><span class="line">        $content &#x3D; &quot;Too slow!&quot;;</span><br><span class="line">        file_put_contents(&quot;$savepath&quot; . $_GET[&#39;filename&#39;], $content);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>可以发现会我们传入的<code>filename</code>会固定的存储在一个固定的位置，而这个位置会在输出中得到。<br>而文件的内容先是flag然后延迟一下马上替换为了 Too slow! 。其实输入的content并没任何作用。<br>思路：我们一直上传同一个文件名，然后使用python或者pb不断的访问这个文件。如果够快就不会把文本内容替换为 Too slow! 这样我们就可以访问到flag了！！</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>信安小蚂蚁
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://mayi077.github.io/2020/05/01/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-parse-str%E5%87%BD%E6%95%B0%E7%BC%BA%E9%99%B7/" title="代码审计 -- parse_str函数缺陷">https://mayi077.github.io/2020/05/01/代码审计-parse-str函数缺陷/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+     <div>
+       
+         ﻿<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+         
+      </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" rel="tag"><i class="fa fa-tag"></i>代码审计</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/05/01/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-%E6%AD%A3%E5%88%99%E4%BD%BF%E7%94%A8%E4%B8%8D%E5%BD%93%E5%AF%BC%E8%87%B4%E7%9A%84%E8%B7%AF%E5%BE%84%E7%A9%BF%E8%B6%8A%E9%97%AE%E9%A2%98/" rel="prev" title="代码审计--正则使用不当导致的路径穿越问题">
+      <i class="fa fa-chevron-left"></i> 代码审计--正则使用不当导致的路径穿越问题
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/05/01/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-preg-replace%E5%87%BD%E6%95%B0%E4%B9%8B%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C/" rel="next" title="代码审计-- preg_replace函数之命令执行">
+      代码审计-- preg_replace函数之命令执行 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#漏洞代码"><span class="nav-number">1.</span> <span class="nav-text">漏洞代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#漏洞解析"><span class="nav-number">2.</span> <span class="nav-text">漏洞解析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#parse-str"><span class="nav-number">2.1.</span> <span class="nav-text">parse_str</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#PHP-SERVER-‘HTTP-REFERER’"><span class="nav-number">2.2.</span> <span class="nav-text">PHP $_SERVER[‘HTTP_REFERER’]</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CTF题目"><span class="nav-number">3.</span> <span class="nav-text">CTF题目</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CTF题解"><span class="nav-number">4.</span> <span class="nav-text">CTF题解</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#第一关"><span class="nav-number">4.1.</span> <span class="nav-text">第一关</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#第二关"><span class="nav-number">4.2.</span> <span class="nav-text">第二关</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
+      src="/images/1.jpg">
+  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23li6cOHoOwCcszzi9',
+      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
+      repo        : 'mayi077.github.io',
+      owner       : 'mayi077',
+      admin       : ['mayi077'],
+      id          : '75f014246f1ad577f6cd707d7cffe4b2',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

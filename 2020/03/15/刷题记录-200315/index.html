@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
+  <link rel="mask-icon" href="/images/tu.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言：这里将记录我一天中刷题所遇到的新知识和比较容易忘记的知识点。加油！ [BJDCTF2020]Easy MD5&amp;emsp;有一个输入框，无论我输入什么都没有回显。于是我尝试扫描目录，可是 buu 有限制。随后我尝试着抓包看看，放到repeater 发现返回包中有提示 select * from &#39;admin&#39; where password&#x3D;md5($pass,true) 其实这">
+<meta property="og:type" content="article">
+<meta property="og:title" content="刷题记录 200315">
+<meta property="og:url" content="https://mayi077.github.io/2020/03/15/%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95-200315/index.html">
+<meta property="og:site_name" content="信安小蚂蚁">
+<meta property="og:description" content="前言：这里将记录我一天中刷题所遇到的新知识和比较容易忘记的知识点。加油！ [BJDCTF2020]Easy MD5&amp;emsp;有一个输入框，无论我输入什么都没有回显。于是我尝试扫描目录，可是 buu 有限制。随后我尝试着抓包看看，放到repeater 发现返回包中有提示 select * from &#39;admin&#39; where password&#x3D;md5($pass,true) 其实这">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pic.downk.cc/item/5e6d85fce83c3a1e3aae1b30.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e6d86d8e83c3a1e3aae613f.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e6d89d7e83c3a1e3aaf522a.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e6da25be83c3a1e3aba8ef3.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e6dd39ae83c3a1e3ace401b.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e6e308ce83c3a1e3a01b295.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e6e315ae83c3a1e3a0233d4.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e6e323be83c3a1e3a02bf1f.jpg">
+<meta property="article:published_time" content="2020-03-15T13:57:02.000Z">
+<meta property="article:modified_time" content="2020-03-15T14:00:22.000Z">
+<meta property="article:author" content="信安小蚂蚁">
+<meta property="article:tag" content="buuctf">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pic.downk.cc/item/5e6d85fce83c3a1e3aae1b30.jpg">
+
+<link rel="canonical" href="https://mayi077.github.io/2020/03/15/%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95-200315/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>刷题记录 200315 | 信安小蚂蚁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">信安小蚂蚁</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right"></div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-主页">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
+
+  </li>
+        <li class="menu-item menu-item-归档">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-分类">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-标签">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-关于">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/03/15/%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95-200315/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          刷题记录 200315
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-03-15 21:57:02 / 修改时间：22:00:22" itemprop="dateCreated datePublished" datetime="2020-03-15T21:57:02+08:00">2020-03-15</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/CTF%E5%A4%8D%E7%8E%B0/" itemprop="url" rel="index">
+                    <span itemprop="name">CTF复现</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>10 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="前言："><a href="#前言：" class="headerlink" title="前言："></a>前言：</h3><p>这里将记录我一天中刷题所遇到的新知识和比较容易忘记的知识点。加油！</p>
+<h3 id="BJDCTF2020-Easy-MD5"><a href="#BJDCTF2020-Easy-MD5" class="headerlink" title="[BJDCTF2020]Easy MD5"></a>[BJDCTF2020]Easy MD5</h3><p>&emsp;有一个输入框，无论我输入什么都没有回显。于是我尝试扫描目录，可是 buu 有限制。随后我尝试着抓包看看，放到repeater 发现返回包中有提示 <code>select * from &#39;admin&#39; where password=md5($pass,true)</code> 其实这里的语句应该是有问题的 mysql 里 md5 函数只有一个参数，这应该是 php 内的 md5函数。先测试一下<br><a href="https://pic.downk.cc/item/5e6d85fce83c3a1e3aae1b30.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e6d85fce83c3a1e3aae1b30.jpg" alt=""></a><br>可以发现在php中当md5的第二个参数值为真时它会出现可利用的字符。<br>&emsp;其实它的第二个参数可以规定函数的输出格式</p>
+<ul>
+<li>TRUE - 原始 16 字符二进制格式 （这是我们可利用的md5值二进制格式可以当作字符串处理，并不是 01 组成的那个二进制格式）</li>
+<li>FALSE - 默认。32 字符十六进制数（这是我们一般所见的md5值）<br><a href="https://pic.downk.cc/item/5e6d86d8e83c3a1e3aae613f.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e6d86d8e83c3a1e3aae613f.jpg" alt=""></a>   </li>
+</ul>
+<p>可利用的原始字符串：</p>
+<ul>
+<li><code>129581926211651571912466741651878684928</code> 它对应的md5（*，true）输入是<code>T0Do#&#39;or&#39;8</code>可以达到闭合效果</li>
+<li><code>ffifdyop</code> 最常用的 它对应的md5（，true）输出是<code>&#39;or&#39;6]!r,b</code>可以达到闭合效果。<br><a href="https://pic.downk.cc/item/5e6d89d7e83c3a1e3aaf522a.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e6d89d7e83c3a1e3aaf522a.jpg" alt=""></a><br><a href="http://www.postgres.cn/docs/9.5/datatype-binary.html" target="_blank" rel="noopener">【二进制数据类型】</a>   </li>
+</ul>
+<p><strong>这题剩下的md5绕过都可以利用数组绕过</strong>  </p>
+<h3 id="ACTF2020-新生赛-Upload"><a href="#ACTF2020-新生赛-Upload" class="headerlink" title="[ACTF2020 新生赛]Upload"></a>[ACTF2020 新生赛]Upload</h3><p>&emsp;这题相对还是比较简单了，但是我太菜了没有试出来，就去看了wp。</p>
+<ol>
+<li>打开题目看到一个上传文件点，我尝试上传一个php马，但是js提示只能上传（jpg，png，gif）文件。</li>
+<li>我先把后缀名改为jpg，然后用bp抓包改为 php 还是上传失败，看来内部还是有检测的。</li>
+<li>我产生大小写绕过，发现可以上传，但并不解析呀。不过也说名不是白名单，这就好多了。</li>
+<li>我依次尝试<code>.php3</code><br><code>.php5</code><br><code>.phtml</code><br><code>.phs</code><br><code>.pht</code> 结果发现phtml可以被解析。接着去访问即可快速拿到flag了。     </li>
+</ol>
+<p>&emsp;我们可以在apache 的 httpd.conf 中看到它把那些后缀名用php解析.<br><a href="https://pic.downk.cc/item/5e6da25be83c3a1e3aba8ef3.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e6da25be83c3a1e3aba8ef3.jpg" alt=""></a></p>
+<h3 id="V-amp-N2020-公开赛-HappyCTFd"><a href="#V-amp-N2020-公开赛-HappyCTFd" class="headerlink" title="[V&amp;N2020 公开赛]HappyCTFd"></a>[V&amp;N2020 公开赛]HappyCTFd</h3><ol>
+<li>题目进去给了个平台，再根据题目 <code>CTFd</code> 可以猜测这是<code>CTFd</code>平台。然后就可以去百度一下这个平台有什么漏洞了。（当然钱前面尝试了普通方法无法使用admin身份登进去。）</li>
+<li><a href="https://www.colabug.com/2020/0204/6940556/amp/" target="_blank" rel="noopener">【CVE-2020-7245 CTFd v2.0.0 – v2.2.2 account takeover分析】</a> 利用方法：<ul>
+<li>利用添加空格绕过限制来注册一个与受害者用户 名相同的账号。</li>
+<li>生成忘记密码链接发送到自己的邮箱</li>
+<li>将自己的账号的用户名改成与被攻击者不相同的用户名</li>
+<li>用邮箱中收到的链接更改密码即可。</li>
+</ul>
+</li>
+<li>要用到邮箱但是在内网无法去访问外网，buu提供了内网邮箱。进去注册一个。</li>
+<li>创建一个<code>admin</code>用户，且邮箱为刚刚创建的那个。</li>
+<li>退出登入，再在登入界面选择忘记密码。填入邮箱后会收到一个改密码的链接。</li>
+<li>我们先不去改密码，先用已知的密码去登入我们的账户然后任意改个其它名字。</li>
+<li>点击收到的更改密码链接，此时将要修改的密码是真正的 <code>admmin</code> 用户的。修改密码后以 <code>admin</code> 用户去登入进去，以后发现已经有admin的权限（有新的界面）进去 challenge 下载了附件就是flag<br><a href="https://pic.downk.cc/item/5e6dd39ae83c3a1e3ace401b.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e6dd39ae83c3a1e3ace401b.jpg" alt=""></a></li>
+</ol>
+<h3 id="BJDCTF2020-Mark-loves-cat"><a href="#BJDCTF2020-Mark-loves-cat" class="headerlink" title="[BJDCTF2020]Mark loves cat"></a>[BJDCTF2020]Mark loves cat</h3><p>&emsp;为什么又是这样，自己想很久想不出来，一看wp就焕然大悟。</p>
+<ol>
+<li>扫描一下题目路径，发现大量的 <code>.git</code> 之类的东西，那么肯定有git泄漏。</li>
+<li>使用 githack 扫描下载源码，发现 一个 flag.php 里面定义了 $flag 为文件读取到的flag。然后index.php 里面有一些php代码。<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">include &#39;flag.php&#39;;</span><br><span class="line">$yds &#x3D; &quot;dog&quot;;</span><br><span class="line">$is &#x3D; &quot;cat&quot;;</span><br><span class="line">$handsome &#x3D; &#39;yds&#39;;</span><br><span class="line"></span><br><span class="line">foreach($_POST as $x &#x3D;&gt; $y)&#123;</span><br><span class="line">    $$x &#x3D; $y;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">foreach($_GET as $x &#x3D;&gt; $y)&#123;</span><br><span class="line">    $$x &#x3D; $$y;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">foreach($_GET as $x &#x3D;&gt; $y)&#123;</span><br><span class="line">    if($_GET[&#39;flag&#39;] &#x3D;&#x3D;&#x3D; $x &amp;&amp; $x !&#x3D;&#x3D; &#39;flag&#39;)&#123;</span><br><span class="line">        exit($handsome);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">if(!isset($_GET[&#39;flag&#39;]) &amp;&amp; !isset($_POST[&#39;flag&#39;]))&#123;</span><br><span class="line">    exit($yds);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">if($_POST[&#39;flag&#39;] &#x3D;&#x3D;&#x3D; &#39;flag&#39;  || $_GET[&#39;flag&#39;] &#x3D;&#x3D;&#x3D; &#39;flag&#39;)&#123;</span><br><span class="line">    exit($is);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">echo &quot;the flag is: &quot;.$flag;  &#x2F;&#x2F;事后还在想靠这里输出flag，现在的知识还无法达到呀。</span><br></pre></td></tr></table></figure>
+代码审计了一段时间发现有点绕一直没搞出来。但是后面知道了，不能一直想着最后的<code>echo &quot;the flag is: &quot;.$flag;</code>输出flag。</li>
+<li><code>foreach($_GET as $x =&gt; $y){
+ $$x = $$y;
+}</code> 这里存在变量覆盖漏洞，也就是我们把flag覆盖赋值给一个变量然后运行exit()退出并把我们的flag抛出来。</li>
+<li>可以利用很多个地方的 exit() 来抛出我们的 flag 。 </li>
+</ol>
+<ul>
+<li>`if($_GET[‘flag’] === $x &amp;&amp; $x !== ‘flag’){<pre><code>exit($handsome);</code></pre>  }<code>这里利用的payload是 get一个</code>handsome=flag&amp;flag=handsome<code>第一次循环的时候 if 成立 且此时 flag 已经被我们赋值给了</code>$handsome`</li>
+<li><code>if(!isset($_GET[&#39;flag&#39;]) &amp;&amp; !isset($_POST[&#39;flag&#39;])){
+  exit($yds);
+}</code> 这里我们用的payload是get一个<code>yds=flag</code>虽然本地会因为没设置$_GET[flag]警告但也误伤大雅会出flag。 </li>
+<li><code>if($_POST[&#39;flag&#39;] === &#39;flag&#39;  || $_GET[&#39;flag&#39;] === &#39;flag&#39;){
+  exit($is);
+}</code>这里我们使用payload get一个<code>is=flag&amp;flag=flag</code> 虽然 没赋值却调用了$_POST[flag]会有警告但也会出flag。</li>
+</ul>
+<h3 id="GWCTF-2019-枯燥的抽奖"><a href="#GWCTF-2019-枯燥的抽奖" class="headerlink" title="[GWCTF 2019]枯燥的抽奖"></a>[GWCTF 2019]枯燥的抽奖</h3><p>&emsp;打开题目发现是已知10位数要猜后面10位数，开始还想爆破后面发现不大可能。</p>
+<ol>
+<li>查看源码可以知道有 check.php 访问后发现，使用的是mt_rand（范围）这个函数。他是伪随机的，可以根据工具猜的到下个10微字符<a href="https://www.freebuf.com/vuls/192012.html" target="_blank" rel="noopener">【PHP mt_rand安全杂谈及应用场景详解】</a>具体详情明天再做总结。</li>
+<li>为了按工具要求输入参数我们使用python写一个脚本：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">## 参数规定：前两个参数表示mt_rand第一次输出的区间，后两个参数表示mt_rand输出的区间</span><br><span class="line">## 当然有其它的输入参数模式，我们在讲这个工具的时候细讲。</span><br><span class="line">str1&#x3D;&#39;abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ&#39;</span><br><span class="line">str2&#x3D;&#39;3arDAQCJlQ&#39;</span><br><span class="line">length &#x3D; len(str2)</span><br><span class="line">res&#x3D;&#39;&#39;</span><br><span class="line">for i in range(len(str2)):</span><br><span class="line">    for j in range(len(str1)):</span><br><span class="line">        if str2[i] &#x3D;&#x3D; str1[j]:</span><br><span class="line">            res+&#x3D;str(j)+&#39; &#39;+str(j)+&#39; &#39;+&#39;0&#39;+&#39; &#39;+str(len(str1)-1)+&#39; &#39;</span><br><span class="line">            break</span><br><span class="line">print(res)</span><br></pre></td></tr></table></figure>
+<a href="https://pic.downk.cc/item/5e6e308ce83c3a1e3a01b295.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e6e308ce83c3a1e3a01b295.jpg" alt=""></a></li>
+<li>随后到kali使用<code>php_mt_seed</code>工具来爆破，使用命令如下：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.&#x2F;php_mt_seed 29 29 0 61 0 0 0 61 17 17 0 61 39 39 0 61 36 36 0 61 52 52 0 61 38 38 0 61 45 45 0 61 11 11 0 61 52 52 0 61</span><br></pre></td></tr></table></figure>
+<a href="https://pic.downk.cc/item/5e6e315ae83c3a1e3a0233d4.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e6e315ae83c3a1e3a0233d4.jpg" alt=""></a></li>
+<li>得到随机种子后我们用PHP对应题目的版本（这里应该是7.1+），代码如下：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">mt_srand(718040818);</span><br><span class="line">$str_long1 &#x3D; &quot;abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ&quot;;</span><br><span class="line">$str &#x3D; &#39;&#39;;</span><br><span class="line">$len1 &#x3D; 20;</span><br><span class="line">for ($i &#x3D; 0; $i &lt; $len1; $i++) &#123;</span><br><span class="line">$str .&#x3D; substr($str_long1, mt_rand(0, strlen($str_long1) - 1), 1);</span><br><span class="line">&#125;</span><br><span class="line">echo &quot;&lt;p id&#x3D;&#39;p1&#39;&gt;&quot; . $str . &quot;&lt;&#x2F;p&gt;&quot;;</span><br></pre></td></tr></table></figure>
+即可得到我们的20位字符。<br><a href="https://pic.downk.cc/item/5e6e323be83c3a1e3a02bf1f.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e6e323be83c3a1e3a02bf1f.jpg" alt=""></a>    </li>
+</ol>
+<p> <a href="https://www.openwall.com/php_mt_seed/" target="_blank" rel="noopener">【php_mt_seed下载链接】</a>  先到文件夹下使用 make 生成一个 php_mt_seed 可执行文件 （需要gcc环境）</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>信安小蚂蚁
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://mayi077.github.io/2020/03/15/%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95-200315/" title="刷题记录 200315">https://mayi077.github.io/2020/03/15/刷题记录-200315/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+     <div>
+       
+         ﻿<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+         
+      </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/buuctf/" rel="tag"><i class="fa fa-tag"></i>buuctf</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/14/CTFHub-%E4%B9%8B-RCE/" rel="prev" title="CTFHub 之 RCE">
+      <i class="fa fa-chevron-left"></i> CTFHub 之 RCE
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/03/16/PHP%E4%B8%ADmt-rand%E5%87%BD%E6%95%B0%E4%BA%A7%E7%94%9F%E7%9A%84%E4%BC%AA%E9%9A%8F%E6%9C%BA%E6%95%B0/" rel="next" title="PHP中mt_rand函数产生的伪随机数">
+      PHP中mt_rand函数产生的伪随机数 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#前言："><span class="nav-number">1.</span> <span class="nav-text">前言：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BJDCTF2020-Easy-MD5"><span class="nav-number">2.</span> <span class="nav-text">[BJDCTF2020]Easy MD5</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ACTF2020-新生赛-Upload"><span class="nav-number">3.</span> <span class="nav-text">[ACTF2020 新生赛]Upload</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#V-amp-N2020-公开赛-HappyCTFd"><span class="nav-number">4.</span> <span class="nav-text">[V&amp;N2020 公开赛]HappyCTFd</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BJDCTF2020-Mark-loves-cat"><span class="nav-number">5.</span> <span class="nav-text">[BJDCTF2020]Mark loves cat</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GWCTF-2019-枯燥的抽奖"><span class="nav-number">6.</span> <span class="nav-text">[GWCTF 2019]枯燥的抽奖</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
+      src="/images/1.jpg">
+  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23li6cOHoOwCcszzi9',
+      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
+      repo        : 'mayi077.github.io',
+      owner       : 'mayi077',
+      admin       : ['mayi077'],
+      id          : 'e1e8057ed2bb1055212daa0bff370484',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

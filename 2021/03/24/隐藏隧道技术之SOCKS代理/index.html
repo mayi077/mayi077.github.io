@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
+  <link rel="mask-icon" href="/images/tu.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="常见的网络场景如下三类：  服务器在内网中，可以任意访问外网。 服务器在内网中，可以访问外网，但是服务器安装了防火墙拒绝敏感的端口连接 服务器在内网中，对外只开放了部分端口（如80端口），且服务器不能访问外部网络。（可以使用http隧道）  0x00 前言&amp;emsp;因为Socks介于传输层与表示层之间，使用TCP协议传输数据，因而不提供如传递ICMP信息之类的网络层相关服务。目前有两个版本：SO">
+<meta property="og:type" content="article">
+<meta property="og:title" content="隐藏隧道技术之SOCKS代理">
+<meta property="og:url" content="https://mayi077.github.io/2021/03/24/%E9%9A%90%E8%97%8F%E9%9A%A7%E9%81%93%E6%8A%80%E6%9C%AF%E4%B9%8BSOCKS%E4%BB%A3%E7%90%86/index.html">
+<meta property="og:site_name" content="信安小蚂蚁">
+<meta property="og:description" content="常见的网络场景如下三类：  服务器在内网中，可以任意访问外网。 服务器在内网中，可以访问外网，但是服务器安装了防火墙拒绝敏感的端口连接 服务器在内网中，对外只开放了部分端口（如80端口），且服务器不能访问外部网络。（可以使用http隧道）  0x00 前言&amp;emsp;因为Socks介于传输层与表示层之间，使用TCP协议传输数据，因而不提供如传递ICMP信息之类的网络层相关服务。目前有两个版本：SO">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://tvax3.sinaimg.cn/large/006Glg0Bly1goup9t3676j30jg0braco.jpg">
+<meta property="og:image" content="https://tva4.sinaimg.cn/large/006Glg0Bly1gotjh52e9mj313e0fvtb2.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006Glg0Bly1gotjtop2njj313k0kjab6.jpg">
+<meta property="og:image" content="https://tvax4.sinaimg.cn/large/006Glg0Bly1gotkjd5fhcj30nk0eqwfm.jpg">
+<meta property="og:image" content="https://tvax4.sinaimg.cn/large/006Glg0Bly1gotl0gcapcj31hc0riqcl.jpg">
+<meta property="og:image" content="https://tvax1.sinaimg.cn/large/006Glg0Bly1gou4812vy6j31fi0mq7dh.jpg">
+<meta property="og:image" content="https://tvax2.sinaimg.cn/large/006Glg0Bly1gou4kev0qlj31380jbnpd.jpg">
+<meta property="og:image" content="https://tva4.sinaimg.cn/large/006Glg0Bly1gou6zti9hfj30oe0l8goz.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006Glg0Bly1gou73wbuznj31g30pywku.jpg">
+<meta property="og:image" content="https://tvax3.sinaimg.cn/large/006Glg0Bly1gouq3xpxu4j30sz0hr3zj.jpg">
+<meta property="og:image" content="https://tva1.sinaimg.cn/large/006Glg0Bly1gouqmno5cjj30qe0hlgta.jpg">
+<meta property="og:image" content="https://tva2.sinaimg.cn/large/006Glg0Bly1gouqtgjienj319q0ghtbr.jpg">
+<meta property="article:published_time" content="2021-03-24T07:03:54.000Z">
+<meta property="article:modified_time" content="2021-03-24T07:22:08.000Z">
+<meta property="article:author" content="信安小蚂蚁">
+<meta property="article:tag" content="隧道技术">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://tvax3.sinaimg.cn/large/006Glg0Bly1goup9t3676j30jg0braco.jpg">
+
+<link rel="canonical" href="https://mayi077.github.io/2021/03/24/%E9%9A%90%E8%97%8F%E9%9A%A7%E9%81%93%E6%8A%80%E6%9C%AF%E4%B9%8BSOCKS%E4%BB%A3%E7%90%86/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>隐藏隧道技术之SOCKS代理 | 信安小蚂蚁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">信安小蚂蚁</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right"></div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-主页">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
+
+  </li>
+        <li class="menu-item menu-item-归档">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-分类">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-标签">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-关于">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2021/03/24/%E9%9A%90%E8%97%8F%E9%9A%A7%E9%81%93%E6%8A%80%E6%9C%AF%E4%B9%8BSOCKS%E4%BB%A3%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          隐藏隧道技术之SOCKS代理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-03-24 15:03:54 / 修改时间：15:22:08" itemprop="dateCreated datePublished" datetime="2021-03-24T15:03:54+08:00">2021-03-24</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%86%85%E7%BD%91%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">内网学习</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>9 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>常见的网络场景如下三类：</p>
+<ul>
+<li>服务器在内网中，可以任意访问外网。</li>
+<li>服务器在内网中，可以访问外网，但是服务器安装了防火墙拒绝敏感的端口连接</li>
+<li>服务器在内网中，对外只开放了部分端口（如80端口），且服务器不能访问外部网络。（可以使用http隧道）</li>
+</ul>
+<h3 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h3><p>&emsp;因为Socks介于传输层与表示层之间，使用TCP协议传输数据，因而不提供如传递ICMP信息之类的网络层相关服务。<br>目前有两个版本：SOCKS4和SOCKS5</p>
+<ol>
+<li>SOCKS4支持TELNET、FTPHTTP等TCP协议；</li>
+<li>SOCKS5支持TCP与UDP，并支持安全认证方案。<br>Ps: Socks不支持ICMP，不能使用ping命令。<br>常见的转发工具及不同平台的代理链工具：<br><img data-src="//tvax3.sinaimg.cn/large/006Glg0Bly1goup9t3676j30jg0braco.jpg" alt="常见工具"><a id="more"></a>
+
+</li>
+</ol>
+<h3 id="0x01-常用的代理工具"><a href="#0x01-常用的代理工具" class="headerlink" title="0x01 常用的代理工具"></a>0x01 常用的代理工具</h3><p>&emsp;socks是一种代理服务，可以简单地将一端系统连接另一端。socks支持多种协议，包括HTTP、FTP等。SOCKS分为socks4和socks5两种类型。socks4只支持tcp协议，而socks5不仅支持TCP/UDP协议，还支持各种身份验证机制，其标准端口为1080。socks能够与目标内网进行通信，避免多次使用端口转发。<br>&emsp;socks代理工具有很多，尽量选择没有GUI界面的，尽量选择不需要安装其它依赖软件的socks代理工具，支持多平台更佳。   </p>
+<h4 id="1、EarthWorm（EW）"><a href="#1、EarthWorm（EW）" class="headerlink" title="1、EarthWorm（EW）"></a>1、EarthWorm（EW）</h4><p>&emsp;Earth:地球，Worm:虫。它是一套便携的网络工具，具有socks5 服务架设和端口转发2大核心功能，可以在复杂网络环境中实现网络穿透。<a href="https://github.com/rootkiter/EarthWorm" target="_blank" rel="noopener">【EarthWorm】</a><br>&emsp;它提供了多个可执行文件以适用不同的操作系统。EW还有一个升级版叫<a href="https://github.com/rootkiter/Termite" target="_blank" rel="noopener">【Termite】</a></p>
+<h4 id="2、reGeorg"><a href="#2、reGeorg" class="headerlink" title="2、reGeorg"></a>2、reGeorg</h4><p>&emsp;reGeorg是reDUh的升级版，主要功能是把内网服务器的端口通过HTTP/HTTPS隧道转发到本机形成一个回路。<br>&emsp;reGeorg利用webshell建立一个socks代理进行内网穿透，服务器必须支持ASPX、PHP、JSP中的一种。</p>
+<h4 id="3、SocksCap64"><a href="#3、SocksCap64" class="headerlink" title="3、SocksCap64"></a>3、SocksCap64</h4><p>&emsp;SocksCap64 是一款在windows中相当好用的全局代理软件。<a href="https://www.sockscap64.com/sockscap-64-free-download-zh-hans/" target="_blank" rel="noopener">【下载链接】</a>  下载后需要管理员权限来打开使用。<br>免费的，感觉比proxifier（收费，可破解）好用简洁。<img data-src="//tva4.sinaimg.cn/large/006Glg0Bly1gotjh52e9mj313e0fvtb2.jpg" alt=""></p>
+<h4 id="4、Proxifier"><a href="#4、Proxifier" class="headerlink" title="4、Proxifier"></a>4、Proxifier</h4><p>它是一款比较好用的全局代理软件，支持跨平台。下载直接去百度Google找吧。<img data-src="//tva1.sinaimg.cn/large/006Glg0Bly1gotjtop2njj313k0kjab6.jpg" alt="proxifier"></p>
+<h4 id="5、ProxyChains"><a href="#5、ProxyChains" class="headerlink" title="5、ProxyChains"></a>5、ProxyChains</h4><p>chain:链。他是一款可以在Linux下实现全局代理的软件，稳定、可靠可以在任何程序上实现代理，允许tcp和dns流量通过代理隧道，支持 HTTP、SOCKS4 、SOCKS5类型的代理服务器。<a href="http://proxychains.sourceforge.net/" target="_blank" rel="noopener">【下载链接】</a> kali是自带有的。使用也是非常的简单。</p>
+<h3 id="0x02-SOCKS代理技术在网络环境中的应用"><a href="#0x02-SOCKS代理技术在网络环境中的应用" class="headerlink" title="0x02 SOCKS代理技术在网络环境中的应用"></a>0x02 SOCKS代理技术在网络环境中的应用</h3><p>这一部分内容可以参考《内网安全攻防-渗透测试实战指南》 书中的148页。</p>
+<h4 id="1、EarthWorm-的应用"><a href="#1、EarthWorm-的应用" class="headerlink" title="1、EarthWorm 的应用"></a>1、EarthWorm 的应用</h4><p><a href="https://blog.csdn.net/qq_21310689/article/details/85316833" target="_blank" rel="noopener">【参考链接1】</a><br><a href="https://bbs.ichunqiu.com/thread-36219-1-2.html" target="_blank" rel="noopener">【参考链接2】</a><br><a href="http://rootkiter.com/EarthWorm/" target="_blank" rel="noopener">【参考链接3】</a><br>EarthWorm是内网穿透的神器，拥有三项功能正向代理，反向代理，端口转发。<br>为实现这些功能，EarthWorm建立了六大功能模块:</p>
+<ol>
+<li>正向代理：ssocksd</li>
+<li>反向代理：rcsocks、rssocks</li>
+<li>端口转发：lcx_listen、lcx_slave、lcx_tran<br><img data-src="//tvax4.sinaimg.cn/large/006Glg0Bly1gotkjd5fhcj30nk0eqwfm.jpg" alt="ew"><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">-l 该命令为服务启动开启指定端口</span><br><span class="line">-d 指定转发或反弹的主机地址</span><br><span class="line">-e 指定转发或反弹的主机端口</span><br><span class="line">-f 指定连接或映射的主机地址</span><br><span class="line">-g 指定连接或映射的主机端口</span><br><span class="line">-h 打开帮助提示，当与-s参数共同使用时可以看到更详细的内容</span><br><span class="line">-a 关于</span><br><span class="line">-v 显示版本</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h5 id="1-建立正向scocks-5代理"><a href="#1-建立正向scocks-5代理" class="headerlink" title="(1) 建立正向scocks 5代理"></a>(1) 建立正向scocks 5代理</h5><p>如果目标主机（windows）拥有一个外网ip，我们可以使用如下正向代理方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ew_for_win_32.exe  -s ssocksd -l 888</span><br></pre></td></tr></table></figure>
+<p>随后本机（windows）使用代理，ip为目标的公网ip端口为指定的888<br><img data-src="//tvax4.sinaimg.cn/large/006Glg0Bly1gotl0gcapcj31hc0riqcl.jpg" alt="">  </p>
+<h5 id="2-反弹socks-5-代理"><a href="#2-反弹socks-5-代理" class="headerlink" title="(2) 反弹socks 5 代理"></a>(2) 反弹socks 5 代理</h5><p>目标主机没有公网ip,但是可以正常出网的情况。</p>
+<ol>
+<li>先在一台具备公网ip的主机A上运行以下命令：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ew -s rcsocks -l 1080 -e 8888</span><br></pre></td></tr></table></figure>
+意思是在公网vps上添加一个转接隧道，把1080端口收到的代理请求转发给 8888端口。</li>
+<li>在目标主机B中执行如下命令，启动socks5服务，并且反弹到公网主机A的8888端口<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ew -s rssocks -d vpsIp -e 8888</span><br></pre></td></tr></table></figure></li>
+<li>然后返回vps就可以看到反弹成功，随后我们配置代理为vpsIP 的 <code>1080</code> 端口。<img data-src="//tvax1.sinaimg.cn/large/006Glg0Bly1gou4812vy6j31fi0mq7dh.jpg" alt=""></li>
+</ol>
+<h4 id="3-二级级联-a有公网ip"><a href="#3-二级级联-a有公网ip" class="headerlink" title="(3) 二级级联 (a有公网ip)"></a>(3) 二级级联 (a有公网ip)</h4><p><img data-src="//tvax2.sinaimg.cn/large/006Glg0Bly1gou4kev0qlj31380jbnpd.jpg" alt="拓扑图"><br><strong>注意：ip可能有差异</strong><br>我们已拥有 A、B 2台主机的控制权限，A主机有2个网卡可以访问外网并且只能连接内网的B主机没有权限访问内网其它主机，B主机不能不能访问外网可以访问内网中其他主机。</p>
+<ol>
+<li>首先我们在B主机中监听 888端口（这里我们用winserve 1.1.1.3）<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.\ew_for_win_32.exe  -s ssocksd -l 888</span><br></pre></td></tr></table></figure></li>
+<li>然后再A主机中，将1080端口接收到的数据代理给B主机的888端口<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ew_for_win_32.exe  -s lcx_tran -l 1080 -f 1.1.1.3 -g 888</span><br></pre></td></tr></table></figure></li>
+<li>现在我们就可以将A的公网地址和端口使用B主机上架设的socks5代理了。我们再A主机win中无法访问内网的1.1.1.100的web服务，当是当我们搭起代理后可以在本机通过代理访问1.1.1.100。<img data-src="//tva4.sinaimg.cn/large/006Glg0Bly1gou6zti9hfj30oe0l8goz.jpg" alt="">)当我们本机挂起代理后可以访问到1.1.1.100的web服务。这里我们还可以注意到因为B主机无法访问外网所以我们点击测试时是失败的。(后面测试又成功了，奇怪)<img data-src="//tva1.sinaimg.cn/large/006Glg0Bly1gou73wbuznj31g30pywku.jpg" alt=""></li>
+<li>还有一点很奇怪就是代理后无法使用ping命令（应该是没代理ICMp包） 而且注意到防火墙选择any协议时，并没有拦截icmp包（还可以ping通）还有代理隧道似乎没有代理icmp包，无法使用ping命令ping通1.1.1.100。<strong>因为Socks介于传输层与表示层之间，使用TCP协议传输数据，因而不提供如传递ICMP信息之类的网络层相关服务。</strong></li>
+<li>还有不知道为啥代理cmd应用进行扫描时扫不到80端口(估计是代理端口的原因)<img data-src="//tvax3.sinaimg.cn/large/006Glg0Bly1gouq3xpxu4j30sz0hr3zj.jpg" alt=""></li>
+</ol>
+<h4 id="4-二级网络环境（b无公网ip）"><a href="#4-二级网络环境（b无公网ip）" class="headerlink" title="(4) 二级网络环境（b无公网ip）"></a>(4) 二级网络环境（b无公网ip）</h4><p>这里就指A主机没有公网Ip但是可以访问外网，其它的信息和上面一样。<br>这次我们需要进行四步操作。</p>
+<ol>
+<li>在vps(192.168.152.152)中添加转接隧道将，将10800端口收到的数据代理转发给8888端口。<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.&#x2F;ew_for_linux64 -s lcx_listen -l 10800 -e 8888</span><br></pre></td></tr></table></figure></li>
+<li>在b主机（winserve 1.1.1.3）上进行ssocksd方式启动9999端口的socks代理。<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.&#x2F;ew_for_Win.exe -s ssocksd -l 9999</span><br></pre></td></tr></table></figure></li>
+<li>在A主机上利用lcx_slave方式，将公网vps的8888和B主机的9999端口连接起来。<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.&#x2F;ew_for_Win.exe -s lcx_slave -d 192.168.152.152 -e 8888 -f 1.1.1.3 -g 9999</span><br></pre></td></tr></table></figure></li>
+<li>回到kali vps中我们可以看到连接成功的标识<img data-src="//tva1.sinaimg.cn/large/006Glg0Bly1gouqmno5cjj30qe0hlgta.jpg" alt="">)接下来我们就可以利用kali的ip和10800端口进行代理操作了。<img data-src="//tva2.sinaimg.cn/large/006Glg0Bly1gouqtgjienj319q0ghtbr.jpg" alt="">这次又扫出了80端口。奇奇怪怪!</li>
+</ol>
+<h4 id="各种用法的示例"><a href="#各种用法的示例" class="headerlink" title="各种用法的示例"></a>各种用法的示例</h4><h4 id="ssocksd-正向连接"><a href="#ssocksd-正向连接" class="headerlink" title="ssocksd 正向连接"></a>ssocksd 正向连接</h4><p>单独使用就是一个简答的正向连接，就是说我在本机监听一个端口。与其他serve配合使用也比较常见。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ew -s ssocksd -l 888</span><br></pre></td></tr></table></figure>
+
+<h4 id="rcsocks-、-rssocks-反向连接"><a href="#rcsocks-、-rssocks-反向连接" class="headerlink" title="rcsocks 、 rssocks 反向连接"></a>rcsocks 、 rssocks 反向连接</h4><p><code>rcsocks</code> 它大概的意思就是将本机的一个端口接收到的数据转发给本机的另一个端口，多用于我们的vps中（和lcx_listen有点像耶）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ew -s rcsocks -l 1080 -e 8888</span><br></pre></td></tr></table></figure>
+<p><code>rssocks</code> 它相当于建立一个隧道，然后给指定的ip端口绑定。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ew -s rssocks -d vpsip -e 8888</span><br></pre></td></tr></table></figure>
+
+<h5 id="lcx-tran-的用法"><a href="#lcx-tran-的用法" class="headerlink" title="lcx_tran 的用法"></a>lcx_tran 的用法</h5><p>大概可以理解为将本地监听到的端口a，转发给指定ip端口。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.&#x2F;ew -s lcx_tran -l 1080 -f 127.0.0.1 -g 9999</span><br></pre></td></tr></table></figure>
+
+<h5 id="lcx-listen、lcx-slave的用法"><a href="#lcx-listen、lcx-slave的用法" class="headerlink" title="lcx_listen、lcx_slave的用法"></a>lcx_listen、lcx_slave的用法</h5><p><code>lcx_listen</code>大概就是说监听本地一个端口，然后转发给本地一个端口。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.&#x2F;ew -s lcx_listen -l 1080 -e 8888</span><br></pre></td></tr></table></figure>
+<p>而<code>lcx_slave</code>大概的意思是将一个vps的ip端口，和内部的ip端口进行绑定。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">w -s lcx_slave  -d 192.168.152.152 -e 8888 -f 127.0.0.1 -g 9999</span><br></pre></td></tr></table></figure>
+<p>一般也需要配合 ssocksd使用：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">.&#x2F;ew -s lcx_listen -l 1080 -e 8888</span><br><span class="line">.&#x2F;ew -s ssocksd    -l 9999</span><br><span class="line">.&#x2F;ew -s lcx_slave  -d 127.0.0.1 -e 8888 -f 127.0.0.1 -g 9999</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>信安小蚂蚁
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://mayi077.github.io/2021/03/24/%E9%9A%90%E8%97%8F%E9%9A%A7%E9%81%93%E6%8A%80%E6%9C%AF%E4%B9%8BSOCKS%E4%BB%A3%E7%90%86/" title="隐藏隧道技术之SOCKS代理">https://mayi077.github.io/2021/03/24/隐藏隧道技术之SOCKS代理/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+     <div>
+       
+         ﻿<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+         
+      </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E9%9A%A7%E9%81%93%E6%8A%80%E6%9C%AF/" rel="tag"><i class="fa fa-tag"></i>隧道技术</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/03/22/%E9%9A%90%E8%97%8F%E9%80%9A%E4%BF%A1%E9%9A%A7%E9%81%93%E6%8A%80%E6%9C%AF%E4%B9%8B-%E5%BA%94%E7%94%A8%E5%B1%82/" rel="prev" title="隐藏通信隧道技术之 应用层">
+      <i class="fa fa-chevron-left"></i> 隐藏通信隧道技术之 应用层
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/04/01/%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E4%B9%8B%E6%BA%A2%E5%87%BA%E5%92%8C%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE%E9%94%99%E8%AF%AF/" rel="next" title="权限提升之溢出和系统配置错误">
+      权限提升之溢出和系统配置错误 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#0x00-前言"><span class="nav-number">1.</span> <span class="nav-text">0x00 前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x01-常用的代理工具"><span class="nav-number">2.</span> <span class="nav-text">0x01 常用的代理工具</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1、EarthWorm（EW）"><span class="nav-number">2.1.</span> <span class="nav-text">1、EarthWorm（EW）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2、reGeorg"><span class="nav-number">2.2.</span> <span class="nav-text">2、reGeorg</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3、SocksCap64"><span class="nav-number">2.3.</span> <span class="nav-text">3、SocksCap64</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4、Proxifier"><span class="nav-number">2.4.</span> <span class="nav-text">4、Proxifier</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5、ProxyChains"><span class="nav-number">2.5.</span> <span class="nav-text">5、ProxyChains</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x02-SOCKS代理技术在网络环境中的应用"><span class="nav-number">3.</span> <span class="nav-text">0x02 SOCKS代理技术在网络环境中的应用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1、EarthWorm-的应用"><span class="nav-number">3.1.</span> <span class="nav-text">1、EarthWorm 的应用</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-建立正向scocks-5代理"><span class="nav-number">3.1.1.</span> <span class="nav-text">(1) 建立正向scocks 5代理</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-反弹socks-5-代理"><span class="nav-number">3.1.2.</span> <span class="nav-text">(2) 反弹socks 5 代理</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-二级级联-a有公网ip"><span class="nav-number">3.2.</span> <span class="nav-text">(3) 二级级联 (a有公网ip)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-二级网络环境（b无公网ip）"><span class="nav-number">3.3.</span> <span class="nav-text">(4) 二级网络环境（b无公网ip）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#各种用法的示例"><span class="nav-number">3.4.</span> <span class="nav-text">各种用法的示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ssocksd-正向连接"><span class="nav-number">3.5.</span> <span class="nav-text">ssocksd 正向连接</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#rcsocks-、-rssocks-反向连接"><span class="nav-number">3.6.</span> <span class="nav-text">rcsocks 、 rssocks 反向连接</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#lcx-tran-的用法"><span class="nav-number">3.6.1.</span> <span class="nav-text">lcx_tran 的用法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#lcx-listen、lcx-slave的用法"><span class="nav-number">3.6.2.</span> <span class="nav-text">lcx_listen、lcx_slave的用法</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
+      src="/images/1.jpg">
+  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23li6cOHoOwCcszzi9',
+      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
+      repo        : 'mayi077.github.io',
+      owner       : 'mayi077',
+      admin       : ['mayi077'],
+      id          : '099af47e9fac25788adedbcd45ad33ec',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>
