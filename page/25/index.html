@@ -182,6 +182,107 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/01/24/RoarCTF-2019-Easy-Calc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/01/24/RoarCTF-2019-Easy-Calc/" class="post-title-link" itemprop="url">[RoarCTF 2019]Easy Calc</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-01-24 08:37:46" itemprop="dateCreated datePublished" datetime="2020-01-24T08:37:46+08:00">2020-01-24</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-02-15 17:02:27" itemprop="dateModified" datetime="2020-02-15T17:02:27+08:00">2020-02-15</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/CTF%E5%A4%8D%E7%8E%B0/" itemprop="url" rel="index">
+                    <span itemprop="name">CTF复现</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h4 id="前言"><a href="#前言" class="headerlink" title="前言:"></a>前言:</h4><p>&emsp;这题主要有2种解法，一种是HTTP走私（暂时感觉还没有理解透），另一种是根据PHP的字符串解析特性（还算比较好理解）。  </p>
+<h3 id="0X01-用HTTP走私的方法"><a href="#0X01-用HTTP走私的方法" class="headerlink" title="0X01 用HTTP走私的方法"></a>0X01 用HTTP走私的方法</h3><ol>
+<li>HTTP走私有很多种形式，具体可以去 <a href="https://blog.csdn.net/qq_23066945/article/details/102932899" target="_blank" rel="noopener">https://blog.csdn.net/qq_23066945/article/details/102932899</a> 这里了解。</li>
+<li>拿到题目，查看源码可以看到   <img data-src="https://pic.downk.cc/item/5e29604f2fb38b8c3c4253d9.jpg" alt=""> </li>
+<li>于是我们尝试着url直接访问calc.php文件，得到如下代码：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">error_reporting(0);</span><br><span class="line">if(!isset($_GET[&#39;num&#39;]))&#123;</span><br><span class="line">    show_source(__FILE__);</span><br><span class="line">&#125;else&#123;</span><br><span class="line">        $str &#x3D; $_GET[&#39;num&#39;];</span><br><span class="line">        $blacklist &#x3D; [&#39; &#39;, &#39;\t&#39;, &#39;\r&#39;, &#39;\n&#39;,&#39;\&#39;&#39;, &#39;&quot;&#39;, &#39;&#96;&#39;, &#39;\[&#39;, &#39;\]&#39;,&#39;\$&#39;,&#39;\\&#39;,&#39;\^&#39;];</span><br><span class="line">        foreach ($blacklist as $blackitem) &#123;</span><br><span class="line">                if (preg_match(&#39;&#x2F;&#39; . $blackitem . &#39;&#x2F;m&#39;, $str)) &#123;</span><br><span class="line">                        die(&quot;what are you want to do?&quot;);</span><br><span class="line">                &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        eval(&#39;echo &#39;.$str.&#39;;&#39;);</span><br><span class="line">&#125;</span><br><span class="line">?&gt; </span><br><span class="line">&#x2F;&#x2F; 很明显的过滤了一些字符</span><br></pre></td></tr></table></figure></li>
+<li>提交calc.php?num=1，抓包得到：<br><img data-src="https://pic.downk.cc/item/5e2965772fb38b8c3c42c165.jpg" alt=""><br>此时的回显还是正常的，但是当我们输入英文字母时就会触碰waf从而报错。</li>
+<li>我们想到http走私来绕过waf，将get方法改为post随便post点东西，然后回显报错。我们将cl（Content-Length）复制一遍再go一次，虽然报错了，但也可以得到我们想要的结果。<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?num&#x3D;var_dump(scandir(chr(47)))  &#x2F;&#x2F;是用来在php语言中查找目录下的文件及目录，用chr（47），是因为\’在php中就被过滤掉了。</span><br></pre></td></tr></table></figure>
+<img data-src="https://pic.downk.cc/item/5e2966e32fb38b8c3c43570c.jpg" alt=""></li>
+<li>于是我们查看f1ag文件里的数据，我们使用：<strong>?num=var_dump(file_get_contents(chr(47).chr(102).chr(49).chr(97).chr(103).chr(103)))</strong> 得到flag<br><img data-src="https://pic.downk.cc/item/5e2968b82fb38b8c3c43771b.jpg" alt=""></li>
+<li>其实虽然我用这种方法解了出来，但是并不太了解里面的详细缘由，有机会一定要搞清楚。</li>
+</ol>
+<h3 id="0X02-根据PHP的字符串解析特性来解题"><a href="#0X02-根据PHP的字符串解析特性来解题" class="headerlink" title="0X02 根据PHP的字符串解析特性来解题"></a>0X02 根据PHP的字符串解析特性来解题</h3><p>&emsp; 前面的分析都是一样的主要是怎么来执行我想要执行的语句呢？ waf中过滤的是‘num’变量而并没有过滤‘ num’变量，而php中会自动去除前面的空格，所以我们只要将?num= 改为? num= 就可以完美绕过waf。<br>我们直接执行最后一句?num=var_dump(file_get_contents(chr(47).chr(102).chr(49).chr(97).chr(103).chr(103)))即可得到flag如：<img data-src="https://pic.downk.cc/item/5e296ac02fb38b8c3c439cee.jpg" alt=""></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/01/22/web-%E9%AB%98%E6%98%8E%E7%9A%84%E9%BB%91%E5%AE%A2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -579,114 +680,6 @@
   
   
 
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/01/18/web-admin/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/1.jpg">
-      <meta itemprop="name" content="信安小蚂蚁">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="信安小蚂蚁">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/01/18/web-admin/" class="post-title-link" itemprop="url">web-admin</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-01-18 22:50:59" itemprop="dateCreated datePublished" datetime="2020-01-18T22:50:59+08:00">2020-01-18</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-02-15 17:03:17" itemprop="dateModified" datetime="2020-02-15T17:03:17+08:00">2020-02-15</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/CTF%E5%A4%8D%E7%8E%B0/" itemprop="url" rel="index">
-                    <span itemprop="name">CTF复现</span>
-                  </a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-file-word-o"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>809</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-clock-o"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>2 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h4 id="前言："><a href="#前言：" class="headerlink" title="前言："></a>前言：</h4><p>&emsp;看别人的wp发现这题主要有3种方法但因现在的我能力有限只能搞懂一种方法——Unicode欺骗。那么接下来我将总结此种方法，以及解题思路。  </p>
-<h3 id="一、解题思路"><a href="#一、解题思路" class="headerlink" title="一、解题思路"></a>一、解题思路</h3><ol>
-<li>打开题目链接，发现可以注册可以登入。经过一系列判断过后，我开始尝试随便创一个用户。登入后发现，可以改密码和提交意见，随后在查看改密码的那个页面的源码有一个注释如：<br><img data-src="https://pic.downk.cc/item/5e2314292fb38b8c3c5fa5f8.jpg" alt=""><br>&emsp;下载后观察发现：<br><img data-src="https://pic.downk.cc/item/5e2314722fb38b8c3c5faedf.jpg" alt="">  </li>
-</ol>
-<ol start="2">
-<li><p>打开代码后发现古怪，自定义函数：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">def strlower(username):</span><br><span class="line">    username &#x3D; nodeprep.prepare(username)</span><br><span class="line">    return username</span><br><span class="line">    &#x2F;&#x2F; 看字面意思是将字符串中的大写转小写，但是python自带了lower函数所以古怪，经过查找资料发现Unicode欺骗漏洞</span><br></pre></td></tr></table></figure>
-<p><img data-src="https://pic.downk.cc/item/5e2316ea2fb38b8c3c5ff5c5.jpg" alt=""></p>
-</li>
-<li><p>然后我们发现在使用nodeprep.prepare函数转换时过程如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ᴬ-&gt; A -&gt; a</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>而从上面的代码可知，在创建的时候会进行一次nodeprep.prepare(username)赋值username，在改密码时又会进行一次nodeprep.prepare(username)赋值给username。那么username经过2此nodeprep.prepare(username)后可以得到admin，也就是最后改的密码是admin的密码。</p>
-</li>
-<li><p>那么我们先注册一个<strong>ᴬdmin</strong>，实际在数据库里纯的是<strong>Admin</strong> 然后我们进行改密码操作，又经过nodeprep.prepare后实际改的是<strong>admin</strong>的密码。</p>
-</li>
-<li><p>输入admin 和我们以前改的密码，即可得到我们的flag：<br><img data-src="https://pic.downk.cc/item/5e2319cf2fb38b8c3c603e2d.jpg" alt=""> </p>
-</li>
-</ol>
-<h3 id="二、难点的理解"><a href="#二、难点的理解" class="headerlink" title="二、难点的理解"></a>二、难点的理解</h3><h6 id="emsp-对于nodeprep-prepare函数，就是有一个转换过程的漏洞ᴬ-gt-A-gt-a-如果想看其它字符转换可以到此网站进行查找-：-https-unicode-table-com-en-search-q-small-capital"><a href="#emsp-对于nodeprep-prepare函数，就是有一个转换过程的漏洞ᴬ-gt-A-gt-a-如果想看其它字符转换可以到此网站进行查找-：-https-unicode-table-com-en-search-q-small-capital" class="headerlink" title="&emsp;对于nodeprep.prepare函数，就是有一个转换过程的漏洞ᴬ-&gt; A -&gt; a 如果想看其它字符转换可以到此网站进行查找 ： https://unicode-table.com/en/search/?q=small+capital"></a>&emsp;对于nodeprep.prepare函数，就是有一个转换过程的漏洞ᴬ-&gt; A -&gt; a 如果想看其它字符转换可以到此网站进行查找 ： <a href="https://unicode-table.com/en/search/?q=small+capital" target="_blank" rel="noopener">https://unicode-table.com/en/search/?q=small+capital</a></h6>
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
   </div>
 
   
@@ -758,18 +751,18 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-count">135</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
-        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-count">86</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

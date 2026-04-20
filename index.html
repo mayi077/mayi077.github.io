@@ -182,6 +182,163 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2026/04/20/2026-04-20-TLS%E5%8A%A0%E5%AF%86%E5%A5%97%E4%BB%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/04/20/2026-04-20-TLS%E5%8A%A0%E5%AF%86%E5%A5%97%E4%BB%B6/" class="post-title-link" itemprop="url">TLS加密套件</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-04-20 22:30:00 / 修改时间：22:28:12" itemprop="dateCreated datePublished" datetime="2026-04-20T22:30:00+08:00">2026-04-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/" itemprop="url" rel="index">
+                    <span itemprop="name">密码学</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>10 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p><img data-src="image1.png" alt="TLS加密套件"></p>
+<h2 id="SSL-TLS-握手过程"><a href="#SSL-TLS-握手过程" class="headerlink" title="SSL/TLS 握手过程"></a>SSL/TLS 握手过程</h2><p>首先得完成传输层的握手，然后进入SSL握手阶段：</p>
+<ol>
+<li><p>客户端发送Client Hello Message，表明自己可以使用的SSL版本（从高到低尝试）、加密套件及相应参数如：</p>
+<ol>
+<li>client_version(SSL版本)：TLS1.2</li>
+<li>random：客户端随机数，用于后续协商密钥。</li>
+<li>cipher_suites：支持的加密套件列表（由高到低排序）。</li>
+<li>compression_methods：压缩算法列表（由高到低排序）。为null，表示不要压缩<br><img data-src="image2.png" alt="TLS加密套件"></li>
+</ol>
+</li>
+<li><p>服务器接收到ClientHello后，会返回ServerHello。服务器从客户端在ClientHello中提供的密码套件、SSL/TLS版本、压缩算法列表里选择它所支持的项，并把它的选择包含在ServerHello中告知客户端。</p>
+<ul>
+<li>服务器也用TLS 1.2；提供服务器随机数；没有找到这个客户端的SessionID，所以填入了新的SessionID；选择了TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA384加密套件；同意不压缩数据；<br><img data-src="image3.png" alt="TLS加密套件"></li>
+</ul>
+</li>
+<li><p><strong>Server -&gt; Client</strong>：Certificate、Server Key Exchange、Certificate Request、ServerHello Done：</p>
+<ul>
+<li>Certificate服务器证书：和<strong>所选密钥套件中密钥交换算法（Key Exchange）匹配</strong>，用于客户端验证服务器身份和交换密钥的X.509证书。</li>
+<li>Server Key Exchange服务器密钥交换信息：如果<strong>服务器没有证书，或者服务器的证书仅用来签名</strong>（如DSS证书、签名RSA证书），那么就需要发送这条消息。</li>
+<li>Certificate Request证书请求：<strong>要求客户端也发送它的证书，让服务端校验客户端的身份。</strong>（可选）</li>
+<li>Server Hello Done：一条简单的表明状态的空消息。<br><img data-src="image4.png" alt="TLS加密套件"></li>
+</ul>
+</li>
+<li><p><strong>客户端校验服务端身份</strong></p>
+<ol>
+<li>如果发现证书不合法，客户端可以发起告警信息。</li>
+</ol>
+</li>
+<li><p><strong>Client –&gt; Server：</strong>Certificate Verify、Change Cipher Spec、Encrypted Handshake Message</p>
+<ul>
+<li>Certificate客户端证书<strong>：</strong>如果服务器发送了”Certificate Request”，要求校验客户端身份，那么客户端需要回应自己的证书。如果客户端没有合适的证书，直接抛出告警信息让服务端处理（<strong>服务端的处理方式通常就是断开TCP连接</strong>）。和所选密钥套件中密钥交换算法（Key Exchange）匹配的，用于服务器验证客户端身份的X.509证书。</li>
+<li>Client Key Exchange客户端密钥交换信息：合法性校验通过后，客户端计算产生随机数字Pre-master，并用证书公钥加密，发送给服务器</li>
+<li>Change Cipher Spec更换加密规约<br><img data-src="image5.png" alt="TLS加密套件"></li>
+</ul>
+</li>
+<li><p><strong>服务端回应客户端</strong></p>
+<ol>
+<li>****服务端同样地发送Change Cipher Spec、Finish（Encrypted Handshake Message）消息，然后开始数据传输。<br><img data-src="image6.png" alt="TLS加密套件"></li>
+</ol>
+</li>
+</ol>
+<h2 id="TLS-加密套件"><a href="#TLS-加密套件" class="headerlink" title="TLS 加密套件"></a>TLS 加密套件</h2><p>TLS 使用到的认证加密算法、完整性校验算法、密钥协商算法、数字签名算法等，这些算法都是要配合使用的（单独使用无法保证信息安全传输），各类算法相互组合可以形成一套套加密方案。TLS 握手阶段，服务器与客户端需要协商都使用哪些加密算法，如果逐个协商显然效率较低，TLS将可用的加密算法组合为一个个密码套件，<strong>服务器与客户端只要协商一种密码套件，就确定了整个加密方案中用到的所有加密算法，能提高通信效率</strong>。</p>
+<h3 id="加密套件格式说明："><a href="#加密套件格式说明：" class="headerlink" title="加密套件格式说明："></a>加密套件格式说明：</h3><p><img data-src="image7.png" alt="TLS加密套件"></p>
+<p><img data-src="image8.png" alt="TLS加密套件"></p>
+<blockquote>
+<p>💡 TLS（传输层安全性）协议各版本都包含了一系列的加密套件，这些套件可能因为新的安全研究、攻击方法的发现或更高效的算法的出现而被认为是不安全的。随着TLS版本的更新，一些加密套件被废弃，因为它们不再能提供足够的安全性。以下是各个TLS版本中被认为不安全的加密套件及其原因：</p>
+</blockquote>
+<h3 id="TLS-1-1-中的不安全加密套件："><a href="#TLS-1-1-中的不安全加密套件：" class="headerlink" title="TLS 1.1 中的不安全加密套件："></a>TLS 1.1 中的不安全加密套件：</h3><ul>
+<li><strong>使用RC4加密算法的套件</strong>：RC4是一种流密码，它受到多种攻击的影响，例如密钥恢复攻击和偏差攻击，导致其不再安全。</li>
+<li><strong>使用DES或3DES加密算法的套件</strong>：DES由于其较短的密钥长度（56位）很容易受到暴力破解攻击。3DES虽然比DES安全，但是因为它的有效密钥长度（112位）也逐渐变得不够安全，以及运算速度慢，因此不再推荐使用。</li>
+<li><strong>使用MD5或SHA-1散列函数的套件</strong>：MD5和SHA-1都受到了碰撞攻击的影响，这意味着可以找到两个不同的输入产生相同的散列输出，从而破坏了其安全性。</li>
+</ul>
+<h3 id="TLS-1-2-中的不安全加密套件："><a href="#TLS-1-2-中的不安全加密套件：" class="headerlink" title="TLS 1.2 中的不安全加密套件："></a>TLS 1.2 中的不安全加密套件：</h3><ul>
+<li><strong>TLS 1.2继承了TLS 1.1的很多套件，并在此基础上添加了新的套件</strong>。虽然TLS 1.2引入了更多安全的选项，如AES-GCM，但它仍然支持一些不安全的套件，比如：</li>
+<li><strong>使用CBC模式的块密码套件</strong>：这些套件受到各种攻击的影响，如Padding Oracle攻击和Lucky Thirteen攻击，这些攻击可以导致信息泄露。</li>
+<li><strong>使用RSA加密而不是前向保密的密钥交换套件</strong>：如果服务器的RSA私钥被破解，那么之前的所有使用该密钥的通信都可以被解密，而前向保密的套件如DHE或ECDHE可以避免这个问题。</li>
+</ul>
+<h3 id="TLS-1-3-中废弃的不安全套件："><a href="#TLS-1-3-中废弃的不安全套件：" class="headerlink" title="TLS 1.3 中废弃的不安全套件："></a>TLS 1.3 中废弃的不安全套件：</h3><p>TLS 1.3大幅减少了支持的加密套件，只保留了认为是安全的套件。TLS 1.3中废弃了所有以下类型的套件：</p>
+<ul>
+<li><strong>所有使用CBC模式的块密码套件</strong>。</li>
+<li><strong>所有使用RC4、DES或3DES的套件</strong>。</li>
+<li><strong>所有使用MD5或SHA-1的套件</strong>。</li>
+<li><strong>不支持前向保密的套件</strong>，比如那些使用RSA密钥交换的套件。</li>
+<li><strong>所有使用静态密钥交换的套件</strong>（例如固定DH）。</li>
+</ul>
+<p>TLS 1.3只支持使用AEAD（Authenticated Encryption with Associated Data）密码算法的套件，如AES-GCM和ChaCha20-Poly1305，以及使用更安全的散列算法SHA-256和SHA-384的套件。这些更改反映了不断提高的安全标准和对用户数据保护的重视。</p>
+<h3 id="TLS1-3-密码套件"><a href="#TLS1-3-密码套件" class="headerlink" title="TLS1.3 密码套件"></a>TLS1.3 密码套件</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">TLS13-AES128-GCM-SHA256</span><br><span class="line">TLS13-AES256-GCM-SHA384</span><br><span class="line">TLS13-CHACHA20-POLY1305-SHA256</span><br><span class="line">TLS13-AES128-CCM-SHA256</span><br><span class="line">TLS13-AES128-CCM-8-SHA256</span><br></pre></td></tr></table></figure>
+
+<h3 id="TLS1-2-密码套件"><a href="#TLS1-2-密码套件" class="headerlink" title="TLS1.2 密码套件"></a>TLS1.2 密码套件</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">TLS_RSA_WITH_NULL_SHA256</span><br><span class="line">TLS_RSA_WITH_AES_128_CBC_SHA256</span><br><span class="line">TLS_RSA_WITH_AES_256_CBC_SHA256</span><br><span class="line">TLS_RSA_WITH_AES_128_GCM_SHA256</span><br><span class="line">TLS_RSA_WITH_AES_256_GCM_SHA384</span><br><span class="line">TLS_DH_RSA_WITH_AES_128_CBC_SHA256</span><br><span class="line">TLS_DH_RSA_WITH_AES_256_CBC_SHA256</span><br><span class="line">TLS_DH_RSA_WITH_AES_128_GCM_SHA256</span><br><span class="line">TLS_DH_RSA_WITH_AES_256_GCM_SHA384</span><br><span class="line">TLS_DH_DSS_WITH_AES_128_CBC_SHA256</span><br><span class="line">TLS_DH_DSS_WITH_AES_256_CBC_SHA256</span><br><span class="line">TLS_DH_DSS_WITH_AES_128_GCM_SHA256</span><br><span class="line">TLS_DH_DSS_WITH_AES_256_GCM_SHA384</span><br><span class="line">TLS_DHE_RSA_WITH_AES_128_CBC_SHA256</span><br><span class="line">TLS_DHE_RSA_WITH_AES_256_CBC_SHA256</span><br><span class="line">TLS_DHE_RSA_WITH_AES_128_GCM_SHA256</span><br><span class="line">TLS_DHE_RSA_WITH_AES_256_GCM_SHA384</span><br><span class="line">TLS_DHE_DSS_WITH_AES_128_CBC_SHA256</span><br><span class="line">TLS_DHE_DSS_WITH_AES_256_CBC_SHA256</span><br><span class="line">TLS_DHE_DSS_WITH_AES_128_GCM_SHA256</span><br><span class="line">TLS_DHE_DSS_WITH_AES_256_GCM_SHA384</span><br><span class="line">TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256</span><br><span class="line">TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384</span><br><span class="line">TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256</span><br><span class="line">TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384</span><br><span class="line">TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256</span><br><span class="line">TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384</span><br><span class="line">TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256</span><br><span class="line">TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384</span><br><span class="line">TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256</span><br><span class="line">TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384</span><br><span class="line">TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256</span><br><span class="line">TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384</span><br><span class="line">TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256</span><br><span class="line">TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384</span><br><span class="line">TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256</span><br><span class="line">TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384</span><br><span class="line">TLS_DH_anon_WITH_AES_128_CBC_SHA256</span><br><span class="line">TLS_DH_anon_WITH_AES_256_CBC_SHA256</span><br><span class="line">TLS_DH_anon_WITH_AES_128_GCM_SHA256</span><br><span class="line">TLS_DH_anon_WITH_AES_256_GCM_SHA384</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h2><p><a href="https%3A%2F%2Fm01ly.github.io%2F2021%2F07%2F06%2Fhtps-recommend%2F">m01ly.github.io</a></p>
+<p><a href="https%3A%2F%2Fcloud.tencent.com%2Fdeveloper%2Farticle%2F1928677">cloud.tencent.com</a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2026/04/20/2026-04-20-AI-Agent-%E6%9E%B6%E6%9E%84/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -683,103 +840,6 @@
   
   
 
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2021/04/06/%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E4%B9%8B%E4%BB%A4%E7%89%8C%E7%AA%83%E5%8F%96%E4%BB%A5%E5%8F%8A%E6%97%A0%E5%87%AD%E8%AF%81%E6%AC%BA%E9%AA%97/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/1.jpg">
-      <meta itemprop="name" content="信安小蚂蚁">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="信安小蚂蚁">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/04/06/%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E4%B9%8B%E4%BB%A4%E7%89%8C%E7%AA%83%E5%8F%96%E4%BB%A5%E5%8F%8A%E6%97%A0%E5%87%AD%E8%AF%81%E6%AC%BA%E9%AA%97/" class="post-title-link" itemprop="url">权限提升之令牌窃取以及无凭证欺骗</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-04-06 19:11:17 / 修改时间：19:12:25" itemprop="dateCreated datePublished" datetime="2021-04-06T19:11:17+08:00">2021-04-06</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%86%85%E7%BD%91%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index">
-                    <span itemprop="name">内网学习</span>
-                  </a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-file-word-o"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>4.4k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-clock-o"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>11 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="0x01-令牌窃取提权"><a href="#0x01-令牌窃取提权" class="headerlink" title="0x01 令牌窃取提权"></a>0x01 令牌窃取提权</h2><h3 id="1、令牌及伪造令牌介绍"><a href="#1、令牌及伪造令牌介绍" class="headerlink" title="1、令牌及伪造令牌介绍"></a>1、令牌及伪造令牌介绍</h3><p>&emsp;令牌（Token)是指系统中的临时密钥,相当于账户和密码,用于决定是否允许当前请求及判断当前请求是属于哪个用户的。获得了令牌，就可以在不提供密码或其他凭证的情况下访问网络和系统资源。这些令牌将持续存在于系统中(除非系统重新启动)。<br>&emsp;令牌的最大特点是随机性和不可预测性。一般的攻击者或软件都无法将令牌猜测出来。</p>
-<ul>
-<li>访问令牌（Access Token )代表访问控制操作主休的系统对象。</li>
-<li>密保令牌(Security Token )也叫作认证令牌或者硬件令牌，是一种用于实现计算机身份校验的物理设备，例如U盾。</li>
-<li>会话令牌(SessionToken)是交互会话中唯一的身份标识符。   </li>
-</ul>
-<p>伪造令牌攻击的核心是Kerberos协议, Kerberos是一种网络认证协议，其设计目标是通过密钥系统为客户机/服务器应用程序提供强大的认证服务。Kerberos协议的工作机制如下图所示</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/04/06/%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E4%B9%8B%E4%BB%A4%E7%89%8C%E7%AA%83%E5%8F%96%E4%BB%A5%E5%8F%8A%E6%97%A0%E5%87%AD%E8%AF%81%E6%AC%BA%E9%AA%97/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
   </div>
 
   
@@ -851,18 +911,18 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-count">135</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
-        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-count">86</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

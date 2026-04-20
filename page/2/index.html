@@ -182,6 +182,103 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2021/04/06/%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E4%B9%8B%E4%BB%A4%E7%89%8C%E7%AA%83%E5%8F%96%E4%BB%A5%E5%8F%8A%E6%97%A0%E5%87%AD%E8%AF%81%E6%AC%BA%E9%AA%97/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/04/06/%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E4%B9%8B%E4%BB%A4%E7%89%8C%E7%AA%83%E5%8F%96%E4%BB%A5%E5%8F%8A%E6%97%A0%E5%87%AD%E8%AF%81%E6%AC%BA%E9%AA%97/" class="post-title-link" itemprop="url">权限提升之令牌窃取以及无凭证欺骗</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-04-06 19:11:17 / 修改时间：19:12:25" itemprop="dateCreated datePublished" datetime="2021-04-06T19:11:17+08:00">2021-04-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%86%85%E7%BD%91%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index">
+                    <span itemprop="name">内网学习</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>11 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="0x01-令牌窃取提权"><a href="#0x01-令牌窃取提权" class="headerlink" title="0x01 令牌窃取提权"></a>0x01 令牌窃取提权</h2><h3 id="1、令牌及伪造令牌介绍"><a href="#1、令牌及伪造令牌介绍" class="headerlink" title="1、令牌及伪造令牌介绍"></a>1、令牌及伪造令牌介绍</h3><p>&emsp;令牌（Token)是指系统中的临时密钥,相当于账户和密码,用于决定是否允许当前请求及判断当前请求是属于哪个用户的。获得了令牌，就可以在不提供密码或其他凭证的情况下访问网络和系统资源。这些令牌将持续存在于系统中(除非系统重新启动)。<br>&emsp;令牌的最大特点是随机性和不可预测性。一般的攻击者或软件都无法将令牌猜测出来。</p>
+<ul>
+<li>访问令牌（Access Token )代表访问控制操作主休的系统对象。</li>
+<li>密保令牌(Security Token )也叫作认证令牌或者硬件令牌，是一种用于实现计算机身份校验的物理设备，例如U盾。</li>
+<li>会话令牌(SessionToken)是交互会话中唯一的身份标识符。   </li>
+</ul>
+<p>伪造令牌攻击的核心是Kerberos协议, Kerberos是一种网络认证协议，其设计目标是通过密钥系统为客户机/服务器应用程序提供强大的认证服务。Kerberos协议的工作机制如下图所示</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/04/06/%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E4%B9%8B%E4%BB%A4%E7%89%8C%E7%AA%83%E5%8F%96%E4%BB%A5%E5%8F%8A%E6%97%A0%E5%87%AD%E8%AF%81%E6%AC%BA%E9%AA%97/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2021/04/06/msf%E5%9F%BA%E7%A1%80%E5%8F%8A%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -564,106 +661,6 @@
   
   
 
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2021/03/24/%E9%9A%90%E8%97%8F%E9%9A%A7%E9%81%93%E6%8A%80%E6%9C%AF%E4%B9%8BSOCKS%E4%BB%A3%E7%90%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/1.jpg">
-      <meta itemprop="name" content="信安小蚂蚁">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="信安小蚂蚁">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/03/24/%E9%9A%90%E8%97%8F%E9%9A%A7%E9%81%93%E6%8A%80%E6%9C%AF%E4%B9%8BSOCKS%E4%BB%A3%E7%90%86/" class="post-title-link" itemprop="url">隐藏隧道技术之SOCKS代理</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-03-24 15:03:54 / 修改时间：15:22:08" itemprop="dateCreated datePublished" datetime="2021-03-24T15:03:54+08:00">2021-03-24</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%86%85%E7%BD%91%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index">
-                    <span itemprop="name">内网学习</span>
-                  </a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-file-word-o"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>3.6k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-clock-o"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>9 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>常见的网络场景如下三类：</p>
-<ul>
-<li>服务器在内网中，可以任意访问外网。</li>
-<li>服务器在内网中，可以访问外网，但是服务器安装了防火墙拒绝敏感的端口连接</li>
-<li>服务器在内网中，对外只开放了部分端口（如80端口），且服务器不能访问外部网络。（可以使用http隧道）</li>
-</ul>
-<h3 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h3><p>&emsp;因为Socks介于传输层与表示层之间，使用TCP协议传输数据，因而不提供如传递ICMP信息之类的网络层相关服务。<br>目前有两个版本：SOCKS4和SOCKS5</p>
-<ol>
-<li>SOCKS4支持TELNET、FTPHTTP等TCP协议；</li>
-<li>SOCKS5支持TCP与UDP，并支持安全认证方案。<br>Ps: Socks不支持ICMP，不能使用ping命令。<br>常见的转发工具及不同平台的代理链工具：<br><img data-src="//tvax3.sinaimg.cn/large/006Glg0Bly1goup9t3676j30jg0braco.jpg" alt="常见工具">
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/03/24/%E9%9A%90%E8%97%8F%E9%9A%A7%E9%81%93%E6%8A%80%E6%9C%AF%E4%B9%8BSOCKS%E4%BB%A3%E7%90%86/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
   </div>
 
   
@@ -735,18 +732,18 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-count">135</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
-        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-count">86</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

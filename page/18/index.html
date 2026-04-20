@@ -182,6 +182,127 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/03/16/PHP%E4%B8%ADmt-rand%E5%87%BD%E6%95%B0%E4%BA%A7%E7%94%9F%E7%9A%84%E4%BC%AA%E9%9A%8F%E6%9C%BA%E6%95%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/03/16/PHP%E4%B8%ADmt-rand%E5%87%BD%E6%95%B0%E4%BA%A7%E7%94%9F%E7%9A%84%E4%BC%AA%E9%9A%8F%E6%9C%BA%E6%95%B0/" class="post-title-link" itemprop="url">PHP中mt_rand函数产生的伪随机数</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-03-16 20:19:35 / 修改时间：20:21:59" itemprop="dateCreated datePublished" datetime="2020-03-16T20:19:35+08:00">2020-03-16</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%97%A5%E5%B8%B8%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index">
+                    <span itemprop="name">日常笔记</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>10 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="前言"><a href="#前言" class="headerlink" title="前言:"></a>前言:</h3><p>&emsp;PHP的mt_rand函数作为一个随机数生成工具在程序中被广泛使用，但是我们不难发现它生成的随机数不是真正的随机数而是伪随机。既然是伪随机就有可能利用。</p>
+<h3 id="PHP-mt-rand函数"><a href="#PHP-mt-rand函数" class="headerlink" title="PHP mt_rand函数"></a>PHP mt_rand函数</h3><p>&emsp;mt_rand函数有两个可选参数 min 和 max，如果没有提供可选参数，mt_rand函数将返回返回 0 到 RAND_MAX (随机数的最大可能值) 之间的伪随机数。例如想要 5 到 15（包括 5 和 15）之间的随机数，用 mt_rand(5, 15)。<br>&emsp;使用mt_rand()生成随机数的第一个步骤是使用种子（无符号整数值）来生成包含624个值的状态数组。我们可以调用mt_srand($seed)。从 PHP 4.2.0 开始，随机数生成器自动播种，当然如果我们再播种的话会覆盖了系统自动播的种子。 </p>
+<h3 id="利用思路"><a href="#利用思路" class="headerlink" title="利用思路"></a>利用思路</h3><p>&emsp;因为是伪随机，那么如果我们输入同样的参数那么肯定会出同样的结果。它的可控参数有2个<strong>种子</strong> 和 <strong>范围</strong> 。也就是说它可以简化为这样的函数<code>y=seed + i*x</code> 其中seed 是我们的种子，x是我们使用mt_rand时给出的范围，i表示第几次调用这个函数。<br>&emsp;一般我们看到了源码，x 范围肯定是已知的，然后会给我们几个y值如果再知道 i 值我们就可以知道 seed 的值。那么就是知道任意 i 的随机数是多少。<br>&emsp;对于这样一个简单的函数，我们当然可以直接计算出一个解来，但 mt_rand实际使用的函数可是相当复杂且无法逆运算的。有效的破解方法其实是穷举所有的种子并根据种子生成随机数序列再跟已知的随机数序列做比对来验证种子是否正确。php_mt_seed就是这么一个工具，它的速度非常快。它可以根据单次mt_rand()的输出结果直接爆破出可能的种子，当然也可以爆破类似mt_rand(1,100)这样限定了MIN MAX输出的种子。</p>
+<h3 id="php-mt-seed-的使用"><a href="#php-mt-seed-的使用" class="headerlink" title="php_mt_seed 的使用"></a>php_mt_seed 的使用</h3><p>&emsp;php_mt_seed是一个破解mt_rand函数seed的工具，在最简单的调用模式下，它能通过mt_rand第一次输出的值寻找mt_rand的seed，在更高级的模式中它能匹配不是第一次输出的和不明确具体输出的情况。php_mt_seed 4.0 支持以下几个大的版本： PHP 3.0.7 to 5.2.0，PHP 5.2.1 to 7.0.x， and PHP 7.1.0+ 。</p>
+<h4 id="安装-php-mt-seed"><a href="#安装-php-mt-seed" class="headerlink" title="安装 php_mt_seed"></a>安装 php_mt_seed</h4><ol>
+<li><a href="https://www.openwall.com/php_mt_seed/" target="_blank" rel="noopener">【下载地址】</a></li>
+<li>下载以后解压，然后到文件夹下 make 就会生成一个可执行文件</li>
+<li>安装需要 gcc 环境</li>
+</ol>
+<h4 id="参数问题"><a href="#参数问题" class="headerlink" title="参数问题"></a>参数问题</h4><p>&emsp;php_mt_seed基于命令行运行，命令行可以使用1，2，4或者更多的参数。这些参数需要详细说明mt_rand()的输出。</p>
+<ul>
+<li><strong>一个参数</strong> 当只有一个参数的时候，这个参数代表mt_rand第一次输出的值。</li>
+<li><strong>两个参数</strong> 当有两个参数的时候，他们代表mt_rand第一次输出应该位于什么区间内。第一个参数为最小值，第二个参数为最大值。</li>
+<li><strong>四个参数（高级模式）</strong>  前两个参数表示mt_rand第一次输出的区间，后两个参数表示mt_rand输出的区间。</li>
+<li><strong>多于五个参数（高级模式）</strong> 每四个参数一组，但是最后一组可以是1，2或4个参数  </li>
+</ul>
+<h3 id="实验测试"><a href="#实验测试" class="headerlink" title="实验测试"></a>实验测试</h3><h4 id="测试一"><a href="#测试一" class="headerlink" title="测试一"></a>测试一</h4><p>代码如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">mt_srand(718040818);  &#x2F;&#x2F;一般程序用的是自动播种，这里为了更好的理解就用了手动播种</span><br><span class="line">$a&#x3D;mt_rand(0,10);</span><br><span class="line">$b&#x3D;mt_rand(0,10);</span><br><span class="line">$c&#x3D;mt_rand(0,10);</span><br><span class="line">print($a.&quot;\n&quot;.$b.&quot;\n&quot;.$c);</span><br></pre></td></tr></table></figure>
+<p><a href="https://pic.downk.cc/item/5e6f3843e83c3a1e3a6ebb96.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e6f3843e83c3a1e3a6ebb96.jpg" alt=""></a></p>
+<p>   假如现在我们知道第一个随机数 10 我们尝试找出 种子的值使用命令 <code>./php_mt_seed 10</code> 发现找到的种子不对，为什么呢？ 因为我们使用的是 mt_rand(0,10) 还有一个范围参数我们需要给定。那么我们使用<code>./php_mt_seed 10 10 0 10</code> 可是 php_mt_seed 跑出很多 seed 至少 100 以上 这不是我们想要的结果。那么我们肯定有加参数了，使用<code>./php_mt_seed 10 10 0 10 5 5 0 10</code> 可是还是有很多呀。测试发现当使用了 8 次的值才可以跑出相对可以看的 seed 种子 那么这个方法需要很多数据才可以猜到呀。<strong>换一种说话这是相对安全的？</strong> 当然我说的是我这种情况不排除其它情况只有几个 seed 对应。<br>   &emsp;虽然可以说实验是失败了但是我们也可以得到一些结论:</p>
+<ul>
+<li>1 个参数和2个参数只适用于调用mt_rand()函数时没带范围参数的。</li>
+<li>虽然说都可以得到种子，但是有时候因为给的参数不足就会出现很多种子，这样我们很难利用。那么我们应尽可能的多输入参数。</li>
+<li>当我们知道多个 随机值 但mt_rand()没有给范围参数我们怎么书写范围呢? 好像是多虑了，因为这样出来的 随机数很大所以对应的 seed 很少不需要输入多个参数了。</li>
+</ul>
+<h4 id="测试二-常见"><a href="#测试二-常见" class="headerlink" title="测试二 (常见)"></a>测试二 (常见)</h4><p>代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line"> function user_password($length &#x3D; 10) &#123;</span><br><span class="line"></span><br><span class="line"> $allowable_characters &#x3D; &#39;abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789&#39;;</span><br><span class="line"></span><br><span class="line"> $len &#x3D; strlen($allowable_characters) - 1;</span><br><span class="line"></span><br><span class="line"> $pass &#x3D; &#39;&#39;;</span><br><span class="line"></span><br><span class="line"> for ($i &#x3D; 0; $i &lt; $length; $i++) &#123;</span><br><span class="line"></span><br><span class="line"> $pass .&#x3D; $allowable_characters[mt_rand(0, $len)];</span><br><span class="line"></span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> return $pass;</span><br><span class="line"></span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> mt_srand(time());  &#x2F;&#x2F;使用这个播种和自动播种无差。</span><br><span class="line"></span><br><span class="line"> echo user_password(), &quot;\n&quot;;</span><br><span class="line"></span><br><span class="line"> echo user_password(), &quot;\n&quot;;</span><br><span class="line"></span><br><span class="line"> echo user_password(), &quot;\n&quot;;</span><br><span class="line"></span><br><span class="line"> ?&gt;</span><br></pre></td></tr></table></figure>
+<p>因为没有手动播种所以每一次的种子值都不一样从而导致我们每次运行所产生的结果也不同。我们这次产生的3个密码是:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">2hz6uvW4jG</span><br><span class="line">dmvFuJn94S</span><br><span class="line">c5D7LjjeKN</span><br></pre></td></tr></table></figure>
+<p>现在我们根据第一个密码（应该是只有知道第一个密码才有效）。密码有10位，每一位都使用了一次mt_rand()函数这样一来我们就有10组参数应该可以跑出具体的几个 seed种子。<br>我现使用python 编写个脚本来使已知的数据转化为我们想要的形式，脚本如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">str1&#x3D;&#39;abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789&#39;  ##这里对应源码中的字符串没有数字0、1</span><br><span class="line">str2&#x3D;&#39;2hz6uvW4jG&#39;</span><br><span class="line">length &#x3D; len(str2)</span><br><span class="line">res&#x3D;&#39;&#39;</span><br><span class="line">for i in range(len(str2)):</span><br><span class="line">    for j in range(len(str1)):</span><br><span class="line">        if str2[i] &#x3D;&#x3D; str1[j]:</span><br><span class="line">            res+&#x3D;str(j)+&#39; &#39;+str(j)+&#39; &#39;+&#39;0&#39;+&#39; &#39;+str(len(str1)-1)+&#39; &#39;</span><br><span class="line">            break</span><br><span class="line">print(res)</span><br></pre></td></tr></table></figure>
+<p>得到的结果是：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">49 49 0 56 7 7 0 56 24 24 0 56 53 53 0 56 19 19 0 56 20 20 0 56 45 45 0 56 51 51 0 56 9 9 0 56 31 31 0 56</span><br></pre></td></tr></table></figure>
+<p>我们到kali 里使用命令如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.&#x2F;php_mt_seed 49 49 0 56 7 7 0 56 24 24 0 56 53 53 0 56 19 19 0 56 20 20 0 56 45 45 0 56 51 51 0 56 9 9 0 56 31 31 0 56</span><br></pre></td></tr></table></figure>
+<p>我们找到源代码运行时对应的那个php版本（由于版本不同产生的随机数可能不同）。也就是<code>1584359324</code>。我们现在知道了种子随后我们就可以直接copy源码，在调用随mt_rand函数前加上mt_srand函数来手动播种。这样就是和产生密码时的环境一样了，当然php版本也要一样。<br>代码如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">function user_password($length &#x3D; 10) &#123;</span><br><span class="line"></span><br><span class="line">    $allowable_characters &#x3D; &#39;abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789&#39;;</span><br><span class="line"></span><br><span class="line">    $len &#x3D; strlen($allowable_characters) - 1;</span><br><span class="line"></span><br><span class="line">    $pass &#x3D; &#39;&#39;;</span><br><span class="line"></span><br><span class="line">    for ($i &#x3D; 0; $i &lt; $length; $i++) &#123;</span><br><span class="line"></span><br><span class="line">        $pass .&#x3D; $allowable_characters[mt_rand(0, $len)];</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    return $pass;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">mt_srand(1584359324);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">echo user_password(), &quot;\n&quot;;</span><br><span class="line"></span><br><span class="line">echo user_password(), &quot;\n&quot;;</span><br><span class="line"></span><br><span class="line">echo user_password(), &quot;\n&quot;;</span><br></pre></td></tr></table></figure>
+<p><a href="https://pic.downk.cc/item/5e6f6df7e83c3a1e3a8c4f0d.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5e6f6df7e83c3a1e3a8c4f0d.jpg" alt=""></a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/03/15/%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95-200315/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -716,136 +837,6 @@
   
   
 
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/03/10/SVN-%E6%B3%84%E6%BC%8F-%E5%8F%8A-%E5%88%A9%E7%94%A8%E5%B7%A5%E5%85%B7/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/1.jpg">
-      <meta itemprop="name" content="信安小蚂蚁">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="信安小蚂蚁">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/10/SVN-%E6%B3%84%E6%BC%8F-%E5%8F%8A-%E5%88%A9%E7%94%A8%E5%B7%A5%E5%85%B7/" class="post-title-link" itemprop="url">SVN 泄漏 及 利用工具</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-03-10 17:40:53 / 修改时间：17:43:47" itemprop="dateCreated datePublished" datetime="2020-03-10T17:40:53+08:00">2020-03-10</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%97%A5%E5%B8%B8%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index">
-                    <span itemprop="name">日常笔记</span>
-                  </a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-file-word-o"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>2.8k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-clock-o"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>7 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="前言："><a href="#前言：" class="headerlink" title="前言："></a>前言：</h3><p>&emsp; 安装工具费了老多的时间，最后只是因为服务器响应慢导致的，气煞我也。不过也对linux 多了一点点了解。<br>&emsp;总结下就是学会看帮助文档，学会看错误提示，学会百度谷歌，学会实践。</p>
-<h3 id="SVN-是个什么东西"><a href="#SVN-是个什么东西" class="headerlink" title="SVN 是个什么东西"></a>SVN 是个什么东西</h3><p>&emsp;SVN（Subversion）是一个开放源代码的版本控制系统，与使用Git版本控制器类似。在服务器上布署代码时。如果是使用 svn checkout 功能来更新代码，而没有配置好目录访问权限，则会存在此漏洞。黑客利用此漏洞，可以下载整套网站的源代码。</p>
-<h4 id="svn-目录"><a href="#svn-目录" class="headerlink" title="svn 目录"></a>svn 目录</h4><p>&emsp;使用 svn checkout 后，项目目录会产生一个<strong>隐藏的</strong> <code>.svn</code>文件夹。<br>&emsp;svn1.6及以前版本会在项目的每个文件夹都生成一个<code>.svn</code> 文件夹，里面包含了所有文件的备份。<br>&emsp;svn1.7 及以后版本只在项目根目录生成一个<code>.svn</code>文件夹，里面的<strong>pristime</strong>文件夹里包含了整个项目的所有文件备份。它里面有一堆 00到ff 的文件夹，每个文件夹里有若干个<code>.svn-base</code> 文件，文件命名规则是文件原名的哈希值，然后文件夹名称其实是文件的开头2位数。<br>&emsp; <code>.svn/</code>会有一个<code>wc,db</code> 二进制文件，里面包含项目里的所有代码及每个文件名及对应哈希后的值（知道对应的哈希值有助于找flag）。<br><strong>以上说的是1.7及以上版本</strong>  </p>
-<h3 id="利用-dvcs-ripper-工具"><a href="#利用-dvcs-ripper-工具" class="headerlink" title="利用 dvcs-ripper 工具"></a>利用 dvcs-ripper 工具</h3><p>&emsp;它可以把存在漏洞的网站<code>.svn</code>信息全部下载到本地便于我们更好的利用。它还可以利用于<code>git</code>,<code>hg</code>,<code>bzr</code>,<code>cvs</code>的等的信息泄漏。</p>
-<h4 id="dvcs-ripper-的安装"><a href="#dvcs-ripper-的安装" class="headerlink" title="dvcs-ripper 的安装"></a>dvcs-ripper 的安装</h4><p>&emsp;这个工具是用Perl语言写的，所以需要安装 perl 环境而且具体漏洞还需要安装一些具体模块。<br><strong>在kali 上安装及使用</strong>  </p>
-<ul>
-<li>sudo apt-get install perl libio-socket-ssl-perl libdbd-sqlite3-perl libclass-dbi-perl libio-all-lwp-perl  安装所需要的环境。</li>
-<li>下载及解压软件<a href="https://github.com/kost/dvcs-ripper" target="_blank" rel="noopener">【软件地址】</a></li>
-<li>进入解压后的使用命令<code>perl rip-svn.pl -v -u http://www.example.com/.svn/</code> 即可以下载 <code>.svn</code>泄漏的所有文件。</li>
-<li>当然肯能不会成功，那久要具体情况具体分析了。<h3 id="安装工具时遇到的一些困难"><a href="#安装工具时遇到的一些困难" class="headerlink" title="安装工具时遇到的一些困难"></a>安装工具时遇到的一些困难</h3>&emsp;linux 还是比较复杂的，使用过程出现了缺失模块的问题，安装模块又出现安装不上的问题。总之要善于看报错信息要积累要实践。（有机会系统的学习就更好了。）</li>
-</ul>
-<ol>
-<li>kali 上使用报错 缺少 <code>DBD::SQLite</code> 这个模块。按网上教程使用<code>perl -MCPAN -e &#39;install DBD::SQLite&#39;</code>安装这个模块，总是连接超时。开始不明白以为是自己配置的源问题于是就是了解及修改了一波，最后却发现只是当时请求比较慢多试了几次就好了。</li>
-<li>centos 中安装后也报错缺失<code>LWP</code>这个模块，尝试去安装却报错在<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Reading &#39;&#x2F;root&#x2F;.cpan&#x2F;Metadata&#39;</span><br><span class="line">  Database was generated on Mon, 09 Mar 2020 04:29:03 GMT</span><br><span class="line">Warning: Cannot install lwp, don&#39;t know what it is.</span><br><span class="line">Try the command</span><br><span class="line"></span><br><span class="line">    i &#x2F;lwp&#x2F;</span><br><span class="line"></span><br><span class="line">to find objects with matching identifiers.</span><br></pre></td></tr></table></figure>
-但是我手动去这文件找却又可以找到。后面发现是我安装的模块不对,要使用<code>perl -MCPAN -e &quot;install Bundle::LWP&quot;</code>来安装该模块。</li>
-</ol>
-<h3 id="CTFhub–SVN泄漏"><a href="#CTFhub–SVN泄漏" class="headerlink" title="CTFhub–SVN泄漏"></a>CTFhub–SVN泄漏</h3><ol>
-<li>扫描发现有<code>.svn/</code>目录确认是 <code>.svn</code>泄露。使用 <code>dvcs-ripper</code> 工具中的 <code>rip-svn.pl</code> 脚本进行 clone。</li>
-<li>使用命令<code>perl rip-svn.pl -v -u http://challenge-e6b3d24d85a17e13.sandbox.ctfhub.com:10080/.svn/</code> 来下载代码。</li>
-<li>使用 <code>ls -al</code> 来查看是否有新增文件夹如<code>.svn</code>，进入文件夹先看看 wc.db 文件内是否有为flag的文件名。 <code>cat wc.db | grep -a flag</code>。</li>
-<li>可以看到flag文件名对应的哈希值，到<code>.svn/pristime/</code>中去找（ 哈希值开头2位为文件夹名 ）。当然这是一般情况，特殊情况可以多找找其它文件夹内的文件。</li>
-<li>cat 文件即可看到<code>flag</code>。</li>
-</ol>
-<h3 id="其它积累"><a href="#其它积累" class="headerlink" title="其它积累"></a>其它积累</h3><p>&emsp;在解决这个问题的同时也了解到了一些其它知识。</p>
-<h4 id="关于-Linux-中安装软件"><a href="#关于-Linux-中安装软件" class="headerlink" title="关于 Linux 中安装软件"></a>关于 Linux 中安装软件</h4><p>&emsp;<a href="https://www.cnblogs.com/linuxAndMcu/p/10717565.html#_label0" target="_blank" rel="noopener">【参考连接1】</a>   <a href="https://my.oschina.net/u/3803405/blog/1791226" target="_blank" rel="noopener">【参考链接2】</a></p>
-<h5 id="常用的-yum"><a href="#常用的-yum" class="headerlink" title="常用的 yum"></a>常用的 yum</h5><p>&emsp;基于RPM包管理，能够从指定的服务器（配置的源）自动下载RPM包并且安装，可以自动处理依赖性关系，并且一次安装所有依赖的软体包，无须繁琐地一次次下载、安装。yum提供了查找、安装、删除某一个、一组甚至全部软件包的命令，而且命令简洁而又好记。centos中可以使用kali不行。<strong>软件包管理器的前端工具</strong> 。yum换源要下载新的<code>.rpm</code>文件，然后用rpm进行安装。 </p>
-<h5 id="常用的-apt-get"><a href="#常用的-apt-get" class="headerlink" title="常用的 apt-get"></a>常用的 apt-get</h5><p>&emsp;apt-get（Advanced Package Tool），是一条linux命令，适用于deb包管理式的操作系统，主要用于自动从互联网的软件仓库（repositories）中搜索、安装、升级、卸载软件或操作系统。使用apt-get的主流Linux系统包括Debian和Ubuntu变异版本。kali 及相关Linux发行版可用。<br><strong>相关目录如下</strong></p>
-<pre><code>#文件的内容是软件包的描述信息, 该软件包括当前系统所使用的 ubunt 安装源中的所有软件包,其中包括当前系统中已安装的和未安装的软件包.
-/var/lib/dpkg/available
-
-#目录是在用 apt-get install 安装软件时，软件包的临时存放路径
-/var/cache/apt/archives
-
-#存放的是软件源站点
-/etc/apt/sources.list
-
-#使用apt-get update命令会从/etc/apt/sources.list中下载软件列表，并保存到该目录
-/var/lib/apt/lists</code></pre><h4 id="grep-的进一步了解"><a href="#grep-的进一步了解" class="headerlink" title="grep 的进一步了解"></a>grep 的进一步了解</h4><p>&emsp;grep命令是一种强大的文本搜索工具，它能使用正则表达式搜索文本，并把匹配的<strong>行</strong>打印出来。用于查看文件中是否包含 flag 字样再好不过了。<br><strong>常用参数</strong> ：</p>
-<ul>
-<li>-a 或 –text : 不忽略二进制的数据。不用这参数查看二进制文件会报错。</li>
-<li>-A&lt;显示行数&gt; ： 除了显示符合范本样式的那一列之外，并显示该行之后的内容。</li>
-<li>-b : 在显示符合样式的那一行之前，标示出该行第一个字符的编号。</li>
-<li>-B&lt;显示行数&gt; ：除了显示符合样式的那一行之外，并显示该行之前的内容。</li>
-<li>-l : 列出文件内容符合指定的样式的文件名称。</li>
-<li>-i : 忽略字符大小写的差别。</li>
-<li>-H : 在显示符合样式的那一行之前，表示该行所属的文件名称。</li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
   </div>
 
   
@@ -917,18 +908,18 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-count">135</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
-        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-count">86</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
+  <link rel="mask-icon" href="/images/tu.ico" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="SSL&#x2F;TLS 握手过程首先得完成传输层的握手，然后进入SSL握手阶段：  客户端发送Client Hello Message，表明自己可以使用的SSL版本（从高到低尝试）、加密套件及相应参数如：  client_version(SSL版本)：TLS1.2 random：客户端随机数，用于后续协商密钥。 cipher_suites：支持的加密套件列表（由高到低排序）。 compression_m">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TLS加密套件">
+<meta property="og:url" content="https://mayi077.github.io/2026/04/20/2026-04-20-TLS%E5%8A%A0%E5%AF%86%E5%A5%97%E4%BB%B6/index.html">
+<meta property="og:site_name" content="信安小蚂蚁">
+<meta property="og:description" content="SSL&#x2F;TLS 握手过程首先得完成传输层的握手，然后进入SSL握手阶段：  客户端发送Client Hello Message，表明自己可以使用的SSL版本（从高到低尝试）、加密套件及相应参数如：  client_version(SSL版本)：TLS1.2 random：客户端随机数，用于后续协商密钥。 cipher_suites：支持的加密套件列表（由高到低排序）。 compression_m">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://mayi077.github.io/2026/04/20/2026-04-20-TLS%E5%8A%A0%E5%AF%86%E5%A5%97%E4%BB%B6/image1.png">
+<meta property="og:image" content="https://mayi077.github.io/2026/04/20/2026-04-20-TLS%E5%8A%A0%E5%AF%86%E5%A5%97%E4%BB%B6/image2.png">
+<meta property="og:image" content="https://mayi077.github.io/2026/04/20/2026-04-20-TLS%E5%8A%A0%E5%AF%86%E5%A5%97%E4%BB%B6/image3.png">
+<meta property="og:image" content="https://mayi077.github.io/2026/04/20/2026-04-20-TLS%E5%8A%A0%E5%AF%86%E5%A5%97%E4%BB%B6/image4.png">
+<meta property="og:image" content="https://mayi077.github.io/2026/04/20/2026-04-20-TLS%E5%8A%A0%E5%AF%86%E5%A5%97%E4%BB%B6/image5.png">
+<meta property="og:image" content="https://mayi077.github.io/2026/04/20/2026-04-20-TLS%E5%8A%A0%E5%AF%86%E5%A5%97%E4%BB%B6/image6.png">
+<meta property="og:image" content="https://mayi077.github.io/2026/04/20/2026-04-20-TLS%E5%8A%A0%E5%AF%86%E5%A5%97%E4%BB%B6/image7.png">
+<meta property="og:image" content="https://mayi077.github.io/2026/04/20/2026-04-20-TLS%E5%8A%A0%E5%AF%86%E5%A5%97%E4%BB%B6/image8.png">
+<meta property="article:published_time" content="2026-04-20T14:30:00.000Z">
+<meta property="article:modified_time" content="2026-04-20T14:28:12.303Z">
+<meta property="article:author" content="信安小蚂蚁">
+<meta property="article:tag" content="学习备份">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mayi077.github.io/2026/04/20/2026-04-20-TLS%E5%8A%A0%E5%AF%86%E5%A5%97%E4%BB%B6/image1.png">
+
+<link rel="canonical" href="https://mayi077.github.io/2026/04/20/2026-04-20-TLS%E5%8A%A0%E5%AF%86%E5%A5%97%E4%BB%B6/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>TLS加密套件 | 信安小蚂蚁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">信安小蚂蚁</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right"></div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-主页">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
+
+  </li>
+        <li class="menu-item menu-item-归档">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-分类">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-标签">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-关于">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2026/04/20/2026-04-20-TLS%E5%8A%A0%E5%AF%86%E5%A5%97%E4%BB%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          TLS加密套件
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-04-20 22:30:00 / 修改时间：22:28:12" itemprop="dateCreated datePublished" datetime="2026-04-20T22:30:00+08:00">2026-04-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/" itemprop="url" rel="index">
+                    <span itemprop="name">密码学</span>
+                  </a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>10 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><img data-src="image1.png" alt="TLS加密套件"></p>
+<h2 id="SSL-TLS-握手过程"><a href="#SSL-TLS-握手过程" class="headerlink" title="SSL/TLS 握手过程"></a>SSL/TLS 握手过程</h2><p>首先得完成传输层的握手，然后进入SSL握手阶段：</p>
+<ol>
+<li><p>客户端发送Client Hello Message，表明自己可以使用的SSL版本（从高到低尝试）、加密套件及相应参数如：</p>
+<ol>
+<li>client_version(SSL版本)：TLS1.2</li>
+<li>random：客户端随机数，用于后续协商密钥。</li>
+<li>cipher_suites：支持的加密套件列表（由高到低排序）。</li>
+<li>compression_methods：压缩算法列表（由高到低排序）。为null，表示不要压缩<br><img data-src="image2.png" alt="TLS加密套件"></li>
+</ol>
+</li>
+<li><p>服务器接收到ClientHello后，会返回ServerHello。服务器从客户端在ClientHello中提供的密码套件、SSL/TLS版本、压缩算法列表里选择它所支持的项，并把它的选择包含在ServerHello中告知客户端。</p>
+<ul>
+<li>服务器也用TLS 1.2；提供服务器随机数；没有找到这个客户端的SessionID，所以填入了新的SessionID；选择了TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA384加密套件；同意不压缩数据；<br><img data-src="image3.png" alt="TLS加密套件"></li>
+</ul>
+</li>
+<li><p><strong>Server -&gt; Client</strong>：Certificate、Server Key Exchange、Certificate Request、ServerHello Done：</p>
+<ul>
+<li>Certificate服务器证书：和<strong>所选密钥套件中密钥交换算法（Key Exchange）匹配</strong>，用于客户端验证服务器身份和交换密钥的X.509证书。</li>
+<li>Server Key Exchange服务器密钥交换信息：如果<strong>服务器没有证书，或者服务器的证书仅用来签名</strong>（如DSS证书、签名RSA证书），那么就需要发送这条消息。</li>
+<li>Certificate Request证书请求：<strong>要求客户端也发送它的证书，让服务端校验客户端的身份。</strong>（可选）</li>
+<li>Server Hello Done：一条简单的表明状态的空消息。<br><img data-src="image4.png" alt="TLS加密套件"></li>
+</ul>
+</li>
+<li><p><strong>客户端校验服务端身份</strong></p>
+<ol>
+<li>如果发现证书不合法，客户端可以发起告警信息。</li>
+</ol>
+</li>
+<li><p><strong>Client –&gt; Server：</strong>Certificate Verify、Change Cipher Spec、Encrypted Handshake Message</p>
+<ul>
+<li>Certificate客户端证书<strong>：</strong>如果服务器发送了”Certificate Request”，要求校验客户端身份，那么客户端需要回应自己的证书。如果客户端没有合适的证书，直接抛出告警信息让服务端处理（<strong>服务端的处理方式通常就是断开TCP连接</strong>）。和所选密钥套件中密钥交换算法（Key Exchange）匹配的，用于服务器验证客户端身份的X.509证书。</li>
+<li>Client Key Exchange客户端密钥交换信息：合法性校验通过后，客户端计算产生随机数字Pre-master，并用证书公钥加密，发送给服务器</li>
+<li>Change Cipher Spec更换加密规约<br><img data-src="image5.png" alt="TLS加密套件"></li>
+</ul>
+</li>
+<li><p><strong>服务端回应客户端</strong></p>
+<ol>
+<li>****服务端同样地发送Change Cipher Spec、Finish（Encrypted Handshake Message）消息，然后开始数据传输。<br><img data-src="image6.png" alt="TLS加密套件"></li>
+</ol>
+</li>
+</ol>
+<h2 id="TLS-加密套件"><a href="#TLS-加密套件" class="headerlink" title="TLS 加密套件"></a>TLS 加密套件</h2><p>TLS 使用到的认证加密算法、完整性校验算法、密钥协商算法、数字签名算法等，这些算法都是要配合使用的（单独使用无法保证信息安全传输），各类算法相互组合可以形成一套套加密方案。TLS 握手阶段，服务器与客户端需要协商都使用哪些加密算法，如果逐个协商显然效率较低，TLS将可用的加密算法组合为一个个密码套件，<strong>服务器与客户端只要协商一种密码套件，就确定了整个加密方案中用到的所有加密算法，能提高通信效率</strong>。</p>
+<h3 id="加密套件格式说明："><a href="#加密套件格式说明：" class="headerlink" title="加密套件格式说明："></a>加密套件格式说明：</h3><p><img data-src="image7.png" alt="TLS加密套件"></p>
+<p><img data-src="image8.png" alt="TLS加密套件"></p>
+<blockquote>
+<p>💡 TLS（传输层安全性）协议各版本都包含了一系列的加密套件，这些套件可能因为新的安全研究、攻击方法的发现或更高效的算法的出现而被认为是不安全的。随着TLS版本的更新，一些加密套件被废弃，因为它们不再能提供足够的安全性。以下是各个TLS版本中被认为不安全的加密套件及其原因：</p>
+</blockquote>
+<h3 id="TLS-1-1-中的不安全加密套件："><a href="#TLS-1-1-中的不安全加密套件：" class="headerlink" title="TLS 1.1 中的不安全加密套件："></a>TLS 1.1 中的不安全加密套件：</h3><ul>
+<li><strong>使用RC4加密算法的套件</strong>：RC4是一种流密码，它受到多种攻击的影响，例如密钥恢复攻击和偏差攻击，导致其不再安全。</li>
+<li><strong>使用DES或3DES加密算法的套件</strong>：DES由于其较短的密钥长度（56位）很容易受到暴力破解攻击。3DES虽然比DES安全，但是因为它的有效密钥长度（112位）也逐渐变得不够安全，以及运算速度慢，因此不再推荐使用。</li>
+<li><strong>使用MD5或SHA-1散列函数的套件</strong>：MD5和SHA-1都受到了碰撞攻击的影响，这意味着可以找到两个不同的输入产生相同的散列输出，从而破坏了其安全性。</li>
+</ul>
+<h3 id="TLS-1-2-中的不安全加密套件："><a href="#TLS-1-2-中的不安全加密套件：" class="headerlink" title="TLS 1.2 中的不安全加密套件："></a>TLS 1.2 中的不安全加密套件：</h3><ul>
+<li><strong>TLS 1.2继承了TLS 1.1的很多套件，并在此基础上添加了新的套件</strong>。虽然TLS 1.2引入了更多安全的选项，如AES-GCM，但它仍然支持一些不安全的套件，比如：</li>
+<li><strong>使用CBC模式的块密码套件</strong>：这些套件受到各种攻击的影响，如Padding Oracle攻击和Lucky Thirteen攻击，这些攻击可以导致信息泄露。</li>
+<li><strong>使用RSA加密而不是前向保密的密钥交换套件</strong>：如果服务器的RSA私钥被破解，那么之前的所有使用该密钥的通信都可以被解密，而前向保密的套件如DHE或ECDHE可以避免这个问题。</li>
+</ul>
+<h3 id="TLS-1-3-中废弃的不安全套件："><a href="#TLS-1-3-中废弃的不安全套件：" class="headerlink" title="TLS 1.3 中废弃的不安全套件："></a>TLS 1.3 中废弃的不安全套件：</h3><p>TLS 1.3大幅减少了支持的加密套件，只保留了认为是安全的套件。TLS 1.3中废弃了所有以下类型的套件：</p>
+<ul>
+<li><strong>所有使用CBC模式的块密码套件</strong>。</li>
+<li><strong>所有使用RC4、DES或3DES的套件</strong>。</li>
+<li><strong>所有使用MD5或SHA-1的套件</strong>。</li>
+<li><strong>不支持前向保密的套件</strong>，比如那些使用RSA密钥交换的套件。</li>
+<li><strong>所有使用静态密钥交换的套件</strong>（例如固定DH）。</li>
+</ul>
+<p>TLS 1.3只支持使用AEAD（Authenticated Encryption with Associated Data）密码算法的套件，如AES-GCM和ChaCha20-Poly1305，以及使用更安全的散列算法SHA-256和SHA-384的套件。这些更改反映了不断提高的安全标准和对用户数据保护的重视。</p>
+<h3 id="TLS1-3-密码套件"><a href="#TLS1-3-密码套件" class="headerlink" title="TLS1.3 密码套件"></a>TLS1.3 密码套件</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">TLS13-AES128-GCM-SHA256</span><br><span class="line">TLS13-AES256-GCM-SHA384</span><br><span class="line">TLS13-CHACHA20-POLY1305-SHA256</span><br><span class="line">TLS13-AES128-CCM-SHA256</span><br><span class="line">TLS13-AES128-CCM-8-SHA256</span><br></pre></td></tr></table></figure>
+
+<h3 id="TLS1-2-密码套件"><a href="#TLS1-2-密码套件" class="headerlink" title="TLS1.2 密码套件"></a>TLS1.2 密码套件</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">TLS_RSA_WITH_NULL_SHA256</span><br><span class="line">TLS_RSA_WITH_AES_128_CBC_SHA256</span><br><span class="line">TLS_RSA_WITH_AES_256_CBC_SHA256</span><br><span class="line">TLS_RSA_WITH_AES_128_GCM_SHA256</span><br><span class="line">TLS_RSA_WITH_AES_256_GCM_SHA384</span><br><span class="line">TLS_DH_RSA_WITH_AES_128_CBC_SHA256</span><br><span class="line">TLS_DH_RSA_WITH_AES_256_CBC_SHA256</span><br><span class="line">TLS_DH_RSA_WITH_AES_128_GCM_SHA256</span><br><span class="line">TLS_DH_RSA_WITH_AES_256_GCM_SHA384</span><br><span class="line">TLS_DH_DSS_WITH_AES_128_CBC_SHA256</span><br><span class="line">TLS_DH_DSS_WITH_AES_256_CBC_SHA256</span><br><span class="line">TLS_DH_DSS_WITH_AES_128_GCM_SHA256</span><br><span class="line">TLS_DH_DSS_WITH_AES_256_GCM_SHA384</span><br><span class="line">TLS_DHE_RSA_WITH_AES_128_CBC_SHA256</span><br><span class="line">TLS_DHE_RSA_WITH_AES_256_CBC_SHA256</span><br><span class="line">TLS_DHE_RSA_WITH_AES_128_GCM_SHA256</span><br><span class="line">TLS_DHE_RSA_WITH_AES_256_GCM_SHA384</span><br><span class="line">TLS_DHE_DSS_WITH_AES_128_CBC_SHA256</span><br><span class="line">TLS_DHE_DSS_WITH_AES_256_CBC_SHA256</span><br><span class="line">TLS_DHE_DSS_WITH_AES_128_GCM_SHA256</span><br><span class="line">TLS_DHE_DSS_WITH_AES_256_GCM_SHA384</span><br><span class="line">TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256</span><br><span class="line">TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384</span><br><span class="line">TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256</span><br><span class="line">TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384</span><br><span class="line">TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256</span><br><span class="line">TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384</span><br><span class="line">TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256</span><br><span class="line">TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384</span><br><span class="line">TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256</span><br><span class="line">TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384</span><br><span class="line">TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256</span><br><span class="line">TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384</span><br><span class="line">TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256</span><br><span class="line">TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384</span><br><span class="line">TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256</span><br><span class="line">TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384</span><br><span class="line">TLS_DH_anon_WITH_AES_128_CBC_SHA256</span><br><span class="line">TLS_DH_anon_WITH_AES_256_CBC_SHA256</span><br><span class="line">TLS_DH_anon_WITH_AES_128_GCM_SHA256</span><br><span class="line">TLS_DH_anon_WITH_AES_256_GCM_SHA384</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h2><p><a href="https%3A%2F%2Fm01ly.github.io%2F2021%2F07%2F06%2Fhtps-recommend%2F">m01ly.github.io</a></p>
+<p><a href="https%3A%2F%2Fcloud.tencent.com%2Fdeveloper%2Farticle%2F1928677">cloud.tencent.com</a></p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>信安小蚂蚁
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://mayi077.github.io/2026/04/20/2026-04-20-TLS%E5%8A%A0%E5%AF%86%E5%A5%97%E4%BB%B6/" title="TLS加密套件">https://mayi077.github.io/2026/04/20/2026-04-20-TLS加密套件/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+     <div>
+       
+         ﻿<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+         
+      </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%AD%A6%E4%B9%A0%E5%A4%87%E4%BB%BD/" rel="tag"><i class="fa fa-tag"></i>学习备份</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/04/20/2026-04-20-AI-Agent-%E6%9E%B6%E6%9E%84/" rel="prev" title="AI Agent 架构">
+      <i class="fa fa-chevron-left"></i> AI Agent 架构
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#SSL-TLS-握手过程"><span class="nav-number">1.</span> <span class="nav-text">SSL&#x2F;TLS 握手过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TLS-加密套件"><span class="nav-number">2.</span> <span class="nav-text">TLS 加密套件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#加密套件格式说明："><span class="nav-number">2.1.</span> <span class="nav-text">加密套件格式说明：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TLS-1-1-中的不安全加密套件："><span class="nav-number">2.2.</span> <span class="nav-text">TLS 1.1 中的不安全加密套件：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TLS-1-2-中的不安全加密套件："><span class="nav-number">2.3.</span> <span class="nav-text">TLS 1.2 中的不安全加密套件：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TLS-1-3-中废弃的不安全套件："><span class="nav-number">2.4.</span> <span class="nav-text">TLS 1.3 中废弃的不安全套件：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TLS1-3-密码套件"><span class="nav-number">2.5.</span> <span class="nav-text">TLS1.3 密码套件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TLS1-2-密码套件"><span class="nav-number">2.6.</span> <span class="nav-text">TLS1.2 密码套件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考："><span class="nav-number">3.</span> <span class="nav-text">参考：</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
+      src="/images/1.jpg">
+  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">86</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'Ov23li6cOHoOwCcszzi9',
+      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
+      repo        : 'mayi077.github.io',
+      owner       : 'mayi077',
+      admin       : ['mayi077'],
+      id          : 'dafa688eefabc47305381ab365a207ff',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

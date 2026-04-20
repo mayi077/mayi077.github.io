@@ -182,6 +182,103 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/02/03/%E4%B9%9D%E8%BF%9E%E7%8E%AF/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/02/03/%E4%B9%9D%E8%BF%9E%E7%8E%AF/" class="post-title-link" itemprop="url">九连环</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-02-03 15:54:47" itemprop="dateCreated datePublished" datetime="2020-02-03T15:54:47+08:00">2020-02-03</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-02-15 17:05:00" itemprop="dateModified" datetime="2020-02-15T17:05:00+08:00">2020-02-15</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/CTF%E5%A4%8D%E7%8E%B0/" itemprop="url" rel="index">
+                    <span itemprop="name">CTF复现</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>426</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h4 id="前言："><a href="#前言：" class="headerlink" title="前言："></a>前言：</h4><p>&emsp;通过这题我们可以学习一款新工具，steghide，他可以帮我们提取出一些隐藏文件（大概是用他这个软件隐藏的，不限于此），接下来我们来看看这题吧。</p>
+<h3 id="解题思路"><a href="#解题思路" class="headerlink" title="解题思路"></a>解题思路</h3><ol>
+<li>下载文件，得到一个图片开始以为文件名是什么的密码，结果然并luan。我们用foremost分解出一个压缩包，里面有一个图片和一个压缩包，压缩包没加密，图片加密了。</li>
+<li>丢进winhex对比zip构造图，发现压缩方式处为0000 也就是说没有加密方式那么就是伪加密。我们按照以前的知识可以删除伪加密，解出压缩包。</li>
+<li>因为qwe.zip有密码，而又只给了我们一个<code>good-宸插悎骞</code>图片所以从图片下手。经过多种方法无果。</li>
+<li>通过wp得知可以用 steghide 来提取出一个文件。kali安装steghide后使用<br><code>steghhide extract -sf &quot;文件名&quot;</code><br>回车后提示要密码，我们这里没设置密码直接回车即可。得到ko.txt。文件内容为：<br><img data-src="https://pic.downk.cc/item/5e37d1452fb38b8c3c7fe538.jpg" alt=""></li>
+<li>然后去解压qwe.zip，得到flag.txt<br><img data-src="https://pic.downk.cc/item/5e37d1952fb38b8c3c7ff0c1.jpg" alt=""></li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/02/03/CISCN2019-%E5%8D%8E%E5%8C%97%E8%B5%9B%E5%8C%BA-Day1-Web1-Dropbox/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -661,112 +758,6 @@
   
   
 
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/01/31/%E7%BD%91%E9%BC%8E%E6%9D%AF-2018-Fakebook/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/1.jpg">
-      <meta itemprop="name" content="信安小蚂蚁">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="信安小蚂蚁">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/01/31/%E7%BD%91%E9%BC%8E%E6%9D%AF-2018-Fakebook/" class="post-title-link" itemprop="url">[网鼎杯 2018]Fakebook</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-01-31 11:00:14" itemprop="dateCreated datePublished" datetime="2020-01-31T11:00:14+08:00">2020-01-31</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-02-15 17:05:09" itemprop="dateModified" datetime="2020-02-15T17:05:09+08:00">2020-02-15</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/CTF%E5%A4%8D%E7%8E%B0/" itemprop="url" rel="index">
-                    <span itemprop="name">CTF复现</span>
-                  </a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-file-word-o"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>2.3k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-clock-o"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>6 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="常规方法"><a href="#常规方法" class="headerlink" title="常规方法"></a>常规方法</h3><ol>
-<li>打开链接发现有2个页面一个login（登入）一个join（注册）因为buu有检测，但是通过大佬的wp可以发现有robots.txt<br><img data-src="https://pic.downk.cc/item/5e338a2a2fb38b8c3c14fa15.jpg" alt=""></li>
-<li>接着我们访问<code>url/user.php.bak</code>会得到一个文件<br><img data-src="https://pic.downk.cc/item/5e338af72fb38b8c3c150e43.jpg" alt=""><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class UserInfo</span><br><span class="line">&#123;</span><br><span class="line">    public $name &#x3D; &quot;&quot;;</span><br><span class="line">    public $age &#x3D; 0;</span><br><span class="line">    public $blog &#x3D; &quot;&quot;;</span><br><span class="line"></span><br><span class="line">    public function __construct($name, $age, $blog)</span><br><span class="line">    &#123;</span><br><span class="line">        $this-&gt;name &#x3D; $name;</span><br><span class="line">        $this-&gt;age &#x3D; (int)$age;</span><br><span class="line">        $this-&gt;blog &#x3D; $blog;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    function get($url)</span><br><span class="line">    &#123;</span><br><span class="line">        $ch &#x3D; curl_init();</span><br><span class="line"></span><br><span class="line">        curl_setopt($ch, CURLOPT_URL, $url);</span><br><span class="line">        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);</span><br><span class="line">        $output &#x3D; curl_exec($ch);   &#x2F;&#x2F;执行一个cURL会话，用来文件传输</span><br><span class="line">        $httpCode &#x3D; curl_getinfo($ch, CURLINFO_HTTP_CODE);</span><br><span class="line">        if($httpCode &#x3D;&#x3D; 404) &#123;</span><br><span class="line">            return 404;</span><br><span class="line">        &#125;</span><br><span class="line">        curl_close($ch);</span><br><span class="line"></span><br><span class="line">        return $output;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public function getBlogContents ()</span><br><span class="line">    &#123;</span><br><span class="line">        return $this-&gt;get($this-&gt;blog);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public function isValidBlog ()</span><br><span class="line">    &#123;</span><br><span class="line">        $blog &#x3D; $this-&gt;blog;</span><br><span class="line">        return preg_match(&quot;&#x2F;^(((http(s?))\:\&#x2F;\&#x2F;)?)([0-9a-zA-Z\-]+\.)+[a-zA-Z]&#123;2,6&#125;(\:[0-9]+)?(\&#x2F;\S*)?$&#x2F;i&quot;, $blog);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-&emsp;我们可以看到是UserInfo这个类的源码，看其他师傅们的WP可以知道还可以扫出来flag.php的存在。因为我们可以自定义自己博客的网址，所以猜测这里是否能够通过file协议读取绝对路径下的文件。<br>&emsp;接着在join里面虽然我们要输入自己博客的网址，但是其进行了非常严格的正则表达式过滤，所以想在这个位置运用file协议基本上是不可能了。</li>
-<li>我们随便注册一个，看看是否有其它发现。<br><img data-src="https://pic.downk.cc/item/5e338ef82fb38b8c3c155e8f.jpg" alt=""></li>
-<li>随后用<code>url/view.php?no=1 and 1=2</code>来测试发现确实纯在sql注入。接着我们进行常规注入操作，不过因为有WAF的存在，我们使用union select 的时候需要将空格转换成/**/绕过，其它方法也可。</li>
-<li>接着使用<code>/view.php?no=-1 union/**/select 1,data,3,4 from users</code> 发现使用了UserInfo类，且有反序列化可以绕过以前的限制，即可以自定义我们的网站地址。（因为页面提示了我们反序列化，所以猜测no参数的值代入数据库查询之后还会被反序列化一次，这个时候就会导致blog变成我们构造的blog）<br><img data-src="https://pic.downk.cc/item/5e33904f2fb38b8c3c157443.jpg" alt=""></li>
-<li>反序列化的payload我们直接依葫芦画瓢即可<br><code>O:8:&quot;UserInfo&quot;:3:{s:4:&quot;name&quot;;s:7:&quot;mayi077&quot;;s:3:&quot;age&quot;;i:12;s:4:&quot;blog&quot;;s:29:&quot;file:///var/www/html/flag.php&quot;;}</code><br>注意序列化的格式s(格式为字符串):n(字符串长度):str(字符串)  </li>
-<li>最后我们输入<code>url/view.php?no=-1 union/**/select 1,2,3,&#39;O:8:&quot;UserInfo&quot;:3:{s:4:&quot;name&quot;;s:7:&quot;mayi077&quot;;s:3:&quot;age&quot;;i:12;s:4:&quot;blog&quot;;s:29:&quot;file:///var/www/html/flag.php&quot;;}&#39; from users</code>得到flag，大功告成！！<br><img data-src="https://pic.downk.cc/item/5e3393672fb38b8c3c15aa7c.jpg" alt=""></li>
-</ol>
-<h3 id="非预期解"><a href="#非预期解" class="headerlink" title="非预期解"></a>非预期解</h3><p>&emsp;<code>/view.php?no=-1 union/**/select 1,group_concat(load_file(&#39;/var/www/html/flag.php&#39;)),1,1 from users</code> 可以拿到flag：<br>&emsp;<img data-src="https://pic.downk.cc/item/5e3397702fb38b8c3c15f063.jpg" alt=""></p>
-<p>&emsp; 其中load_file()函数的限制是：<br>1、必须有权限读取并且文件必须完全可读。</p>
-<p>   and (select count(<em>) from mysql.user)&gt;0 /*如果结果返回正常，说明具有读写权限.</em>/</p>
-<p>   and (select count(<em>) from mysql.user)&gt;0 /</em> 返回错误，应该是管理员给数据库账户降权了*/</p>
-<p>2、欲读取文件必须在服务器上</p>
-<p>3、必须指定文件完整的路径</p>
-<p>4、欲读取文件必须小于max_allowed_packet</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
   </div>
 
   
@@ -838,18 +829,18 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-count">135</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
-        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-count">86</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

