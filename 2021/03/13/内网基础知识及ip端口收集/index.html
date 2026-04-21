@@ -1,321 +1,202 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
-<meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.1">
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
-  <link rel="mask-icon" href="/images/tu.ico" color="#222">
-
-<link rel="stylesheet" href="/css/main.css">
-
-
-<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
-
-<script id="hexo-configurations">
-    var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
-  </script>
-
-  <meta name="description" content="0x00 内网靶机搭建红日安全提供的内网渗透靶场环境（13G）   百度网盘：https:&#x2F;&#x2F;pan.baidu.com&#x2F;s&#x2F;1nC6V8e_EuKfaLb2IuEbe7w&amp;shfl&#x3D;sharepset下载密码为：n1u2系统登录密码：hongrisec@2019，登录后可能会要求你更改密码  靶场涉及3台虚拟机如下内网拓扑结构：分别如下： VM1：Windows 7 x64，开放 Web">
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>内网基础知识及ip端口收集 | 信安小蚂蚁</title><meta name="author" content="信安小蚂蚁"><meta name="copyright" content="信安小蚂蚁"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="0x00 内网靶机搭建红日安全提供的内网渗透靶场环境（13G）   百度网盘：https:&#x2F;&#x2F;pan.baidu.com&#x2F;s&#x2F;1nC6V8e_EuKfaLb2IuEbe7w&amp;shfl&#x3D;sharepset下载密码为：n1u2系统登录密码：hongrisec@2019，登录后可能会要求你更改密码  靶场涉及3台虚拟机如下内网拓扑结构：分别如下： VM1：Windows 7 x64，开放 Web">
 <meta property="og:type" content="article">
 <meta property="og:title" content="内网基础知识及ip端口收集">
 <meta property="og:url" content="https://mayi077.github.io/2021/03/13/%E5%86%85%E7%BD%91%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8Aip%E7%AB%AF%E5%8F%A3%E6%94%B6%E9%9B%86/index.html">
 <meta property="og:site_name" content="信安小蚂蚁">
 <meta property="og:description" content="0x00 内网靶机搭建红日安全提供的内网渗透靶场环境（13G）   百度网盘：https:&#x2F;&#x2F;pan.baidu.com&#x2F;s&#x2F;1nC6V8e_EuKfaLb2IuEbe7w&amp;shfl&#x3D;sharepset下载密码为：n1u2系统登录密码：hongrisec@2019，登录后可能会要求你更改密码  靶场涉及3台虚拟机如下内网拓扑结构：分别如下： VM1：Windows 7 x64，开放 Web">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://tvax2.sinaimg.cn/large/006Glg0Bgy1gofrc3ywm1j30v30er0ya.jpg">
-<meta property="og:image" content="https://tva1.sinaimg.cn/large/006Glg0Bgy1gofrlscvblj30q60ibgmk.jpg">
-<meta property="og:image" content="https://tvax4.sinaimg.cn/large/006Glg0Bgy1gofrnws8z4j30o60hlwfi.jpg">
-<meta property="og:image" content="https://tva1.sinaimg.cn/large/006Glg0Bgy1gofrtfgeb0j30i70hvgn8.jpg">
-<meta property="og:image" content="https://tvax2.sinaimg.cn/large/006Glg0Bgy1gofryapy21j313q0a8751.jpg">
-<meta property="og:image" content="https://tvax3.sinaimg.cn/large/006Glg0Bgy1gofs2vokk7j31180nb0v1.jpg">
-<meta property="og:image" content="https://tvax4.sinaimg.cn/large/006Glg0Bgy1goftdn45ljj30nh0exjrv.jpg">
-<meta property="og:image" content="https://tvax4.sinaimg.cn/large/006Glg0Bgy1goftz4sp77j31dz0d8jsn.jpg">
-<meta property="og:image" content="https://tvax1.sinaimg.cn/large/006Glg0Bgy1gofu1efxd9j31920943zf.jpg">
-<meta property="og:image" content="https://tva2.sinaimg.cn/large/006Glg0Bgy1gofu6dxz3jj31gl0ea0ue.jpg">
-<meta property="og:image" content="https://tva2.sinaimg.cn/large/006Glg0Bgy1gofubp0nx1j30sg0lcju4.jpg">
-<meta property="og:image" content="https://tva3.sinaimg.cn/large/006Glg0Bgy1gofugtffbrj30l70hljsj.jpg">
-<meta property="og:image" content="https://tva3.sinaimg.cn/large/006Glg0Bgy1gogbjiey2hj30ny0d4gop.jpg">
-<meta property="og:image" content="https://tva2.sinaimg.cn/large/006Glg0Bgy1gogc0cj75uj30qo0c2q75.jpg">
-<meta property="og:image" content="https://tvax4.sinaimg.cn/large/006Glg0Bgy1goi4l3rr89j30ue06gaai.jpg">
-<meta property="og:image" content="https://tva4.sinaimg.cn/large/006Glg0Bgy1goi97ldvaoj30zy0df0v3.jpg">
-<meta property="og:image" content="https://tvax3.sinaimg.cn/large/006Glg0Bgy1goi9e6un0pj30yu0ix41i.jpg">
-<meta property="og:image" content="https://tva2.sinaimg.cn/large/006Glg0Bgy1goib0qzom6j314p0gsdgr.jpg">
-<meta property="og:image" content="https://tva1.sinaimg.cn/large/006Glg0Bgy1goid5x76g3j316z0lxq4h.jpg">
-<meta property="og:image" content="https://tvax3.sinaimg.cn/large/006Glg0Bgy1goid41di1oj31470dy3zb.jpg">
+<meta property="og:image" content="https://mayi077.github.io/images/1.jpg">
 <meta property="article:published_time" content="2021-03-13T12:35:48.000Z">
 <meta property="article:modified_time" content="2021-03-13T12:48:28.000Z">
 <meta property="article:author" content="信安小蚂蚁">
 <meta property="article:tag" content="端口收集">
 <meta property="article:tag" content="IP收集">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://tvax2.sinaimg.cn/large/006Glg0Bgy1gofrc3ywm1j30v30er0ya.jpg">
-
-<link rel="canonical" href="https://mayi077.github.io/2021/03/13/%E5%86%85%E7%BD%91%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8Aip%E7%AB%AF%E5%8F%A3%E6%94%B6%E9%9B%86/">
-
-
-<script id="page-configurations">
-  // https://hexo.io/docs/variables.html
-  CONFIG.page = {
-    sidebar: "",
-    isHome: false,
-    isPost: true
-  };
-</script>
-
-  <title>内网基础知识及ip端口收集 | 信安小蚂蚁</title>
-  
-
-
-
-
-
-
-  <noscript>
-  <style>
-  .use-motion .brand,
-  .use-motion .menu-item,
-  .sidebar-inner,
-  .use-motion .post-block,
-  .use-motion .pagination,
-  .use-motion .comments,
-  .use-motion .post-header,
-  .use-motion .post-body,
-  .use-motion .collection-header { opacity: initial; }
-
-  .use-motion .site-title,
-  .use-motion .site-subtitle {
-    opacity: initial;
-    top: initial;
-  }
-
-  .use-motion .logo-line-before i { left: initial; }
-  .use-motion .logo-line-after i { right: initial; }
-  </style>
-</noscript>
-
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage">
-  <div class="container use-motion">
-    <div class="headband"></div>
-
-    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏">
-      <span class="toggle-line toggle-line-first"></span>
-      <span class="toggle-line toggle-line-middle"></span>
-      <span class="toggle-line toggle-line-last"></span>
-    </div>
-  </div>
-
-  <div class="site-meta">
-
-    <div>
-      <a href="/" class="brand" rel="start">
-        <span class="logo-line-before"><i></i></span>
-        <span class="site-title">信安小蚂蚁</span>
-        <span class="logo-line-after"><i></i></span>
-      </a>
-    </div>
-  </div>
-
-  <div class="site-nav-right"></div>
-</div>
-
-
-<nav class="site-nav">
-  
-  <ul id="menu" class="menu">
-        <li class="menu-item menu-item-主页">
-
-    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
-
-  </li>
-        <li class="menu-item menu-item-归档">
-
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
-
-  </li>
-        <li class="menu-item menu-item-分类">
-
-    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
-
-  </li>
-        <li class="menu-item menu-item-标签">
-
-    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
-
-  </li>
-        <li class="menu-item menu-item-关于">
-
-    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
-
-  </li>
-      <li class="menu-item menu-item-search">
-        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
-        </a>
-      </li>
-  </ul>
-
-</nav>
-  <div class="site-search">
-    <div class="popup search-popup">
-    <div class="search-header">
-  <span class="search-icon">
-    <i class="fa fa-search"></i>
-  </span>
-  <div class="search-input-container">
-    <input autocomplete="off" autocorrect="off" autocapitalize="off"
-           placeholder="搜索..." spellcheck="false"
-           type="search" class="search-input">
-  </div>
-  <span class="popup-btn-close">
-    <i class="fa fa-times-circle"></i>
-  </span>
-</div>
-<div id="search-result"></div>
-
-</div>
-<div class="search-pop-overlay"></div>
-
-  </div>
-</div>
-    </header>
-
-    
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
-  </div>
-
-
-    <main class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          
-
-          <div class="content">
-            
-
-  <div class="posts-expand">
+<meta name="twitter:image" content="https://mayi077.github.io/images/1.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "内网基础知识及ip端口收集",
+  "url": "https://mayi077.github.io/2021/03/13/%E5%86%85%E7%BD%91%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8Aip%E7%AB%AF%E5%8F%A3%E6%94%B6%E9%9B%86/",
+  "image": "https://mayi077.github.io/images/1.jpg",
+  "datePublished": "2021-03-13T12:35:48.000Z",
+  "dateModified": "2021-03-13T12:48:28.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "信安小蚂蚁",
+      "url": "https://mayi077.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://mayi077.github.io/2021/03/13/%E5%86%85%E7%BD%91%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8Aip%E7%AB%AF%E5%8F%A3%E6%94%B6%E9%9B%86/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.5-b1"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
       
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
   
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2021/03/13/%E5%86%85%E7%BD%91%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8Aip%E7%AB%AF%E5%8F%A3%E6%94%B6%E9%9B%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/1.jpg">
-      <meta itemprop="name" content="信安小蚂蚁">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="信安小蚂蚁">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          内网基础知识及ip端口收集
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-03-13 20:35:48 / 修改时间：20:48:28" itemprop="dateCreated datePublished" datetime="2021-03-13T20:35:48+08:00">2021-03-13</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%86%85%E7%BD%91%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index">
-                    <span itemprop="name">内网学习</span>
-                  </a>
-                </span>
-            </span>
-
-          
-            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-eye"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span id="busuanzi_value_page_pv"></span>
-            </span><br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-file-word-o"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>2.4k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-clock-o"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>6 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
       
-        <h3 id="0x00-内网靶机搭建"><a href="#0x00-内网靶机搭建" class="headerlink" title="0x00 内网靶机搭建"></a>0x00 内网靶机搭建</h3><p>红日安全提供的内网渗透靶场环境（13G）</p>
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '内网基础知识及ip端口收集',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 5.4.0"></head><body><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">信安小蚂蚁</span></a><a class="nav-page-title" href="/"><span class="site-name">内网基础知识及ip端口收集</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"></div></nav><div id="post-info"><h1 class="post-title">内网基础知识及ip端口收集</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-03-13T12:35:48.000Z" title="发表于 2021-03-13 20:35:48">2021-03-13</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-03-13T12:48:28.000Z" title="更新于 2021-03-13 20:48:28">2021-03-13</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%86%85%E7%BD%91%E5%AD%A6%E4%B9%A0/">内网学习</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h3 id="0x00-内网靶机搭建"><a href="#0x00-内网靶机搭建" class="headerlink" title="0x00 内网靶机搭建"></a>0x00 内网靶机搭建</h3><p>红日安全提供的内网渗透靶场环境（13G）</p>
 <blockquote>
-<p> 百度网盘：<a href="https://pan.baidu.com/s/1nC6V8e_EuKfaLb2IuEbe7w&amp;shfl=sharepset" target="_blank" rel="noopener">https://pan.baidu.com/s/1nC6V8e_EuKfaLb2IuEbe7w&amp;shfl=sharepset</a><br>下载密码为：n1u2<br>系统登录密码：hongrisec@2019，登录后可能会要求你更改密码</p>
+<p> 百度网盘：<a target="_blank" rel="noopener" href="https://pan.baidu.com/s/1nC6V8e_EuKfaLb2IuEbe7w&amp;shfl=sharepset">https://pan.baidu.com/s/1nC6V8e_EuKfaLb2IuEbe7w&amp;shfl=sharepset</a><br>下载密码为：n1u2<br>系统登录密码：hongrisec@2019，登录后可能会要求你更改密码</p>
 </blockquote>
-<p>靶场涉及3台虚拟机如下内网拓扑结构：<br><img data-src="//tvax2.sinaimg.cn/large/006Glg0Bgy1gofrc3ywm1j30v30er0ya.jpg" alt="内网拓扑"><br>分别如下：</p>
+<p>靶场涉及3台虚拟机如下内网拓扑结构：<br><img src="//tvax2.sinaimg.cn/large/006Glg0Bgy1gofrc3ywm1j30v30er0ya.jpg" alt="内网拓扑"><br>分别如下：</p>
 <p>VM1：Windows 7 x64，开放 Web 服务的服务器</p>
 <p>VM2：Win2K3 Metasploitable，内网机器</p>
 <p>VM3：Windows Server 2008 R2 x64，内网机器，域控服务器（关于域控的介绍见下文）     </p>
-<a id="more"></a>
+<span id="more"></span>
 <p>靶场练习的攻击目的就是在攻破 VM1 拿到 webshell 之后，继续向内网的 VM2 和 VM3 机器进行渗透，最终拿到域控服务器的最高权限。 (下面内容不是基于这个靶场)</p>
 <h3 id="0x01-域"><a href="#0x01-域" class="headerlink" title="0x01 域"></a>0x01 域</h3><p>域（Domain）是将网络中的多台计算机通过逻辑的方式组织到一起，进行集中管理的环境。用户以合法身份登录域后，就可以访问域内的资源，默认一个域中的用户无法访问另一个域中的资源。<br>举例个应用场景：公司内有 1000 台计算机，需要在每台计算机上创建一个叫 lagou 的统一用户，按传统方法就是一台台去建号并设置密码，一旦要改密码又要一台台去修改。</p>
-<p>如果通过域来统一管理就方便多了，在域中通过活动目录（域中提供目录服务的组件，可用于存储网络对象，比如账号、计算机、共享资源、打印机和联系人等信息）创建 lagou 账号就可在 1000 台计算机任意一台中登录，更改密码也同样适用。<br><a href="https://blog.51cto.com/loveemily/2163147" target="_blank" rel="noopener">【命令参考链接】</a></p>
+<p>如果通过域来统一管理就方便多了，在域中通过活动目录（域中提供目录服务的组件，可用于存储网络对象，比如账号、计算机、共享资源、打印机和联系人等信息）创建 lagou 账号就可在 1000 台计算机任意一台中登录，更改密码也同样适用。<br><a target="_blank" rel="noopener" href="https://blog.51cto.com/loveemily/2163147">【命令参考链接】</a></p>
 <h4 id="如何判断是否存在域呢？"><a href="#如何判断是否存在域呢？" class="headerlink" title="如何判断是否存在域呢？"></a>如何判断是否存在域呢？</h4><ol>
-<li>通过查看计算机属性可以获取一些域信息如：<img data-src="//tva1.sinaimg.cn/large/006Glg0Bgy1gofrlscvblj30q60ibgmk.jpg" alt="域信息"></li>
-<li>使用<code>ipconfig /all</code> 命令<img data-src="//tvax4.sinaimg.cn/large/006Glg0Bgy1gofrnws8z4j30o60hlwfi.jpg" alt="域信息"></li>
-<li>使用 <code>systeminfo</code><img data-src="//tva1.sinaimg.cn/large/006Glg0Bgy1gofrtfgeb0j30i70hvgn8.jpg" alt="域信息">如果不存在域，域那里会显示workgroup，意为工作组</li>
-<li>使用命令<code>net config workstation</code><img data-src="//tvax2.sinaimg.cn/large/006Glg0Bgy1gofryapy21j313q0a8751.jpg" alt=""></li>
-<li>使用 net time来判断<img data-src="//tvax3.sinaimg.cn/large/006Glg0Bgy1gofs2vokk7j31180nb0v1.jpg" alt="">正常显示时间说明当前是域用户，报错无权限说明有域但当前不是域用户，报错找不到服务器说明不存在域。</li>
+<li>通过查看计算机属性可以获取一些域信息如：<img src="//tva1.sinaimg.cn/large/006Glg0Bgy1gofrlscvblj30q60ibgmk.jpg" alt="域信息"></li>
+<li>使用<code>ipconfig /all</code> 命令<img src="//tvax4.sinaimg.cn/large/006Glg0Bgy1gofrnws8z4j30o60hlwfi.jpg" alt="域信息"></li>
+<li>使用 <code>systeminfo</code><img src="//tva1.sinaimg.cn/large/006Glg0Bgy1gofrtfgeb0j30i70hvgn8.jpg" alt="域信息">如果不存在域，域那里会显示workgroup，意为工作组</li>
+<li>使用命令<code>net config workstation</code><img src="//tvax2.sinaimg.cn/large/006Glg0Bgy1gofryapy21j313q0a8751.jpg" alt=""></li>
+<li>使用 net time来判断<img src="//tvax3.sinaimg.cn/large/006Glg0Bgy1gofs2vokk7j31180nb0v1.jpg" alt="">正常显示时间说明当前是域用户，报错无权限说明有域但当前不是域用户，报错找不到服务器说明不存在域。</li>
 </ol>
-<h4 id="查看域内指定用户详细信息"><a href="#查看域内指定用户详细信息" class="headerlink" title="查看域内指定用户详细信息"></a>查看域内指定用户详细信息</h4><p>如果存在域中，可以使用以下命令查看指定用户的详细信息：<br><code>net user mayi /domain</code><br><img data-src="//tvax4.sinaimg.cn/large/006Glg0Bgy1goftdn45ljj30nh0exjrv.jpg" alt=""><br>注意，需要是域里面的用户才可以执行此命令。</p>
+<h4 id="查看域内指定用户详细信息"><a href="#查看域内指定用户详细信息" class="headerlink" title="查看域内指定用户详细信息"></a>查看域内指定用户详细信息</h4><p>如果存在域中，可以使用以下命令查看指定用户的详细信息：<br><code>net user mayi /domain</code><br><img src="//tvax4.sinaimg.cn/large/006Glg0Bgy1goftdn45ljj30nh0exjrv.jpg" alt=""><br>注意，需要是域里面的用户才可以执行此命令。</p>
 <h4 id="查看本域内有哪些机器"><a href="#查看本域内有哪些机器" class="headerlink" title="查看本域内有哪些机器"></a>查看本域内有哪些机器</h4><ol>
-<li>书上说使用<code>net view /domain:域名</code>如：<code>net view /domain:one</code>（好像需要在dc中使用）我win10的mayi域用户执行不了。<img data-src="//tvax4.sinaimg.cn/large/006Glg0Bgy1goftz4sp77j31dz0d8jsn.jpg" alt="">而且查询的并不准确呀。</li>
-<li>使用 <code>dsquery computer</code>命令<img data-src="//tvax1.sinaimg.cn/large/006Glg0Bgy1gofu1efxd9j31920943zf.jpg" alt="">也是在域控中可以执行。</li>
+<li>书上说使用<code>net view /domain:域名</code>如：<code>net view /domain:one</code>（好像需要在dc中使用）我win10的mayi域用户执行不了。<img src="//tvax4.sinaimg.cn/large/006Glg0Bgy1goftz4sp77j31dz0d8jsn.jpg" alt="">而且查询的并不准确呀。</li>
+<li>使用 <code>dsquery computer</code>命令<img src="//tvax1.sinaimg.cn/large/006Glg0Bgy1gofu1efxd9j31920943zf.jpg" alt="">也是在域控中可以执行。</li>
 </ol>
-<h4 id="查询域内用户组列表"><a href="#查询域内用户组列表" class="headerlink" title="查询域内用户组列表"></a>查询域内用户组列表</h4><p>使用命令<code>net group /domain</code><img data-src="//tva2.sinaimg.cn/large/006Glg0Bgy1gofu6dxz3jj31gl0ea0ue.jpg" alt=""></p>
+<h4 id="查询域内用户组列表"><a href="#查询域内用户组列表" class="headerlink" title="查询域内用户组列表"></a>查询域内用户组列表</h4><p>使用命令<code>net group /domain</code><img src="//tva2.sinaimg.cn/large/006Glg0Bgy1gofu6dxz3jj31gl0ea0ue.jpg" alt=""></p>
 <h3 id="0x02-域控制器"><a href="#0x02-域控制器" class="headerlink" title="0x02 域控制器"></a>0x02 域控制器</h3><p>&emsp;域控制器是域中拥有管理域内其他主机的计算机，它负责所有本域内的计算和用户的验证工作，它是整个域的通信枢纽，域内所有用来验证身份的账号和密码哈希都存在域控制器中。所以，内网渗透的最终目标常常就是为了攻下域控服务器，这样就等同于控制整个域内的计算机。  </p>
-<h4 id="查看域控的机器名"><a href="#查看域控的机器名" class="headerlink" title="查看域控的机器名"></a>查看域控的机器名</h4><p><code>nl test /dclist:域名</code><img data-src="//tva2.sinaimg.cn/large/006Glg0Bgy1gofubp0nx1j30sg0lcju4.jpg" alt=""></p>
+<h4 id="查看域控的机器名"><a href="#查看域控的机器名" class="headerlink" title="查看域控的机器名"></a>查看域控的机器名</h4><p><code>nl test /dclist:域名</code><img src="//tva2.sinaimg.cn/large/006Glg0Bgy1gofubp0nx1j30sg0lcju4.jpg" alt=""></p>
 <h4 id="查看域控制器和域管理员组的组成员"><a href="#查看域控制器和域管理员组的组成员" class="headerlink" title="查看域控制器和域管理员组的组成员"></a>查看域控制器和域管理员组的组成员</h4><ol>
 <li>域控制器组<code>net group &quot;Domain Controllers&quot; /domain</code></li>
-<li>域管理员组 <code>net group &quot;domain admins&quot; /domain</code><img data-src="//tva3.sinaimg.cn/large/006Glg0Bgy1gofugtffbrj30l70hljsj.jpg" alt=""></li>
+<li>域管理员组 <code>net group &quot;domain admins&quot; /domain</code><img src="//tva3.sinaimg.cn/large/006Glg0Bgy1gofugtffbrj30l70hljsj.jpg" alt=""></li>
 </ol>
-<h3 id="0x03-扫描内网主机，寻找对应机器名的-IP"><a href="#0x03-扫描内网主机，寻找对应机器名的-IP" class="headerlink" title="0x03 扫描内网主机，寻找对应机器名的 IP"></a>0x03 扫描内网主机，寻找对应机器名的 IP</h3><h4 id="利用NetBIOS协议"><a href="#利用NetBIOS协议" class="headerlink" title="利用NetBIOS协议"></a>利用NetBIOS协议</h4><p>&emsp;使用 <a href="https://github.com/lifenjoiner/nbtscan/releases/download/nbtscan-v1.5.2-2394b4/nbtscan-v1.5.2-2394b4-win32.7z" target="_blank" rel="noopener">【nbtscan】</a>工具，命令<code>nbtscan 192.168.52.0/24</code> (这里win10默认的防火墙竟然拦截了，扫不出来，关了才扫出如下图)<img data-src="//tva3.sinaimg.cn/large/006Glg0Bgy1gogbjiey2hj30ny0d4gop.jpg" alt=""></p>
+<h3 id="0x03-扫描内网主机，寻找对应机器名的-IP"><a href="#0x03-扫描内网主机，寻找对应机器名的-IP" class="headerlink" title="0x03 扫描内网主机，寻找对应机器名的 IP"></a>0x03 扫描内网主机，寻找对应机器名的 IP</h3><h4 id="利用NetBIOS协议"><a href="#利用NetBIOS协议" class="headerlink" title="利用NetBIOS协议"></a>利用NetBIOS协议</h4><p>&emsp;使用 <a target="_blank" rel="noopener" href="https://github.com/lifenjoiner/nbtscan/releases/download/nbtscan-v1.5.2-2394b4/nbtscan-v1.5.2-2394b4-win32.7z">【nbtscan】</a>工具，命令<code>nbtscan 192.168.52.0/24</code> (这里win10默认的防火墙竟然拦截了，扫不出来，关了才扫出如下图)<img src="//tva3.sinaimg.cn/large/006Glg0Bgy1gogbjiey2hj30ny0d4gop.jpg" alt=""></p>
 <h4 id="利用ICMP协议"><a href="#利用ICMP协议" class="headerlink" title="利用ICMP协议"></a>利用ICMP协议</h4><p><code>for /L %i in (1,1,254) DO @ping -w 1 -n 1 192.168.152.%i | findstr &quot;TTL=&quot;</code></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-n count 发送 count 指定的 ECHO 数据包数</span><br><span class="line">-w timeout 指定超时间隔，单位为毫秒。</span><br></pre></td></tr></table></figure>
-<p><img data-src="//tva2.sinaimg.cn/large/006Glg0Bgy1gogc0cj75uj30qo0c2q75.jpg" alt="">比工具慢</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-n count 发送 count 指定的 ECHO 数据包数</span><br><span class="line">-w timeout 指定超时间隔，单位为毫秒。</span><br></pre></td></tr></table></figure>
+<p><img src="//tva2.sinaimg.cn/large/006Glg0Bgy1gogc0cj75uj30qo0c2q75.jpg" alt="">比工具慢</p>
 <h4 id="利用ARP扫描探测内网"><a href="#利用ARP扫描探测内网" class="headerlink" title="利用ARP扫描探测内网"></a>利用ARP扫描探测内网</h4><ol>
-<li>利用<a href="https://github.com/EmpireProject/Empire" target="_blank" rel="noopener">【empire】</a> 中的arpscan 模块。</li>
+<li>利用<a target="_blank" rel="noopener" href="https://github.com/EmpireProject/Empire">【empire】</a> 中的arpscan 模块。</li>
 <li>利用arp-scan工具等等<h3 id="0x04-扫描域内端口"><a href="#0x04-扫描域内端口" class="headerlink" title="0x04 扫描域内端口"></a>0x04 扫描域内端口</h3>通过查询目标主机开放的端口信息，可以了解目标主机开启的服务，可以根据目标开放的服务查找相应的漏洞以及分析目标的网络拓扑结构。主要关注：</li>
 </ol>
 <ul>
@@ -323,292 +204,23 @@
 <li>端口上运行的服务</li>
 <li>常见应用的默认端口</li>
 </ul>
-<h4 id="利用telnet命令进行端口扫描"><a href="#利用telnet命令进行端口扫描" class="headerlink" title="利用telnet命令进行端口扫描"></a>利用telnet命令进行端口扫描</h4><p>如果只想快速探测某台主机的某个端口是否开放，可以使用telnet命令方便的判断。但是默认win似乎都没有telnet这个命令，linux可用此命令。<code>nelnet ip 端口</code>如：<img data-src="//tvax4.sinaimg.cn/large/006Glg0Bgy1goi4l3rr89j30ue06gaai.jpg" alt=""></p>
+<h4 id="利用telnet命令进行端口扫描"><a href="#利用telnet命令进行端口扫描" class="headerlink" title="利用telnet命令进行端口扫描"></a>利用telnet命令进行端口扫描</h4><p>如果只想快速探测某台主机的某个端口是否开放，可以使用telnet命令方便的判断。但是默认win似乎都没有telnet这个命令，linux可用此命令。<code>nelnet ip 端口</code>如：<img src="//tvax4.sinaimg.cn/large/006Glg0Bgy1goi4l3rr89j30ue06gaai.jpg" alt=""></p>
 <h4 id="Metasploit端口扫描"><a href="#Metasploit端口扫描" class="headerlink" title="Metasploit端口扫描"></a>Metasploit端口扫描</h4><ol>
 <li>kali中输入<code>msfconsole</code> 进入msf界面。</li>
-<li>接着我们运行<code>search portscan</code> 命令搜索端口扫描的模块<img data-src="//tva4.sinaimg.cn/large/006Glg0Bgy1goi97ldvaoj30zy0df0v3.jpg" alt=""></li>
-<li>设置被扫描ip并且运行<br><img data-src="//tvax3.sinaimg.cn/large/006Glg0Bgy1goi9e6un0pj30yu0ix41i.jpg" alt=""></li>
+<li>接着我们运行<code>search portscan</code> 命令搜索端口扫描的模块<img src="//tva4.sinaimg.cn/large/006Glg0Bgy1goi97ldvaoj30zy0df0v3.jpg" alt=""></li>
+<li>设置被扫描ip并且运行<br><img src="//tvax3.sinaimg.cn/large/006Glg0Bgy1goi9e6un0pj30yu0ix41i.jpg" alt=""></li>
 </ol>
 <h4 id="Nishang的Invoke-PortScan模块"><a href="#Nishang的Invoke-PortScan模块" class="headerlink" title="Nishang的Invoke-PortScan模块"></a>Nishang的Invoke-PortScan模块</h4><p>使用nishang的invoke-portscan模块，也可以完成端口扫描工作。</p>
 <ol>
-<li>下载<a href="https://github.com/samratashok/nishang" target="_blank" rel="noopener">【nishang源码】</a> 并保证powershell版本为3.0以上，<code>get-host</code><img data-src="//tva2.sinaimg.cn/large/006Glg0Bgy1goib0qzom6j314p0gsdgr.jpg" alt=""></li>
-<li>然后就是导入模块，二种思路第一种是直接用绕过来导入如：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">powershell.exe -exec bypass -command &#123;Import-Module .\nishang.psm1&#125;</span><br></pre></td></tr></table></figure>
-第二种设置一下执行策略如：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">》》》 Set-ExecutionPolicy RemoteSigned</span><br><span class="line">》》》 Import-Module .nishang.psm1</span><br></pre></td></tr></table></figure>
+<li>下载<a target="_blank" rel="noopener" href="https://github.com/samratashok/nishang">【nishang源码】</a> 并保证powershell版本为3.0以上，<code>get-host</code><img src="//tva2.sinaimg.cn/large/006Glg0Bgy1goib0qzom6j314p0gsdgr.jpg" alt=""></li>
+<li>然后就是导入模块，二种思路第一种是直接用绕过来导入如：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">powershell.exe -exec bypass -command &#123;Import-Module .\nishang.psm1&#125;</span><br></pre></td></tr></table></figure>
+第二种设置一下执行策略如：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">》》》 Set-ExecutionPolicy RemoteSigned</span><br><span class="line">》》》 Import-Module .nishang.psm1</span><br></pre></td></tr></table></figure>
 虽然有警告但还是导入成功了，使用<code>Get-Command -Module nishang</code>可以查看(win10自带就杀了)。</li>
-<li>导入后记得在当前窗口使用<code>get-help Invoke-PortScan -full</code>获取帮助文档，新开窗口无效，应为import只对本窗口有效。<img data-src="//tva1.sinaimg.cn/large/006Glg0Bgy1goid5x76g3j316z0lxq4h.jpg" alt=""></li>
-<li>使用命令<code>Invoke-PortScan -StartAddress 192.168.152.1 -EndAddress 192.168.152.254  -ResolveHost</code><img data-src="//tvax3.sinaimg.cn/large/006Glg0Bgy1goid41di1oj31470dy3zb.jpg" alt=""></li>
+<li>导入后记得在当前窗口使用<code>get-help Invoke-PortScan -full</code>获取帮助文档，新开窗口无效，应为import只对本窗口有效。<img src="//tva1.sinaimg.cn/large/006Glg0Bgy1goid5x76g3j316z0lxq4h.jpg" alt=""></li>
+<li>使用命令<code>Invoke-PortScan -StartAddress 192.168.152.1 -EndAddress 192.168.152.254  -ResolveHost</code><img src="//tvax3.sinaimg.cn/large/006Glg0Bgy1goid41di1oj31470dy3zb.jpg" alt=""></li>
 </ol>
-
-    </div>
-
-    
-    
-    
-        
-
-<div>
-<ul class="post-copyright">
-  <li class="post-copyright-author">
-    <strong>本文作者： </strong>信安小蚂蚁
-  </li>
-  <li class="post-copyright-link">
-    <strong>本文链接：</strong>
-    <a href="https://mayi077.github.io/2021/03/13/%E5%86%85%E7%BD%91%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8Aip%E7%AB%AF%E5%8F%A3%E6%94%B6%E9%9B%86/" title="内网基础知识及ip端口收集">https://mayi077.github.io/2021/03/13/内网基础知识及ip端口收集/</a>
-  </li>
-  <li class="post-copyright-license">
-    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
-  </li>
-</ul>
-</div>
-
-     <div>
-       
-         ﻿<div>
-    
-        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
-    
-</div>
-         
-      </div>
-
-
-      <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/%E7%AB%AF%E5%8F%A3%E6%94%B6%E9%9B%86/" rel="tag"><i class="fa fa-tag"></i>端口收集</a>
-              <a href="/tags/IP%E6%94%B6%E9%9B%86/" rel="tag"><i class="fa fa-tag"></i>IP收集</a>
-          </div>
-
-        
-
-
-        
-    <div class="post-nav">
-      <div class="post-nav-item">
-    <a href="/2021/01/27/bugku-noteasytrick/" rel="prev" title="bugku-noteasytrick">
-      <i class="fa fa-chevron-left"></i> bugku-noteasytrick
-    </a></div>
-      <div class="post-nav-item">
-    <a href="/2021/03/16/%E9%9A%90%E8%97%8F%E9%80%9A%E4%BF%A1%E9%9A%A7%E9%81%93%E6%8A%80%E6%9C%AF%EF%BC%88%E4%B8%8A%EF%BC%89/" rel="next" title="隐藏通信隧道技术之基本概念和网络层">
-      隐藏通信隧道技术之基本概念和网络层 <i class="fa fa-chevron-right"></i>
-    </a></div>
-    </div>
-      </footer>
-    
-  </article>
-  
-  
-  
-
-  </div>
-
-
-          </div>
-          
-    <div class="comments" id="gitalk-container"></div>
-
-<script>
-  window.addEventListener('tabs:register', () => {
-    let activeClass = CONFIG.comments.activeClass;
-    if (CONFIG.comments.storage) {
-      activeClass = localStorage.getItem('comments_active') || activeClass;
-    }
-    if (activeClass) {
-      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
-      if (activeTab) {
-        activeTab.click();
-      }
-    }
-  });
-  if (CONFIG.comments.storage) {
-    window.addEventListener('tabs:click', event => {
-      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
-      let commentClass = event.target.classList[1];
-      localStorage.setItem('comments_active', commentClass);
-    });
-  }
-</script>
-
-        </div>
-          
-  
-  <div class="toggle sidebar-toggle">
-    <span class="toggle-line toggle-line-first"></span>
-    <span class="toggle-line toggle-line-middle"></span>
-    <span class="toggle-line toggle-line-last"></span>
-  </div>
-
-  <aside class="sidebar">
-    <div class="sidebar-inner">
-
-      <ul class="sidebar-nav motion-element">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
-      </ul>
-
-      <!--noindex-->
-      <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#0x00-内网靶机搭建"><span class="nav-number">1.</span> <span class="nav-text">0x00 内网靶机搭建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x01-域"><span class="nav-number">2.</span> <span class="nav-text">0x01 域</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#如何判断是否存在域呢？"><span class="nav-number">2.1.</span> <span class="nav-text">如何判断是否存在域呢？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#查看域内指定用户详细信息"><span class="nav-number">2.2.</span> <span class="nav-text">查看域内指定用户详细信息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#查看本域内有哪些机器"><span class="nav-number">2.3.</span> <span class="nav-text">查看本域内有哪些机器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#查询域内用户组列表"><span class="nav-number">2.4.</span> <span class="nav-text">查询域内用户组列表</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x02-域控制器"><span class="nav-number">3.</span> <span class="nav-text">0x02 域控制器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#查看域控的机器名"><span class="nav-number">3.1.</span> <span class="nav-text">查看域控的机器名</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#查看域控制器和域管理员组的组成员"><span class="nav-number">3.2.</span> <span class="nav-text">查看域控制器和域管理员组的组成员</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x03-扫描内网主机，寻找对应机器名的-IP"><span class="nav-number">4.</span> <span class="nav-text">0x03 扫描内网主机，寻找对应机器名的 IP</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#利用NetBIOS协议"><span class="nav-number">4.1.</span> <span class="nav-text">利用NetBIOS协议</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#利用ICMP协议"><span class="nav-number">4.2.</span> <span class="nav-text">利用ICMP协议</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#利用ARP扫描探测内网"><span class="nav-number">4.3.</span> <span class="nav-text">利用ARP扫描探测内网</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x04-扫描域内端口"><span class="nav-number">5.</span> <span class="nav-text">0x04 扫描域内端口</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#利用telnet命令进行端口扫描"><span class="nav-number">5.1.</span> <span class="nav-text">利用telnet命令进行端口扫描</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Metasploit端口扫描"><span class="nav-number">5.2.</span> <span class="nav-text">Metasploit端口扫描</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Nishang的Invoke-PortScan模块"><span class="nav-number">5.3.</span> <span class="nav-text">Nishang的Invoke-PortScan模块</span></a></li></ol></li></ol></div>
-      </div>
-      <!--/noindex-->
-
-      <div class="site-overview-wrap sidebar-panel">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
-      src="/images/1.jpg">
-  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
-  <div class="site-description" itemprop="description"></div>
-</div>
-<div class="site-state-wrap motion-element">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-          <a href="/archives">
-          <span class="site-state-item-count">135</span>
-          <span class="site-state-item-name">日志</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-categories">
-            <a href="/categories/">
-        <span class="site-state-item-count">11</span>
-        <span class="site-state-item-name">分类</span></a>
-      </div>
-      <div class="site-state-item site-state-tags">
-            <a href="/tags/">
-        <span class="site-state-item-count">86</span>
-        <span class="site-state-item-name">标签</span></a>
-      </div>
-  </nav>
-</div>
-  <div class="links-of-author motion-element">
-      <span class="links-of-author-item">
-        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
-      </span>
-      <span class="links-of-author-item">
-        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
-      </span>
-  </div>
-  <div class="cc-license motion-element" itemprop="license">
-    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
-  </div>
-
-
-
-      </div>
-
-    </div>
-  </aside>
-  <div id="sidebar-dimmer"></div>
-
-
-      </div>
-    </main>
-
-    <footer class="footer">
-      <div class="footer-inner">
-        
-
-<div class="copyright">
-  
-  &copy; 
-  <span itemprop="copyrightYear">2026</span>
-  <span class="with-love">
-    <i class="fa fa-user"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
-</div>
-
-
-
-
-
-
-
-
-
-        
-<div class="busuanzi-count">
-  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-</div>
-
-
-
-
-
-
-
-
-      </div>
-    </footer>
-  </div>
-
-  
-  <script src="/lib/anime.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
-  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
-  <script src="/lib/velocity/velocity.min.js"></script>
-  <script src="/lib/velocity/velocity.ui.min.js"></script>
-
-<script src="/js/utils.js"></script>
-
-<script src="/js/motion.js"></script>
-
-
-<script src="/js/schemes/muse.js"></script>
-
-
-<script src="/js/next-boot.js"></script>
-
-
-
-
-  
-
-
-
-
-  
-<script src="/js/local-search.js"></script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-
-  
-
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.8.0/dist/gitalk.min.css">
-
-<script>
-NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
-  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1.8.0/dist/gitalk.min.js', () => {
-    var gitalk = new Gitalk({
-      clientID    : 'Ov23li6cOHoOwCcszzi9',
-      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
-      repo        : 'mayi077.github.io',
-      owner       : 'mayi077',
-      admin       : ['mayi077'],
-      id          : '799a0e77e07f377b8cc7b42c912bb38e',
-        language: 'zh-CN',
-      distractionFreeMode: true,
-      enablePKCE: true
-    });
-    gitalk.render('gitalk-container');
-  }, window.Gitalk);
-});
-</script>
-
-</body>
-</html>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://mayi077.github.io">信安小蚂蚁</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://mayi077.github.io/2021/03/13/%E5%86%85%E7%BD%91%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8Aip%E7%AB%AF%E5%8F%A3%E6%94%B6%E9%9B%86/">https://mayi077.github.io/2021/03/13/%E5%86%85%E7%BD%91%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8Aip%E7%AB%AF%E5%8F%A3%E6%94%B6%E9%9B%86/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://mayi077.github.io" target="_blank">信安小蚂蚁</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%AB%AF%E5%8F%A3%E6%94%B6%E9%9B%86/">端口收集</a><a class="post-meta__tags" href="/tags/IP%E6%94%B6%E9%9B%86/">IP收集</a></div><div class="post-share"><div class="social-share" data-image="/images/1.jpg" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2021/03/16/%E9%9A%90%E8%97%8F%E9%80%9A%E4%BF%A1%E9%9A%A7%E9%81%93%E6%8A%80%E6%9C%AF%EF%BC%88%E4%B8%8A%EF%BC%89/" title="隐藏通信隧道技术之基本概念和网络层"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">隐藏通信隧道技术之基本概念和网络层</div></div><div class="info-2"><div class="info-item-1">0x01 通信技术的基础知识0x001 什么是隧道？&emsp;隧道，就是绕过端口屏蔽的通信方式。以允许通过防火墙两端的数据包类型或端口进行封装，然后穿过防火墙，与对方进行通信。当被封装的数据包到达目的地时，再将数据包还原，并将还原后的数据包发送给相应的服务器上。&emsp;隐藏通信隧道技术常用于在访问受限的网络环境中追踪数据流向和在非受信任的网络中实现安全的数据传输。  0x002 常见的隧道技术 网路层： IPv6隧道、ICMP隧道、GRE(通用路由封装)隧道 传输层： TCP隧道、UDP隧道、常规端口转发 应用层： SSH隧道、HTTP/S隧道、DNS隧道  0X003 判断内网的连通性&emsp;判断内网的连通性是指判断机器能否上外网等。要综合判断各种协议(TCP、HTTP、DNS、ICMP等)及其端口的通信情况，常见的允许流量流出的端口有80、8080、443、53、110、123(网路时间协定NTP,)等。 1、ICMP协议我们可以使用ping命令来判断是否连通。 2、TCP、UDP 协议我们可以使用：netcat &lt;ip地址 端口&gt;来测试连通性。netc...</div></div></div></a><a class="pagination-related" href="/2021/01/27/bugku-noteasytrick/" title="bugku-noteasytrick"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">bugku-noteasytrick</div></div><div class="info-2"><div class="info-item-1">第一次拿一血，泪目。 0X00 题目源码：1234567891011121314151617181920212223242526272829303132333435363738394041 &lt;?phperror_reporting(0);ini_set(&quot;display_errors&quot;,&quot;Off&quot;);class Jesen &#123;    public $filename;    public $content;    public $me;    function __wakeup()&#123;        $this-&gt;me = new ctf();    &#125;    function __destruct() &#123;        $this-&gt;me-&gt;open($this-&gt;filename,$this-&gt;content);    &#125;&#125;class Ctf &#123;    function __toString() &#123;        retur...</div></div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/images/1.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">信安小蚂蚁</div><div class="author-info-description"></div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">135</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">86</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/mayi077"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">2020–2021，这里记录了 100+ 篇文字。
+后来因工作入职，暂时搁笔。
+2026，重新起航。
+继续写下去。
+</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#0x00-%E5%86%85%E7%BD%91%E9%9D%B6%E6%9C%BA%E6%90%AD%E5%BB%BA"><span class="toc-number">1.</span> <span class="toc-text">0x00 内网靶机搭建</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#0x01-%E5%9F%9F"><span class="toc-number">2.</span> <span class="toc-text">0x01 域</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%88%A4%E6%96%AD%E6%98%AF%E5%90%A6%E5%AD%98%E5%9C%A8%E5%9F%9F%E5%91%A2%EF%BC%9F"><span class="toc-number">2.1.</span> <span class="toc-text">如何判断是否存在域呢？</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E5%9F%9F%E5%86%85%E6%8C%87%E5%AE%9A%E7%94%A8%E6%88%B7%E8%AF%A6%E7%BB%86%E4%BF%A1%E6%81%AF"><span class="toc-number">2.2.</span> <span class="toc-text">查看域内指定用户详细信息</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E6%9C%AC%E5%9F%9F%E5%86%85%E6%9C%89%E5%93%AA%E4%BA%9B%E6%9C%BA%E5%99%A8"><span class="toc-number">2.3.</span> <span class="toc-text">查看本域内有哪些机器</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2%E5%9F%9F%E5%86%85%E7%94%A8%E6%88%B7%E7%BB%84%E5%88%97%E8%A1%A8"><span class="toc-number">2.4.</span> <span class="toc-text">查询域内用户组列表</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#0x02-%E5%9F%9F%E6%8E%A7%E5%88%B6%E5%99%A8"><span class="toc-number">3.</span> <span class="toc-text">0x02 域控制器</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E5%9F%9F%E6%8E%A7%E7%9A%84%E6%9C%BA%E5%99%A8%E5%90%8D"><span class="toc-number">3.1.</span> <span class="toc-text">查看域控的机器名</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E5%9F%9F%E6%8E%A7%E5%88%B6%E5%99%A8%E5%92%8C%E5%9F%9F%E7%AE%A1%E7%90%86%E5%91%98%E7%BB%84%E7%9A%84%E7%BB%84%E6%88%90%E5%91%98"><span class="toc-number">3.2.</span> <span class="toc-text">查看域控制器和域管理员组的组成员</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#0x03-%E6%89%AB%E6%8F%8F%E5%86%85%E7%BD%91%E4%B8%BB%E6%9C%BA%EF%BC%8C%E5%AF%BB%E6%89%BE%E5%AF%B9%E5%BA%94%E6%9C%BA%E5%99%A8%E5%90%8D%E7%9A%84-IP"><span class="toc-number">4.</span> <span class="toc-text">0x03 扫描内网主机，寻找对应机器名的 IP</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%A9%E7%94%A8NetBIOS%E5%8D%8F%E8%AE%AE"><span class="toc-number">4.1.</span> <span class="toc-text">利用NetBIOS协议</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%A9%E7%94%A8ICMP%E5%8D%8F%E8%AE%AE"><span class="toc-number">4.2.</span> <span class="toc-text">利用ICMP协议</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%A9%E7%94%A8ARP%E6%89%AB%E6%8F%8F%E6%8E%A2%E6%B5%8B%E5%86%85%E7%BD%91"><span class="toc-number">4.3.</span> <span class="toc-text">利用ARP扫描探测内网</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#0x04-%E6%89%AB%E6%8F%8F%E5%9F%9F%E5%86%85%E7%AB%AF%E5%8F%A3"><span class="toc-number">5.</span> <span class="toc-text">0x04 扫描域内端口</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%A9%E7%94%A8telnet%E5%91%BD%E4%BB%A4%E8%BF%9B%E8%A1%8C%E7%AB%AF%E5%8F%A3%E6%89%AB%E6%8F%8F"><span class="toc-number">5.1.</span> <span class="toc-text">利用telnet命令进行端口扫描</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Metasploit%E7%AB%AF%E5%8F%A3%E6%89%AB%E6%8F%8F"><span class="toc-number">5.2.</span> <span class="toc-text">Metasploit端口扫描</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Nishang%E7%9A%84Invoke-PortScan%E6%A8%A1%E5%9D%97"><span class="toc-number">5.3.</span> <span class="toc-text">Nishang的Invoke-PortScan模块</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/04/20/2026-04-20-TLS%E5%8A%A0%E5%AF%86%E5%A5%97%E4%BB%B6/" title="TLS加密套件">TLS加密套件</a><time datetime="2026-04-20T14:30:00.000Z" title="发表于 2026-04-20 22:30:00">2026-04-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/04/20/2026-04-20-AI-Agent-%E6%9E%B6%E6%9E%84/" title="AI Agent 架构">AI Agent 架构</a><time datetime="2026-04-19T16:00:00.000Z" title="发表于 2026-04-20 00:00:00">2026-04-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2021/04/15/PHP-%E6%AD%A3%E5%88%99%E7%9A%84-m%E5%A4%9A%E8%A1%8C%E6%A8%A1%E5%BC%8F/" title="PHP 正则的 m多行模式">PHP 正则的 m多行模式</a><time datetime="2021-04-15T00:54:31.000Z" title="发表于 2021-04-15 08:54:31">2021-04-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2021/04/14/vulnstack-ATT-CK%E5%AE%9E%E6%88%98%E7%B3%BB%E5%88%97-%E7%BA%A2%E9%98%9F%E5%AE%9E%E6%88%98%EF%BC%88%E4%B8%80%EF%BC%89/" title="vulnstack-ATT&amp;CK实战系列 红队实战（一）">vulnstack-ATT&amp;CK实战系列 红队实战（一）</a><time datetime="2021-04-14T12:46:10.000Z" title="发表于 2021-04-14 20:46:10">2021-04-14</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2021/04/09/%E5%9F%9F%E5%86%85%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8/" title="域内横向移动">域内横向移动</a><time datetime="2021-04-09T07:56:53.000Z" title="发表于 2021-04-09 15:56:53">2021-04-09</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 信安小蚂蚁</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 5.4.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.5-b1</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.5-b1"></script><script src="/js/main.js?v=5.5.5-b1"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

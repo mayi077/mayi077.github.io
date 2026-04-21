@@ -1,289 +1,188 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
-<meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.1">
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
-  <link rel="mask-icon" href="/images/tu.ico" color="#222">
-
-<link rel="stylesheet" href="/css/main.css">
-
-
-<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
-
-<script id="hexo-configurations">
-    var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
-  </script>
-
-  <meta name="description" content="测试代码大体如下: 12345mysql_query(&quot;set names utf8&quot;);if ($username &#x3D;&#x3D;&#x3D; &#39;admin&#39;) &amp;#123;    die(&#39;Permission denied!&#39;);&amp;#125;$result &#x3D; $mysqli-&gt;query(&quot;SELECT">
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Mysql字符集转换漏洞 | 信安小蚂蚁</title><meta name="author" content="信安小蚂蚁"><meta name="copyright" content="信安小蚂蚁"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="测试代码大体如下: 12345mysql_query(&quot;set names utf8&quot;);if ($username &#x3D;&#x3D;&#x3D; &amp;#x27;admin&amp;#x27;) &amp;#123;    die(&amp;#x27;Permission denied!&amp;#x27;);&amp;#125;$result &#x3D; $mysqli-&gt;query(&quot;SELECT * FROM z_users">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Mysql字符集转换漏洞">
 <meta property="og:url" content="https://mayi077.github.io/2020/08/01/Mysql%E5%AD%97%E7%AC%A6%E9%9B%86%E8%BD%AC%E6%8D%A2%E6%BC%8F%E6%B4%9E/index.html">
 <meta property="og:site_name" content="信安小蚂蚁">
-<meta property="og:description" content="测试代码大体如下: 12345mysql_query(&quot;set names utf8&quot;);if ($username &#x3D;&#x3D;&#x3D; &#39;admin&#39;) &amp;#123;    die(&#39;Permission denied!&#39;);&amp;#125;$result &#x3D; $mysqli-&gt;query(&quot;SELECT">
+<meta property="og:description" content="测试代码大体如下: 12345mysql_query(&quot;set names utf8&quot;);if ($username &#x3D;&#x3D;&#x3D; &amp;#x27;admin&amp;#x27;) &amp;#123;    die(&amp;#x27;Permission denied!&amp;#x27;);&amp;#125;$result &#x3D; $mysqli-&gt;query(&quot;SELECT * FROM z_users">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://pic.downk.cc/item/5f25666714195aa59426c9b8.jpg">
-<meta property="og:image" content="https://pic.downk.cc/item/5f25670e14195aa594273560.jpg">
+<meta property="og:image" content="https://mayi077.github.io/images/1.jpg">
 <meta property="article:published_time" content="2020-08-01T13:05:36.000Z">
 <meta property="article:modified_time" content="2020-08-01T13:10:03.000Z">
 <meta property="article:author" content="信安小蚂蚁">
 <meta property="article:tag" content="基础积累">
 <meta property="article:tag" content="编码">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://pic.downk.cc/item/5f25666714195aa59426c9b8.jpg">
-
-<link rel="canonical" href="https://mayi077.github.io/2020/08/01/Mysql%E5%AD%97%E7%AC%A6%E9%9B%86%E8%BD%AC%E6%8D%A2%E6%BC%8F%E6%B4%9E/">
-
-
-<script id="page-configurations">
-  // https://hexo.io/docs/variables.html
-  CONFIG.page = {
-    sidebar: "",
-    isHome: false,
-    isPost: true
-  };
-</script>
-
-  <title>Mysql字符集转换漏洞 | 信安小蚂蚁</title>
-  
-
-
-
-
-
-
-  <noscript>
-  <style>
-  .use-motion .brand,
-  .use-motion .menu-item,
-  .sidebar-inner,
-  .use-motion .post-block,
-  .use-motion .pagination,
-  .use-motion .comments,
-  .use-motion .post-header,
-  .use-motion .post-body,
-  .use-motion .collection-header { opacity: initial; }
-
-  .use-motion .site-title,
-  .use-motion .site-subtitle {
-    opacity: initial;
-    top: initial;
-  }
-
-  .use-motion .logo-line-before i { left: initial; }
-  .use-motion .logo-line-after i { right: initial; }
-  </style>
-</noscript>
-
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage">
-  <div class="container use-motion">
-    <div class="headband"></div>
-
-    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏">
-      <span class="toggle-line toggle-line-first"></span>
-      <span class="toggle-line toggle-line-middle"></span>
-      <span class="toggle-line toggle-line-last"></span>
-    </div>
-  </div>
-
-  <div class="site-meta">
-
-    <div>
-      <a href="/" class="brand" rel="start">
-        <span class="logo-line-before"><i></i></span>
-        <span class="site-title">信安小蚂蚁</span>
-        <span class="logo-line-after"><i></i></span>
-      </a>
-    </div>
-  </div>
-
-  <div class="site-nav-right"></div>
-</div>
-
-
-<nav class="site-nav">
-  
-  <ul id="menu" class="menu">
-        <li class="menu-item menu-item-主页">
-
-    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
-
-  </li>
-        <li class="menu-item menu-item-归档">
-
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
-
-  </li>
-        <li class="menu-item menu-item-分类">
-
-    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
-
-  </li>
-        <li class="menu-item menu-item-标签">
-
-    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
-
-  </li>
-        <li class="menu-item menu-item-关于">
-
-    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
-
-  </li>
-      <li class="menu-item menu-item-search">
-        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
-        </a>
-      </li>
-  </ul>
-
-</nav>
-  <div class="site-search">
-    <div class="popup search-popup">
-    <div class="search-header">
-  <span class="search-icon">
-    <i class="fa fa-search"></i>
-  </span>
-  <div class="search-input-container">
-    <input autocomplete="off" autocorrect="off" autocapitalize="off"
-           placeholder="搜索..." spellcheck="false"
-           type="search" class="search-input">
-  </div>
-  <span class="popup-btn-close">
-    <i class="fa fa-times-circle"></i>
-  </span>
-</div>
-<div id="search-result"></div>
-
-</div>
-<div class="search-pop-overlay"></div>
-
-  </div>
-</div>
-    </header>
-
-    
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
-  </div>
-
-
-    <main class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          
-
-          <div class="content">
-            
-
-  <div class="posts-expand">
+<meta name="twitter:image" content="https://mayi077.github.io/images/1.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Mysql字符集转换漏洞",
+  "url": "https://mayi077.github.io/2020/08/01/Mysql%E5%AD%97%E7%AC%A6%E9%9B%86%E8%BD%AC%E6%8D%A2%E6%BC%8F%E6%B4%9E/",
+  "image": "https://mayi077.github.io/images/1.jpg",
+  "datePublished": "2020-08-01T13:05:36.000Z",
+  "dateModified": "2020-08-01T13:10:03.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "信安小蚂蚁",
+      "url": "https://mayi077.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://mayi077.github.io/2020/08/01/Mysql%E5%AD%97%E7%AC%A6%E9%9B%86%E8%BD%AC%E6%8D%A2%E6%BC%8F%E6%B4%9E/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.5-b1"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
       
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
   
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/08/01/Mysql%E5%AD%97%E7%AC%A6%E9%9B%86%E8%BD%AC%E6%8D%A2%E6%BC%8F%E6%B4%9E/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/1.jpg">
-      <meta itemprop="name" content="信安小蚂蚁">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="信安小蚂蚁">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          Mysql字符集转换漏洞
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-08-01 21:05:36 / 修改时间：21:10:03" itemprop="dateCreated datePublished" datetime="2020-08-01T21:05:36+08:00">2020-08-01</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/" itemprop="url" rel="index">
-                    <span itemprop="name">基础积累</span>
-                  </a>
-                </span>
-            </span>
-
-          
-            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-eye"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span id="busuanzi_value_page_pv"></span>
-            </span><br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-file-word-o"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>2.9k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-clock-o"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>7 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
       
-        <p>测试代码大体如下:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mysql_query(&quot;set names utf8&quot;);</span><br><span class="line">if ($username &#x3D;&#x3D;&#x3D; &#39;admin&#39;) &#123;</span><br><span class="line">    die(&#39;Permission denied!&#39;);</span><br><span class="line">&#125;</span><br><span class="line">$result &#x3D; $mysqli-&gt;query(&quot;SELECT * FROM z_users where username &#x3D; &#39;&#123;$username&#125;&#39; &quot;);</span><br></pre></td></tr></table></figure>
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Mysql字符集转换漏洞',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 5.4.0"></head><body><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">信安小蚂蚁</span></a><a class="nav-page-title" href="/"><span class="site-name">Mysql字符集转换漏洞</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"></div></nav><div id="post-info"><h1 class="post-title">Mysql字符集转换漏洞</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2020-08-01T13:05:36.000Z" title="发表于 2020-08-01 21:05:36">2020-08-01</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-08-01T13:10:03.000Z" title="更新于 2020-08-01 21:10:03">2020-08-01</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/">基础积累</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>测试代码大体如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mysql_query(&quot;set names utf8&quot;);</span><br><span class="line">if ($username === &#x27;admin&#x27;) &#123;</span><br><span class="line">    die(&#x27;Permission denied!&#x27;);</span><br><span class="line">&#125;</span><br><span class="line">$result = $mysqli-&gt;query(&quot;SELECT * FROM z_users where username = &#x27;&#123;$username&#125;&#x27; &quot;);</span><br></pre></td></tr></table></figure>
 
 <h3 id="利用ASCii码来理解"><a href="#利用ASCii码来理解" class="headerlink" title="利用ASCii码来理解"></a>利用ASCii码来理解</h3><p>我们想要绕过，我们可以靠输入16进制进去，然后MySQL无法解析的字符会自动省略。 <strong>值得注意的是，00-1F 是自动忽略，而后面的特殊字符会进行截断</strong><br>测试发现我们输入不可显示的字符的16进制可以绕过，如payload:  </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;test&#x2F;mysql_char.php?username&#x3D;admin%11</span><br></pre></td></tr></table></figure>
-<p>当然这里的<code>%11</code>可以为其它任何的不可显示的字符的十六进制。   <a href="https://blog.csdn.net/jinduozhao/article/details/75398793" target="_blank" rel="noopener">【ASCII码】</a>    </p>
-<a id="more"></a> 
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://127.0.0.1/test/mysql_char.php?username=admin%11</span><br></pre></td></tr></table></figure>
+<p>当然这里的<code>%11</code>可以为其它任何的不可显示的字符的十六进制。   <a target="_blank" rel="noopener" href="https://blog.csdn.net/jinduozhao/article/details/75398793">【ASCII码】</a>    </p>
+<span id="more"></span> 
 
 <p>其实理解为 ASCII码也不能算错，但是这边还有一种理解是关于编码问题的。  </p>
 <h3 id="字符集转换漏洞"><a href="#字符集转换漏洞" class="headerlink" title="字符集转换漏洞"></a>字符集转换漏洞</h3><p>&emsp;因为字符集不同 躲过关键词过滤 进入mysql后产生的截断 恢复关键词查询。</p>
 <h4 id="MySQL语句"><a href="#MySQL语句" class="headerlink" title="MySQL语句"></a>MySQL语句</h4><ol>
 <li>查看字符集 ： <code>show variables like &#39;character_set_%&#39;</code> </li>
-<li>php中设置 客户端字符集 ：<code>set names utf8</code><br>这个语句会修改如下客户端设置：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">character_set_client&#x3D;utf8</span><br><span class="line">character_set_connection&#x3D;utf8</span><br><span class="line">character_set_results&#x3D;utf8</span><br></pre></td></tr></table></figure>
-然后下面这些服务端是不会修改的：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">character_set_database</span><br><span class="line">character_set_server</span><br><span class="line">character_set_filesysytem</span><br><span class="line">character_set_system</span><br></pre></td></tr></table></figure>
+<li>php中设置 客户端字符集 ：<code>set names utf8</code><br>这个语句会修改如下客户端设置：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">character_set_client=utf8</span><br><span class="line">character_set_connection=utf8</span><br><span class="line">character_set_results=utf8</span><br></pre></td></tr></table></figure>
+然后下面这些服务端是不会修改的：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">character_set_database</span><br><span class="line">character_set_server</span><br><span class="line">character_set_filesysytem</span><br><span class="line">character_set_system</span><br></pre></td></tr></table></figure>
 这样就造成了 服务端与客户端 不匹配<br>从而会造成 <strong>字符集转换漏洞</strong></li>
 </ol>
 <h4 id="整体理解一遍"><a href="#整体理解一遍" class="headerlink" title="整体理解一遍"></a>整体理解一遍</h4><blockquote>
 <p>当我们的mysql接受到客户端的数据后，会认为他的编码是character_set_client，然后会将其将换成character_set_connection的编码，然后进入具体表和字段后，再转换成字段对应的编码。<br>当查询结果产生后，会从表和字段的编码，转换成character_set_results编码，返回给客户端。但是编码间的转换是会忽略掉无法解析的数据的，所以就造成了字符集转换漏洞。比如说 Latin1(系统默认) 他是无法处理中文的，但是utf-8 等编码会。</p>
 </blockquote>
 <p>于是我们又做出了如下测试：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">username&#x3D;admin%e4     #在mysql中utf8转为latin1被截断为admin</span><br><span class="line">username&#x3D;admin%e4%bd  #在mysql中utf8转为latin1被截断为admin</span><br><span class="line">username&#x3D;admin%e4%bd%ac  #在mysql中utf8转为latin1失败，出错</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">username=admin%e4     #在mysql中utf8转为latin1被截断为admin</span><br><span class="line">username=admin%e4%bd  #在mysql中utf8转为latin1被截断为admin</span><br><span class="line">username=admin%e4%bd%ac  #在mysql中utf8转为latin1失败，出错</span><br></pre></td></tr></table></figure>
 <p>这里截断原因是，MySQL在字符集转换的时候会自动将不完整的字符忽略。<br>转换出错的原因是，Latin1 不支持汉字。</p>
-<h3 id="关于编码"><a href="#关于编码" class="headerlink" title="关于编码"></a>关于编码</h3><p>这里我们还了解一下 <a href="http://www.ruanyifeng.com/blog/2007/10/ascii_unicode_and_utf-8.html" target="_blank" rel="noopener">【编码理解】</a><br>顺便贴一下 <a href="https://utf8-chartable.de/unicode-utf8-table.pl?number=1024" target="_blank" rel="noopener">【UTF-8查询表】</a>    </p>
+<h3 id="关于编码"><a href="#关于编码" class="headerlink" title="关于编码"></a>关于编码</h3><p>这里我们还了解一下 <a target="_blank" rel="noopener" href="http://www.ruanyifeng.com/blog/2007/10/ascii_unicode_and_utf-8.html">【编码理解】</a><br>顺便贴一下 <a target="_blank" rel="noopener" href="https://utf8-chartable.de/unicode-utf8-table.pl?number=1024">【UTF-8查询表】</a>    </p>
 <p>提取出重点，UTF-8是变长编码，有可能是1~4字节表示:</p>
 <ul>
 <li>一个字节时，字节的范围是[00-7F]</li>
@@ -298,286 +197,17 @@
 </ul>
 <p><strong>其实即使我的所有字符集设置都为 utf8 但是也是存在这个问题的</strong>，我在mysql中测试等出的结论就是会忽略那些 <strong>不太正常的字符</strong> 也有些是截断。  </p>
 <h3 id="利用-两个字节的-字符进行绕过"><a href="#利用-两个字节的-字符进行绕过" class="headerlink" title="利用 两个字节的 字符进行绕过"></a>利用 两个字节的 字符进行绕过</h3><p>如下代码:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">function check_password($str)&#123;</span><br><span class="line">	if(preg_match(&quot;&#x2F;admins&#x2F;i&quot;,$str))&#123;</span><br><span class="line">		return 1;</span><br><span class="line">	&#125;</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>放回 1 就是触发waf了，那么我们怎么绕过？<br>我们可以使用一些特别的字符进行代替 <a href="https://utf8-chartable.de/unicode-utf8-table.pl?number=1024" target="_blank" rel="noopener">【utf8表】</a> 如这个链接里的一些字符就可以代替 a （mysql将它识别为a）截个图：<br><a href="https://pic.downk.cc/item/5f25666714195aa59426c9b8.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5f25666714195aa59426c9b8.jpg" alt=""></a><br>比如这里的这几个就可以代替a，如我们输入以下测试：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:&#x2F;&#x2F;127.0.0.1&#x2F;test&#x2F;mysql_char.php?username&#x3D;%C3%A3dmin</span><br></pre></td></tr></table></figure>
-<p>也是可以通过的（还是文章最前面那个环境） 。<br>这里除了a以为其它许多字符都基本可以找到代替的（b我没有找到），找的话就找长的像的然后一个一个测试。如：<br><a href="https://pic.downk.cc/item/5f25670e14195aa594273560.jpg" target="_blank" rel="noopener"><img data-src="https://pic.downk.cc/item/5f25670e14195aa594273560.jpg" alt=""></a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">function check_password($str)&#123;</span><br><span class="line">	if(preg_match(&quot;/admins/i&quot;,$str))&#123;</span><br><span class="line">		return 1;</span><br><span class="line">	&#125;</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>放回 1 就是触发waf了，那么我们怎么绕过？<br>我们可以使用一些特别的字符进行代替 <a target="_blank" rel="noopener" href="https://utf8-chartable.de/unicode-utf8-table.pl?number=1024">【utf8表】</a> 如这个链接里的一些字符就可以代替 a （mysql将它识别为a）截个图：<br><a target="_blank" rel="noopener" href="https://pic.downk.cc/item/5f25666714195aa59426c9b8.jpg"><img src="https://pic.downk.cc/item/5f25666714195aa59426c9b8.jpg" alt=""></a><br>比如这里的这几个就可以代替a，如我们输入以下测试：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://127.0.0.1/test/mysql_char.php?username=%C3%A3dmin</span><br></pre></td></tr></table></figure>
+<p>也是可以通过的（还是文章最前面那个环境） 。<br>这里除了a以为其它许多字符都基本可以找到代替的（b我没有找到），找的话就找长的像的然后一个一个测试。如：<br><a target="_blank" rel="noopener" href="https://pic.downk.cc/item/5f25670e14195aa594273560.jpg"><img src="https://pic.downk.cc/item/5f25670e14195aa594273560.jpg" alt=""></a></p>
 <h3 id="记一个-payload"><a href="#记一个-payload" class="headerlink" title="记一个 payload"></a>记一个 payload</h3><p>这边题目给的源码是：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">mysql_query(&quot;set names utf8&quot;);</span><br><span class="line">function check_username($str)&#123;</span><br><span class="line">	if(preg_match(&quot;&#x2F;^admin$&#x2F;i&quot;,$str))&#123;</span><br><span class="line">		return 1;</span><br><span class="line">	&#125;                                      </span><br><span class="line">	for($i&#x3D;195;$i&lt;240;$i++)&#123;          </span><br><span class="line">		if(preg_match(&quot;&#x2F;&quot;.chr($i).&quot;&#x2F;i&quot;,$str))&#123;</span><br><span class="line">			return 1;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br><span class="line">function check_password($str)&#123;</span><br><span class="line">	if(preg_match(&quot;&#x2F;admins&#x2F;i&quot;,$str))&#123;</span><br><span class="line">		return 1;</span><br><span class="line">	&#125;</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">$sql&#x3D;&quot;select * from user where username&#x3D;&#39;$username&#39; and password&#x3D;&#39;$password&#39;&quot;;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">mysql_query(&quot;set names utf8&quot;);</span><br><span class="line">function check_username($str)&#123;</span><br><span class="line">	if(preg_match(&quot;/^admin$/i&quot;,$str))&#123;</span><br><span class="line">		return 1;</span><br><span class="line">	&#125;                                      </span><br><span class="line">	for($i=195;$i&lt;240;$i++)&#123;          </span><br><span class="line">		if(preg_match(&quot;/&quot;.chr($i).&quot;/i&quot;,$str))&#123;</span><br><span class="line">			return 1;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br><span class="line">function check_password($str)&#123;</span><br><span class="line">	if(preg_match(&quot;/admins/i&quot;,$str))&#123;</span><br><span class="line">		return 1;</span><br><span class="line">	&#125;</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">$sql=&quot;select * from user where username=&#x27;$username&#x27; and password=&#x27;$password&#x27;&quot;; </span><br><span class="line"> </span><br></pre></td></tr></table></figure>
 <p>但是我觉得正在的源码不是这样的，肯定还有其它的过滤 waf 。利用上面的知识测试和尝试最后得到一个payload（不唯一）</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?username&#x3D;admin%c2&amp;password&#x3D;%C3%A3dmins</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?username=admin%c2&amp;password=%C3%A3dmins</span><br></pre></td></tr></table></figure>
 <p>主要是这个 username 绕过，讲道理 我 <code>%80</code> 等等都可以过的，但是这里就<code>%c2</code> 可以过，应该还是内部控制了其范围。<br>这就记住了 <strong>测试就用%C2</strong> （先用它测）。</p>
-
-    </div>
-
-    
-    
-    
-        
-
-<div>
-<ul class="post-copyright">
-  <li class="post-copyright-author">
-    <strong>本文作者： </strong>信安小蚂蚁
-  </li>
-  <li class="post-copyright-link">
-    <strong>本文链接：</strong>
-    <a href="https://mayi077.github.io/2020/08/01/Mysql%E5%AD%97%E7%AC%A6%E9%9B%86%E8%BD%AC%E6%8D%A2%E6%BC%8F%E6%B4%9E/" title="Mysql字符集转换漏洞">https://mayi077.github.io/2020/08/01/Mysql字符集转换漏洞/</a>
-  </li>
-  <li class="post-copyright-license">
-    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
-  </li>
-</ul>
-</div>
-
-     <div>
-       
-         ﻿<div>
-    
-        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
-    
-</div>
-         
-      </div>
-
-
-      <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/" rel="tag"><i class="fa fa-tag"></i>基础积累</a>
-              <a href="/tags/%E7%BC%96%E7%A0%81/" rel="tag"><i class="fa fa-tag"></i>编码</a>
-          </div>
-
-        
-
-
-        
-    <div class="post-nav">
-      <div class="post-nav-item">
-    <a href="/2020/07/30/BUUCTF-2018-Online-Tool/" rel="prev" title="[BUUCTF 2018]Online Tool">
-      <i class="fa fa-chevron-left"></i> [BUUCTF 2018]Online Tool
-    </a></div>
-      <div class="post-nav-item">
-    <a href="/2020/08/09/phpfilter%E4%BC%AA%E5%8D%8F%E8%AE%AE%E8%AF%BB%E5%8F%96%E6%BA%90%E7%A0%81/" rel="next" title="php://filter伪协议读取源码">
-      php://filter伪协议读取源码 <i class="fa fa-chevron-right"></i>
-    </a></div>
-    </div>
-      </footer>
-    
-  </article>
-  
-  
-  
-
-  </div>
-
-
-          </div>
-          
-    <div class="comments" id="gitalk-container"></div>
-
-<script>
-  window.addEventListener('tabs:register', () => {
-    let activeClass = CONFIG.comments.activeClass;
-    if (CONFIG.comments.storage) {
-      activeClass = localStorage.getItem('comments_active') || activeClass;
-    }
-    if (activeClass) {
-      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
-      if (activeTab) {
-        activeTab.click();
-      }
-    }
-  });
-  if (CONFIG.comments.storage) {
-    window.addEventListener('tabs:click', event => {
-      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
-      let commentClass = event.target.classList[1];
-      localStorage.setItem('comments_active', commentClass);
-    });
-  }
-</script>
-
-        </div>
-          
-  
-  <div class="toggle sidebar-toggle">
-    <span class="toggle-line toggle-line-first"></span>
-    <span class="toggle-line toggle-line-middle"></span>
-    <span class="toggle-line toggle-line-last"></span>
-  </div>
-
-  <aside class="sidebar">
-    <div class="sidebar-inner">
-
-      <ul class="sidebar-nav motion-element">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
-      </ul>
-
-      <!--noindex-->
-      <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#利用ASCii码来理解"><span class="nav-number">1.</span> <span class="nav-text">利用ASCii码来理解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#字符集转换漏洞"><span class="nav-number">2.</span> <span class="nav-text">字符集转换漏洞</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#MySQL语句"><span class="nav-number">2.1.</span> <span class="nav-text">MySQL语句</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#整体理解一遍"><span class="nav-number">2.2.</span> <span class="nav-text">整体理解一遍</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#关于编码"><span class="nav-number">3.</span> <span class="nav-text">关于编码</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#mysql-UTF-8-特性"><span class="nav-number">3.1.</span> <span class="nav-text">mysql UTF-8 特性</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#利用-两个字节的-字符进行绕过"><span class="nav-number">4.</span> <span class="nav-text">利用 两个字节的 字符进行绕过</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#记一个-payload"><span class="nav-number">5.</span> <span class="nav-text">记一个 payload</span></a></li></ol></div>
-      </div>
-      <!--/noindex-->
-
-      <div class="site-overview-wrap sidebar-panel">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
-      src="/images/1.jpg">
-  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
-  <div class="site-description" itemprop="description"></div>
-</div>
-<div class="site-state-wrap motion-element">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-          <a href="/archives">
-          <span class="site-state-item-count">135</span>
-          <span class="site-state-item-name">日志</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-categories">
-            <a href="/categories/">
-        <span class="site-state-item-count">11</span>
-        <span class="site-state-item-name">分类</span></a>
-      </div>
-      <div class="site-state-item site-state-tags">
-            <a href="/tags/">
-        <span class="site-state-item-count">86</span>
-        <span class="site-state-item-name">标签</span></a>
-      </div>
-  </nav>
-</div>
-  <div class="links-of-author motion-element">
-      <span class="links-of-author-item">
-        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
-      </span>
-      <span class="links-of-author-item">
-        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
-      </span>
-  </div>
-  <div class="cc-license motion-element" itemprop="license">
-    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
-  </div>
-
-
-
-      </div>
-
-    </div>
-  </aside>
-  <div id="sidebar-dimmer"></div>
-
-
-      </div>
-    </main>
-
-    <footer class="footer">
-      <div class="footer-inner">
-        
-
-<div class="copyright">
-  
-  &copy; 
-  <span itemprop="copyrightYear">2026</span>
-  <span class="with-love">
-    <i class="fa fa-user"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
-</div>
-
-
-
-
-
-
-
-
-
-        
-<div class="busuanzi-count">
-  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-</div>
-
-
-
-
-
-
-
-
-      </div>
-    </footer>
-  </div>
-
-  
-  <script src="/lib/anime.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
-  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
-  <script src="/lib/velocity/velocity.min.js"></script>
-  <script src="/lib/velocity/velocity.ui.min.js"></script>
-
-<script src="/js/utils.js"></script>
-
-<script src="/js/motion.js"></script>
-
-
-<script src="/js/schemes/muse.js"></script>
-
-
-<script src="/js/next-boot.js"></script>
-
-
-
-
-  
-
-
-
-
-  
-<script src="/js/local-search.js"></script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-
-  
-
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.8.0/dist/gitalk.min.css">
-
-<script>
-NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
-  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1.8.0/dist/gitalk.min.js', () => {
-    var gitalk = new Gitalk({
-      clientID    : 'Ov23li6cOHoOwCcszzi9',
-      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
-      repo        : 'mayi077.github.io',
-      owner       : 'mayi077',
-      admin       : ['mayi077'],
-      id          : 'cba42058614f20027893d0927763bf7c',
-        language: 'zh-CN',
-      distractionFreeMode: true,
-      enablePKCE: true
-    });
-    gitalk.render('gitalk-container');
-  }, window.Gitalk);
-});
-</script>
-
-</body>
-</html>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://mayi077.github.io">信安小蚂蚁</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://mayi077.github.io/2020/08/01/Mysql%E5%AD%97%E7%AC%A6%E9%9B%86%E8%BD%AC%E6%8D%A2%E6%BC%8F%E6%B4%9E/">https://mayi077.github.io/2020/08/01/Mysql%E5%AD%97%E7%AC%A6%E9%9B%86%E8%BD%AC%E6%8D%A2%E6%BC%8F%E6%B4%9E/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://mayi077.github.io" target="_blank">信安小蚂蚁</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/">基础积累</a><a class="post-meta__tags" href="/tags/%E7%BC%96%E7%A0%81/">编码</a></div><div class="post-share"><div class="social-share" data-image="/images/1.jpg" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2020/08/09/phpfilter%E4%BC%AA%E5%8D%8F%E8%AE%AE%E8%AF%BB%E5%8F%96%E6%BA%90%E7%A0%81/" title="php://filter伪协议读取源码"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">php://filter伪协议读取源码</div></div><div class="info-2"><div class="info-item-1">php://filter 是什么？&emsp;我的理解是，它是一个中间流处理器。就是说，我们 发送/接收 的数据先经过它的处理再发送给 内部/外部 。根据它的名字也不难判断，他本意是用来进行数据的过滤。&emsp;它一般有以下可用的参数：     参数 描述 备注    resource=&lt;要过滤的数据流&gt; 指定了你要筛选过滤的数据流。 必选   read=&lt;读链的筛选列表&gt; 可以设定一个或多个过滤器名称，以管道符（|）分隔。 可选   write=&lt;写链的筛选列表&gt; 可以设定一个或多个过滤器名称，以管道符（|）分隔。 可选   没有以read= 或 write= 作为前缀的筛选器会视情况应用于写或读。&emsp;我一般遇到的多是需要读的也就是read=，运用它的前提是要有 类似 include、require、include_once、require_once、file_get_contents、readfile 这些，就是会读取文件内容的。&emsp;而写的话，一般就类似 file_put_contents 类似的函数会进行写操作的。 常用...</div></div></div></a><a class="pagination-related" href="/2020/07/30/BUUCTF-2018-Online-Tool/" title="[BUUCTF 2018]Online Tool"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">[BUUCTF 2018]Online Tool</div></div><div class="info-2"><div class="info-item-1">知识点 escapeshellarg和escapeshellcmd使用不当 namp  -oG 1.php可以写入一个文件  escapeshellarg和escapeshellcmd使用不当贴一个地址看看2个函数的作用吧    这边正常的话，例如我们输入 127.0.0.1&#39; -oG  经过 escapeshellarg处理后就变成了&#39;127.0.0.1&#39;\&#39;&#39; -oG &#39; 也就是发现单引号进行转义，且以它为中心分割为三部分（在两边加单引号） 。随后在进经过escapeshellcmd 时变成：&#39;127.0.0.1&#39;\\&#39;&#39; -oG \&#39;也就是将不成对的单引号及任意\进行添加\的操作。而此时我们想得到shell需要写入一个shell文件我们想要正常执行&lt;?php phpinfo(); ?&gt; -oG 1.php但是经过上面的函数处理后变成了一个被单引号包围的字符串，不会当命令去执行，这里我们需要闭合一个单引号。怎么闭合呢？我们举个例子; 1234567我们payload为 1&#x...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2020/05/09/MRCTF2020-Ezpop/" title="[MRCTF2020]Ezpop"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-05-09</div><div class="info-item-2">[MRCTF2020]Ezpop</div></div><div class="info-2"><div class="info-item-1">我还是太菜了呀。 题目给了源码12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849 &lt;?phpclass Modifier &#123;    protected  $var;    public function append($value)&#123;        include($value); //可以使用伪协议    &#125;    public function __invoke()&#123; //调用函数的方式调用一个对象时的回应方法        $this-&gt;append($this-&gt;var);    &#125;&#125;class Show&#123;    public $source;    public $str;    public function __construct($file=&#x27;index.php&#x27;)&#123;        $this-&gt;source = $...</div></div></div></a><a class="pagination-related" href="/2020/10/05/java%E5%8F%8D%E5%B0%84%E5%9F%BA%E7%A1%80-%E8%AE%BF%E9%97%AE%E7%B1%BB%E5%AD%97%E6%AE%B5%E5%8F%8A%E8%B0%83%E7%94%A8%E7%B1%BB%E6%96%B9%E6%B3%95/" title="java反射基础--访问类字段及调用类方法"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-10-05</div><div class="info-item-2">java反射基础--访问类字段及调用类方法</div></div><div class="info-2"><div class="info-item-1">Class 类在学习 java 反射之前，我们先来看看 Class类。我们知道所有的 class 的本质都是一个数据类型。而 JVM 在第一次读取到一种class 类型时会将其加载进内存。每加载一种class，JVM都会为其创建一个Class类型的实例，并关联起来。这里我们需要注意 Class 它只是一个名字比较特殊的class类，我们可以理解它长这个样子: 123public final class Class &#123;    private Class() &#123;&#125;&#125;  JVM为每个加载了的class都创建了对应的Class实例，并且这个实例中保存了该class的所有信息。也就是说，如果我们获取到了某个Class实例，我们就可以通过这个实例获取到对应的class所有信息。 如何获取到一个 class的 Class实例？示例代码： 1234567891011121314package test1;public class reflect &#123;	public static void main(String[] args) &#123;		Pe...</div></div></div></a><a class="pagination-related" href="/2020/01/12/burpsuit%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/" title="burpsuit的基本使用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-01-12</div><div class="info-item-2">burpsuit的基本使用</div></div><div class="info-2"><div class="info-item-1">前言：&emsp;Burp Suite 是用于攻击web 应用程序的集成平台。它包含了许多Burp工具，这些不同的burp工具通过协同工作，有效的分享信息，支持以某种工具中的信息为基础供另一种工具使用的方式发起攻击。就我现在而言它是必须用到的一款工具，主要用它来达到抓包、改包、重放攻击和爆破的目的，那么接下来我会着重讲讲怎么才能达到这些目的。   一、BurpSuite的安装&emsp;因为它是基于Java开发的所以安装burp会用到jdk，所以必须先配置好jdk , 下载安装自行百度。&emsp;因为它是一款收费软件，所以软件资源需要自行寻找，当然可以直接联系我qq：487280636（请注明来意）  这里我有一个打开burp suite非常方便的bat脚本文件如：点击同意即可进入。 如果没有这个bat的话那么我们按常规的来，直接打开得到：我们按下一步，接着再下一步不用管。  经过上面的任意一种方法后都可成功安装（每次启动都要重复这些步骤） 二、Burp Suite的基本配置 配置 Burp suite 代理 ，打开burp 选择 proxy—–&gt;options记住这里的...</div></div></div></a><a class="pagination-related" href="/2020/04/24/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-in-array%E5%87%BD%E6%95%B0%E7%9A%84%E7%BC%BA%E9%99%B7/" title="代码审计-- in_array函数的缺陷"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-04-24</div><div class="info-item-2">代码审计-- in_array函数的缺陷</div></div><div class="info-2"><div class="info-item-1">前言：&emsp;接下来一段时间，我将学习红日安全推出的   PHP代码审计模块 【题目都来自这里】  源代码123456789101112131415161718192021class Challenge &#123;  const UPLOAD_DIRECTORY = &#x27;./solutions/&#x27;;  private $file;  private $whitelist;  public function __construct($file) &#123;    $this-&gt;file = $file;    $this-&gt;whitelist = range(1, 24);  &#125;  public function __destruct() &#123;    if (in_array($this-&gt;file[&#x27;name&#x27;], $this-&gt;whitelist)) &#123;      move_uploaded_file(        $this-&gt;file[&#x27;tmp_name&#x...</div></div></div></a><a class="pagination-related" href="/2020/01/29/2017%E7%99%BE%E5%BA%A6%E6%9D%AF-%E4%BA%8C%E6%9C%88%E5%9C%BA-Zone/" title="2017百度杯-二月场-Zone"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-01-29</div><div class="info-item-2">2017百度杯-二月场-Zone</div></div><div class="info-2"><div class="info-item-1">前言：&emsp;一直打buu的web有点难受呀，于是去了“i春秋”做了2题。这里主要记录一下 Zone， 不看别人wp我死也写不出来呀。冲呀，我要争取有机会去打蓝帽杯，加油！！好运来！！ 0X01 解题过程 打开链接，弹出以下提示框    &emsp;    单击确定后进入登入页面，无论输入什么账户和密码都弹出以下提示框并且登入失败。    &emsp;    尝试burp抓包发现cookie中有个login，值为0，将0改为1后在访问首页，发现可以正常登入（乱码不用管）  单击 “manage” （此时还是需要用burp改login的值），发现url出现/manages/admin.php?module=index&amp;name=php显然module有可能存在文件包含，经过测试发现会将../替换为空，于是我们尝试一下是否可以包含使用manages/admin.php?module=....//....//....//....//etc/passwd&amp;name=注意，name后面最好不加东西为啥我也不知道。&emsp;    接着就查看nginx.conf文件，因...</div></div></div></a><a class="pagination-related" href="/2020/03/10/SVN-%E6%B3%84%E6%BC%8F-%E5%8F%8A-%E5%88%A9%E7%94%A8%E5%B7%A5%E5%85%B7/" title="SVN 泄漏 及 利用工具"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-03-10</div><div class="info-item-2">SVN 泄漏 及 利用工具</div></div><div class="info-2"><div class="info-item-1">前言：&emsp; 安装工具费了老多的时间，最后只是因为服务器响应慢导致的，气煞我也。不过也对linux 多了一点点了解。&emsp;总结下就是学会看帮助文档，学会看错误提示，学会百度谷歌，学会实践。 SVN 是个什么东西&emsp;SVN（Subversion）是一个开放源代码的版本控制系统，与使用Git版本控制器类似。在服务器上布署代码时。如果是使用 svn checkout 功能来更新代码，而没有配置好目录访问权限，则会存在此漏洞。黑客利用此漏洞，可以下载整套网站的源代码。 svn 目录&emsp;使用 svn checkout 后，项目目录会产生一个隐藏的 .svn文件夹。&emsp;svn1.6及以前版本会在项目的每个文件夹都生成一个.svn 文件夹，里面包含了所有文件的备份。&emsp;svn1.7 及以后版本只在项目根目录生成一个.svn文件夹，里面的pristime文件夹里包含了整个项目的所有文件备份。它里面有一堆 00到ff 的文件夹，每个文件夹里有若干个.svn-base 文件，文件命名规则是文件原名的哈希值，然后文件夹名称其实是文件的开头2位数。&emsp;...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/images/1.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">信安小蚂蚁</div><div class="author-info-description"></div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">135</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">86</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/mayi077"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">2020–2021，这里记录了 100+ 篇文字。
+后来因工作入职，暂时搁笔。
+2026，重新起航。
+继续写下去。
+</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A9%E7%94%A8ASCii%E7%A0%81%E6%9D%A5%E7%90%86%E8%A7%A3"><span class="toc-number">1.</span> <span class="toc-text">利用ASCii码来理解</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E9%9B%86%E8%BD%AC%E6%8D%A2%E6%BC%8F%E6%B4%9E"><span class="toc-number">2.</span> <span class="toc-text">字符集转换漏洞</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#MySQL%E8%AF%AD%E5%8F%A5"><span class="toc-number">2.1.</span> <span class="toc-text">MySQL语句</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%95%B4%E4%BD%93%E7%90%86%E8%A7%A3%E4%B8%80%E9%81%8D"><span class="toc-number">2.2.</span> <span class="toc-text">整体理解一遍</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B3%E4%BA%8E%E7%BC%96%E7%A0%81"><span class="toc-number">3.</span> <span class="toc-text">关于编码</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#mysql-UTF-8-%E7%89%B9%E6%80%A7"><span class="toc-number">3.1.</span> <span class="toc-text">mysql UTF-8 特性</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A9%E7%94%A8-%E4%B8%A4%E4%B8%AA%E5%AD%97%E8%8A%82%E7%9A%84-%E5%AD%97%E7%AC%A6%E8%BF%9B%E8%A1%8C%E7%BB%95%E8%BF%87"><span class="toc-number">4.</span> <span class="toc-text">利用 两个字节的 字符进行绕过</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%B0%E4%B8%80%E4%B8%AA-payload"><span class="toc-number">5.</span> <span class="toc-text">记一个 payload</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/04/20/2026-04-20-TLS%E5%8A%A0%E5%AF%86%E5%A5%97%E4%BB%B6/" title="TLS加密套件">TLS加密套件</a><time datetime="2026-04-20T14:30:00.000Z" title="发表于 2026-04-20 22:30:00">2026-04-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/04/20/2026-04-20-AI-Agent-%E6%9E%B6%E6%9E%84/" title="AI Agent 架构">AI Agent 架构</a><time datetime="2026-04-19T16:00:00.000Z" title="发表于 2026-04-20 00:00:00">2026-04-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2021/04/15/PHP-%E6%AD%A3%E5%88%99%E7%9A%84-m%E5%A4%9A%E8%A1%8C%E6%A8%A1%E5%BC%8F/" title="PHP 正则的 m多行模式">PHP 正则的 m多行模式</a><time datetime="2021-04-15T00:54:31.000Z" title="发表于 2021-04-15 08:54:31">2021-04-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2021/04/14/vulnstack-ATT-CK%E5%AE%9E%E6%88%98%E7%B3%BB%E5%88%97-%E7%BA%A2%E9%98%9F%E5%AE%9E%E6%88%98%EF%BC%88%E4%B8%80%EF%BC%89/" title="vulnstack-ATT&amp;CK实战系列 红队实战（一）">vulnstack-ATT&amp;CK实战系列 红队实战（一）</a><time datetime="2021-04-14T12:46:10.000Z" title="发表于 2021-04-14 20:46:10">2021-04-14</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2021/04/09/%E5%9F%9F%E5%86%85%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8/" title="域内横向移动">域内横向移动</a><time datetime="2021-04-09T07:56:53.000Z" title="发表于 2021-04-09 15:56:53">2021-04-09</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 信安小蚂蚁</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 5.4.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.5-b1</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.5-b1"></script><script src="/js/main.js?v=5.5.5-b1"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

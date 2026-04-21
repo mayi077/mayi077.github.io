@@ -1,1039 +1,247 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
-<meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.1">
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/tu.ico">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/tu.ico">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/tu.ico">
-  <link rel="mask-icon" href="/images/tu.ico" color="#222">
-
-<link rel="stylesheet" href="/css/main.css">
-
-
-<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
-
-<script id="hexo-configurations">
-    var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"mayi077.github.io","root":"/","scheme":"Mist","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"ture","show_result":"ture","style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":"ture","mediumzoom":false,"lazyload":"ture","pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":"ture","preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
-  </script>
-
-  <meta property="og:type" content="website">
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>信安小蚂蚁</title><meta name="author" content="信安小蚂蚁"><meta name="copyright" content="信安小蚂蚁"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta property="og:type" content="website">
 <meta property="og:title" content="信安小蚂蚁">
 <meta property="og:url" content="https://mayi077.github.io/index.html">
 <meta property="og:site_name" content="信安小蚂蚁">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://mayi077.github.io/images/1.jpg">
 <meta property="article:author" content="信安小蚂蚁">
 <meta name="twitter:card" content="summary">
-
-<link rel="canonical" href="https://mayi077.github.io/">
-
-
-<script id="page-configurations">
-  // https://hexo.io/docs/variables.html
-  CONFIG.page = {
-    sidebar: "",
-    isHome: true,
-    isPost: false
-  };
-</script>
-
-  <title>信安小蚂蚁</title>
-  
-
-
-
-
-
-
-  <noscript>
-  <style>
-  .use-motion .brand,
-  .use-motion .menu-item,
-  .sidebar-inner,
-  .use-motion .post-block,
-  .use-motion .pagination,
-  .use-motion .comments,
-  .use-motion .post-header,
-  .use-motion .post-body,
-  .use-motion .collection-header { opacity: initial; }
-
-  .use-motion .site-title,
-  .use-motion .site-subtitle {
-    opacity: initial;
-    top: initial;
-  }
-
-  .use-motion .logo-line-before i { left: initial; }
-  .use-motion .logo-line-after i { right: initial; }
-  </style>
-</noscript>
-
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage">
-  <div class="container use-motion">
-    <div class="headband"></div>
-
-    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏">
-      <span class="toggle-line toggle-line-first"></span>
-      <span class="toggle-line toggle-line-middle"></span>
-      <span class="toggle-line toggle-line-last"></span>
-    </div>
-  </div>
-
-  <div class="site-meta">
-
-    <div>
-      <a href="/" class="brand" rel="start">
-        <span class="logo-line-before"><i></i></span>
-        <span class="site-title">信安小蚂蚁</span>
-        <span class="logo-line-after"><i></i></span>
-      </a>
-    </div>
-  </div>
-
-  <div class="site-nav-right"></div>
-</div>
-
-
-<nav class="site-nav">
-  
-  <ul id="menu" class="menu">
-        <li class="menu-item menu-item-主页">
-
-    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>主页</a>
-
-  </li>
-        <li class="menu-item menu-item-归档">
-
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
-
-  </li>
-        <li class="menu-item menu-item-分类">
-
-    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
-
-  </li>
-        <li class="menu-item menu-item-标签">
-
-    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
-
-  </li>
-        <li class="menu-item menu-item-关于">
-
-    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
-
-  </li>
-      <li class="menu-item menu-item-search">
-        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
-        </a>
-      </li>
-  </ul>
-
-</nav>
-  <div class="site-search">
-    <div class="popup search-popup">
-    <div class="search-header">
-  <span class="search-icon">
-    <i class="fa fa-search"></i>
-  </span>
-  <div class="search-input-container">
-    <input autocomplete="off" autocorrect="off" autocapitalize="off"
-           placeholder="搜索..." spellcheck="false"
-           type="search" class="search-input">
-  </div>
-  <span class="popup-btn-close">
-    <i class="fa fa-times-circle"></i>
-  </span>
-</div>
-<div id="search-result"></div>
-
-</div>
-<div class="search-pop-overlay"></div>
-
-  </div>
-</div>
-    </header>
-
-    
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
-  </div>
-
-
-    <main class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          
-
-          <div class="content">
-            
-
-  <div class="posts-expand">
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2026/04/20/2026-04-20-TLS%E5%8A%A0%E5%AF%86%E5%A5%97%E4%BB%B6/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/1.jpg">
-      <meta itemprop="name" content="信安小蚂蚁">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="信安小蚂蚁">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/04/20/2026-04-20-TLS%E5%8A%A0%E5%AF%86%E5%A5%97%E4%BB%B6/" class="post-title-link" itemprop="url">TLS加密套件</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2026-04-20 22:30:00 / 修改时间：22:28:12" itemprop="dateCreated datePublished" datetime="2026-04-20T22:30:00+08:00">2026-04-20</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/" itemprop="url" rel="index">
-                    <span itemprop="name">密码学</span>
-                  </a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-file-word-o"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>4.1k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-clock-o"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>10 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
+<meta name="twitter:image" content="https://mayi077.github.io/images/1.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "信安小蚂蚁",
+  "alternateName": [
+    "mayi077.github.io"
+  ],
+  "url": "https://mayi077.github.io/"
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://mayi077.github.io/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.5-b1"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
       
-          <p><img data-src="image1.png" alt="TLS加密套件"></p>
-<h2 id="SSL-TLS-握手过程"><a href="#SSL-TLS-握手过程" class="headerlink" title="SSL/TLS 握手过程"></a>SSL/TLS 握手过程</h2><p>首先得完成传输层的握手，然后进入SSL握手阶段：</p>
-<ol>
-<li><p>客户端发送Client Hello Message，表明自己可以使用的SSL版本（从高到低尝试）、加密套件及相应参数如：</p>
-<ol>
-<li>client_version(SSL版本)：TLS1.2</li>
-<li>random：客户端随机数，用于后续协商密钥。</li>
-<li>cipher_suites：支持的加密套件列表（由高到低排序）。</li>
-<li>compression_methods：压缩算法列表（由高到低排序）。为null，表示不要压缩<br><img data-src="image2.png" alt="TLS加密套件"></li>
-</ol>
-</li>
-<li><p>服务器接收到ClientHello后，会返回ServerHello。服务器从客户端在ClientHello中提供的密码套件、SSL/TLS版本、压缩算法列表里选择它所支持的项，并把它的选择包含在ServerHello中告知客户端。</p>
-<ul>
-<li>服务器也用TLS 1.2；提供服务器随机数；没有找到这个客户端的SessionID，所以填入了新的SessionID；选择了TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA384加密套件；同意不压缩数据；<br><img data-src="image3.png" alt="TLS加密套件"></li>
-</ul>
-</li>
-<li><p><strong>Server -&gt; Client</strong>：Certificate、Server Key Exchange、Certificate Request、ServerHello Done：</p>
-<ul>
-<li>Certificate服务器证书：和<strong>所选密钥套件中密钥交换算法（Key Exchange）匹配</strong>，用于客户端验证服务器身份和交换密钥的X.509证书。</li>
-<li>Server Key Exchange服务器密钥交换信息：如果<strong>服务器没有证书，或者服务器的证书仅用来签名</strong>（如DSS证书、签名RSA证书），那么就需要发送这条消息。</li>
-<li>Certificate Request证书请求：<strong>要求客户端也发送它的证书，让服务端校验客户端的身份。</strong>（可选）</li>
-<li>Server Hello Done：一条简单的表明状态的空消息。<br><img data-src="image4.png" alt="TLS加密套件"></li>
-</ul>
-</li>
-<li><p><strong>客户端校验服务端身份</strong></p>
-<ol>
-<li>如果发现证书不合法，客户端可以发起告警信息。</li>
-</ol>
-</li>
-<li><p><strong>Client –&gt; Server：</strong>Certificate Verify、Change Cipher Spec、Encrypted Handshake Message</p>
-<ul>
-<li>Certificate客户端证书<strong>：</strong>如果服务器发送了”Certificate Request”，要求校验客户端身份，那么客户端需要回应自己的证书。如果客户端没有合适的证书，直接抛出告警信息让服务端处理（<strong>服务端的处理方式通常就是断开TCP连接</strong>）。和所选密钥套件中密钥交换算法（Key Exchange）匹配的，用于服务器验证客户端身份的X.509证书。</li>
-<li>Client Key Exchange客户端密钥交换信息：合法性校验通过后，客户端计算产生随机数字Pre-master，并用证书公钥加密，发送给服务器</li>
-<li>Change Cipher Spec更换加密规约<br><img data-src="image5.png" alt="TLS加密套件"></li>
-</ul>
-</li>
-<li><p><strong>服务端回应客户端</strong></p>
-<ol>
-<li>****服务端同样地发送Change Cipher Spec、Finish（Encrypted Handshake Message）消息，然后开始数据传输。<br><img data-src="image6.png" alt="TLS加密套件"></li>
-</ol>
-</li>
-</ol>
-<h2 id="TLS-加密套件"><a href="#TLS-加密套件" class="headerlink" title="TLS 加密套件"></a>TLS 加密套件</h2><p>TLS 使用到的认证加密算法、完整性校验算法、密钥协商算法、数字签名算法等，这些算法都是要配合使用的（单独使用无法保证信息安全传输），各类算法相互组合可以形成一套套加密方案。TLS 握手阶段，服务器与客户端需要协商都使用哪些加密算法，如果逐个协商显然效率较低，TLS将可用的加密算法组合为一个个密码套件，<strong>服务器与客户端只要协商一种密码套件，就确定了整个加密方案中用到的所有加密算法，能提高通信效率</strong>。</p>
-<h3 id="加密套件格式说明："><a href="#加密套件格式说明：" class="headerlink" title="加密套件格式说明："></a>加密套件格式说明：</h3><p><img data-src="image7.png" alt="TLS加密套件"></p>
-<p><img data-src="image8.png" alt="TLS加密套件"></p>
-<blockquote>
-<p>💡 TLS（传输层安全性）协议各版本都包含了一系列的加密套件，这些套件可能因为新的安全研究、攻击方法的发现或更高效的算法的出现而被认为是不安全的。随着TLS版本的更新，一些加密套件被废弃，因为它们不再能提供足够的安全性。以下是各个TLS版本中被认为不安全的加密套件及其原因：</p>
-</blockquote>
-<h3 id="TLS-1-1-中的不安全加密套件："><a href="#TLS-1-1-中的不安全加密套件：" class="headerlink" title="TLS 1.1 中的不安全加密套件："></a>TLS 1.1 中的不安全加密套件：</h3><ul>
-<li><strong>使用RC4加密算法的套件</strong>：RC4是一种流密码，它受到多种攻击的影响，例如密钥恢复攻击和偏差攻击，导致其不再安全。</li>
-<li><strong>使用DES或3DES加密算法的套件</strong>：DES由于其较短的密钥长度（56位）很容易受到暴力破解攻击。3DES虽然比DES安全，但是因为它的有效密钥长度（112位）也逐渐变得不够安全，以及运算速度慢，因此不再推荐使用。</li>
-<li><strong>使用MD5或SHA-1散列函数的套件</strong>：MD5和SHA-1都受到了碰撞攻击的影响，这意味着可以找到两个不同的输入产生相同的散列输出，从而破坏了其安全性。</li>
-</ul>
-<h3 id="TLS-1-2-中的不安全加密套件："><a href="#TLS-1-2-中的不安全加密套件：" class="headerlink" title="TLS 1.2 中的不安全加密套件："></a>TLS 1.2 中的不安全加密套件：</h3><ul>
-<li><strong>TLS 1.2继承了TLS 1.1的很多套件，并在此基础上添加了新的套件</strong>。虽然TLS 1.2引入了更多安全的选项，如AES-GCM，但它仍然支持一些不安全的套件，比如：</li>
-<li><strong>使用CBC模式的块密码套件</strong>：这些套件受到各种攻击的影响，如Padding Oracle攻击和Lucky Thirteen攻击，这些攻击可以导致信息泄露。</li>
-<li><strong>使用RSA加密而不是前向保密的密钥交换套件</strong>：如果服务器的RSA私钥被破解，那么之前的所有使用该密钥的通信都可以被解密，而前向保密的套件如DHE或ECDHE可以避免这个问题。</li>
-</ul>
-<h3 id="TLS-1-3-中废弃的不安全套件："><a href="#TLS-1-3-中废弃的不安全套件：" class="headerlink" title="TLS 1.3 中废弃的不安全套件："></a>TLS 1.3 中废弃的不安全套件：</h3><p>TLS 1.3大幅减少了支持的加密套件，只保留了认为是安全的套件。TLS 1.3中废弃了所有以下类型的套件：</p>
-<ul>
-<li><strong>所有使用CBC模式的块密码套件</strong>。</li>
-<li><strong>所有使用RC4、DES或3DES的套件</strong>。</li>
-<li><strong>所有使用MD5或SHA-1的套件</strong>。</li>
-<li><strong>不支持前向保密的套件</strong>，比如那些使用RSA密钥交换的套件。</li>
-<li><strong>所有使用静态密钥交换的套件</strong>（例如固定DH）。</li>
-</ul>
-<p>TLS 1.3只支持使用AEAD（Authenticated Encryption with Associated Data）密码算法的套件，如AES-GCM和ChaCha20-Poly1305，以及使用更安全的散列算法SHA-256和SHA-384的套件。这些更改反映了不断提高的安全标准和对用户数据保护的重视。</p>
-<h3 id="TLS1-3-密码套件"><a href="#TLS1-3-密码套件" class="headerlink" title="TLS1.3 密码套件"></a>TLS1.3 密码套件</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">TLS13-AES128-GCM-SHA256</span><br><span class="line">TLS13-AES256-GCM-SHA384</span><br><span class="line">TLS13-CHACHA20-POLY1305-SHA256</span><br><span class="line">TLS13-AES128-CCM-SHA256</span><br><span class="line">TLS13-AES128-CCM-8-SHA256</span><br></pre></td></tr></table></figure>
-
-<h3 id="TLS1-2-密码套件"><a href="#TLS1-2-密码套件" class="headerlink" title="TLS1.2 密码套件"></a>TLS1.2 密码套件</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">TLS_RSA_WITH_NULL_SHA256</span><br><span class="line">TLS_RSA_WITH_AES_128_CBC_SHA256</span><br><span class="line">TLS_RSA_WITH_AES_256_CBC_SHA256</span><br><span class="line">TLS_RSA_WITH_AES_128_GCM_SHA256</span><br><span class="line">TLS_RSA_WITH_AES_256_GCM_SHA384</span><br><span class="line">TLS_DH_RSA_WITH_AES_128_CBC_SHA256</span><br><span class="line">TLS_DH_RSA_WITH_AES_256_CBC_SHA256</span><br><span class="line">TLS_DH_RSA_WITH_AES_128_GCM_SHA256</span><br><span class="line">TLS_DH_RSA_WITH_AES_256_GCM_SHA384</span><br><span class="line">TLS_DH_DSS_WITH_AES_128_CBC_SHA256</span><br><span class="line">TLS_DH_DSS_WITH_AES_256_CBC_SHA256</span><br><span class="line">TLS_DH_DSS_WITH_AES_128_GCM_SHA256</span><br><span class="line">TLS_DH_DSS_WITH_AES_256_GCM_SHA384</span><br><span class="line">TLS_DHE_RSA_WITH_AES_128_CBC_SHA256</span><br><span class="line">TLS_DHE_RSA_WITH_AES_256_CBC_SHA256</span><br><span class="line">TLS_DHE_RSA_WITH_AES_128_GCM_SHA256</span><br><span class="line">TLS_DHE_RSA_WITH_AES_256_GCM_SHA384</span><br><span class="line">TLS_DHE_DSS_WITH_AES_128_CBC_SHA256</span><br><span class="line">TLS_DHE_DSS_WITH_AES_256_CBC_SHA256</span><br><span class="line">TLS_DHE_DSS_WITH_AES_128_GCM_SHA256</span><br><span class="line">TLS_DHE_DSS_WITH_AES_256_GCM_SHA384</span><br><span class="line">TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256</span><br><span class="line">TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384</span><br><span class="line">TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256</span><br><span class="line">TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384</span><br><span class="line">TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256</span><br><span class="line">TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384</span><br><span class="line">TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256</span><br><span class="line">TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384</span><br><span class="line">TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256</span><br><span class="line">TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384</span><br><span class="line">TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256</span><br><span class="line">TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384</span><br><span class="line">TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256</span><br><span class="line">TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384</span><br><span class="line">TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256</span><br><span class="line">TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384</span><br><span class="line">TLS_DH_anon_WITH_AES_128_CBC_SHA256</span><br><span class="line">TLS_DH_anon_WITH_AES_256_CBC_SHA256</span><br><span class="line">TLS_DH_anon_WITH_AES_128_GCM_SHA256</span><br><span class="line">TLS_DH_anon_WITH_AES_256_GCM_SHA384</span><br></pre></td></tr></table></figure>
-
-
-<h2 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h2><p><a href="https%3A%2F%2Fm01ly.github.io%2F2021%2F07%2F06%2Fhtps-recommend%2F">m01ly.github.io</a></p>
-<p><a href="https%3A%2F%2Fcloud.tencent.com%2Fdeveloper%2Farticle%2F1928677">cloud.tencent.com</a></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2026/04/20/2026-04-20-AI-Agent-%E6%9E%B6%E6%9E%84/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/1.jpg">
-      <meta itemprop="name" content="信安小蚂蚁">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="信安小蚂蚁">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/04/20/2026-04-20-AI-Agent-%E6%9E%B6%E6%9E%84/" class="post-title-link" itemprop="url">AI Agent 架构</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2026-04-20 00:00:00 / 修改时间：22:09:59" itemprop="dateCreated datePublished" datetime="2026-04-20T00:00:00+08:00">2026-04-20</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/AI/" itemprop="url" rel="index">
-                    <span itemprop="name">AI</span>
-                  </a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-file-word-o"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>1.1k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-clock-o"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>3 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="AI-Agent-架构"><a href="#AI-Agent-架构" class="headerlink" title="AI Agent 架构"></a>AI Agent 架构</h1><p><img data-src="image1.png" alt="AI Agent 架构"></p>
-<h2 id="四种模式对比表"><a href="#四种模式对比表" class="headerlink" title="四种模式对比表"></a>四种模式对比表</h2><table>
-<thead>
-<tr>
-<th>维度</th>
-<th>单步响应</th>
-<th>ReAct</th>
-<th>规划-执行</th>
-<th>多 Agent</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>复杂度</strong></td>
-<td>低</td>
-<td>中</td>
-<td>中高</td>
-<td>高</td>
-</tr>
-<tr>
-<td><strong>是否用工具</strong></td>
-<td>❌</td>
-<td>✅</td>
-<td>✅</td>
-<td>✅</td>
-</tr>
-<tr>
-<td><strong>决策方式</strong></td>
-<td>一次性</td>
-<td>边做边想</td>
-<td>先想后做</td>
-<td>协商决策</td>
-</tr>
-<tr>
-<td><strong>适合任务</strong></td>
-<td>简单问答</td>
-<td>探索性问题</td>
-<td>流程明确的多步任务</td>
-<td>复杂协作项目</td>
-</tr>
-<tr>
-<td><strong>典型框架</strong></td>
-<td>基础 LLM API</td>
-<td>LangChain Agent</td>
-<td>LangGraph, TOT</td>
-<td>AutoGen, CrewAI</td>
-</tr>
-</tbody></table>
-<h2 id="AI-Agent-的四种主流工作模式"><a href="#AI-Agent-的四种主流工作模式" class="headerlink" title="AI Agent 的四种主流工作模式"></a>AI Agent 的四种主流工作模式</h2><h3 id="模式一：单步响应模式（Basic-LLM）"><a href="#模式一：单步响应模式（Basic-LLM）" class="headerlink" title="模式一：单步响应模式（Basic LLM）"></a>模式一：单步响应模式（Basic LLM）</h3><p><strong>工作原理</strong></p>
-<p>用户提问 → LLM 直接回答，一次性完成</p>
-<p><strong>特点</strong></p>
-<ul>
-<li>没有外部工具，纯靠模型内部知识</li>
-<li>速度快，成本低</li>
-<li>无法获取实时信息，不能执行实际操作</li>
-</ul>
-<p><strong>适用场景</strong></p>
-<p>简单问答、创意写作、代码解释</p>
-<p><strong>一句话总结</strong></p>
-<p>“只会动脑子，不会动手，也不会查资料”</p>
-<hr>
-<h3 id="模式二：ReAct-模式（推理-行动循环）"><a href="#模式二：ReAct-模式（推理-行动循环）" class="headerlink" title="模式二：ReAct 模式（推理+行动循环）"></a>模式二：ReAct 模式（推理+行动循环）</h3><p><strong>工作原理</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">思考（Thought）→ 决定行动（Action）→ 观察结果（Observation）→ 再思考...</span><br></pre></td></tr></table></figure>
-
-<p><strong>特点</strong></p>
-<ul>
-<li>LLM 边想边做，根据工具返回的结果调整下一步</li>
-<li>形成”思考-行动-观察”的循环</li>
-<li>能处理需要多步探索的开放性问题</li>
-</ul>
-<p><strong>举个例子</strong></p>
-<p>用户问：”明天北京天气怎么样？适合穿什么？”</p>
-<ol>
-<li>思考：需要查天气 → 行动：调用天气 API → 观察：明天 15°C 有雨</li>
-<li>思考：有雨需要带伞，15°C 需要外套 → 行动：无需再查 → 给出穿衣建议</li>
-</ol>
-<p><strong>适用场景</strong></p>
-<p>实时信息查询、多步骤问题求解、需要试错探索的任务</p>
-<p><strong>一句话总结</strong></p>
-<p>“边想边干，看到结果再决定下一步”</p>
-<hr>
-<h3 id="模式三：规划-执行模式（Plan-and-Solve）"><a href="#模式三：规划-执行模式（Plan-and-Solve）" class="headerlink" title="模式三：规划-执行模式（Plan-and-Solve）"></a>模式三：规划-执行模式（Plan-and-Solve）</h3><p><strong>工作原理</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">规划阶段：LLM 把复杂任务拆成步骤清单</span><br><span class="line">执行阶段：按清单逐步完成，最后汇总结果</span><br></pre></td></tr></table></figure>
-
-<p><strong>特点</strong></p>
-<ul>
-<li>先制定完整计划，再批量执行</li>
-<li>适合步骤明确、可预见的复杂任务</li>
-<li>计划可以人工审核修改后再执行</li>
-</ul>
-<p><strong>举个例子</strong></p>
-<p>用户说：”帮我策划一场 20 人的生日派对”</p>
-<ol>
-<li>规划：确定预算 → 选场地 → 定餐饮 → 买装饰 → 发邀请 → 准备音乐</li>
-<li>执行：依次调用预算计算器、场地查询、餐厅预订等工具</li>
-</ol>
-<p><strong>适用场景</strong></p>
-<p>项目管理、复杂工作流、需要多工具协作的任务</p>
-<p><strong>一句话总结</strong></p>
-<p>“先写剧本，再按剧本演”</p>
-<hr>
-<h3 id="模式四：多-Agent-协作模式（Multi-Agent）"><a href="#模式四：多-Agent-协作模式（Multi-Agent）" class="headerlink" title="模式四：多 Agent 协作模式（Multi-Agent）"></a>模式四：多 Agent 协作模式（Multi-Agent）</h3><p><strong>工作原理</strong></p>
-<p>多个专业 Agent 分工协作，通过对话完成任务</p>
-<p><strong>常见角色</strong></p>
-<table>
-<thead>
-<tr>
-<th>角色</th>
-<th>职责</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>规划 Agent</td>
-<td>拆解任务、分配工作</td>
-</tr>
-<tr>
-<td>执行 Agent</td>
-<td>调用工具完成具体动作</td>
-</tr>
-<tr>
-<td>审核 Agent</td>
-<td>检查结果、提出修改意见</td>
-</tr>
-<tr>
-<td>专家 Agent</td>
-<td>特定领域知识（如法律、医疗）</td>
-</tr>
-</tbody></table>
-<p><strong>特点</strong></p>
-<ul>
-<li>每个 Agent 有专门角色和工具</li>
-<li>Agent 之间可以讨论、辩论、互相纠错</li>
-<li>模拟团队协作，解决超复杂问题</li>
-</ul>
-<p><strong>举个例子</strong></p>
-<p>开发一个网站：</p>
-<ul>
-<li>产品经理 Agent：写需求文档</li>
-<li>架构师 Agent：设计技术方案</li>
-<li>程序员 Agent：写代码</li>
-<li>测试 Agent：检查 Bug</li>
-<li>他们互相沟通，直到网站完成</li>
-</ul>
-<p><strong>适用场景</strong></p>
-<p>软件开发、商业分析、科研协作、任何<strong>需要多人配合的复杂项目</strong></p>
-<p><strong>一句话总结</strong></p>
-<p>“一个 Agent 搞不定，就开一个会”</p>
-<hr>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2021/04/15/PHP-%E6%AD%A3%E5%88%99%E7%9A%84-m%E5%A4%9A%E8%A1%8C%E6%A8%A1%E5%BC%8F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/1.jpg">
-      <meta itemprop="name" content="信安小蚂蚁">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="信安小蚂蚁">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/04/15/PHP-%E6%AD%A3%E5%88%99%E7%9A%84-m%E5%A4%9A%E8%A1%8C%E6%A8%A1%E5%BC%8F/" class="post-title-link" itemprop="url">PHP 正则的 m多行模式</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-04-15 08:54:31 / 修改时间：08:56:49" itemprop="dateCreated datePublished" datetime="2021-04-15T08:54:31+08:00">2021-04-15</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/" itemprop="url" rel="index">
-                    <span itemprop="name">基础积累</span>
-                  </a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-file-word-o"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>1.1k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-clock-o"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>3 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>一个很小很小的知识点，题目源码：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">show_source(__FILE__);</span><br><span class="line">include(&#39;flag.php&#39;);</span><br><span class="line">$a&#x3D;$_GET[&#39;cmd&#39;];</span><br><span class="line">if(preg_match(&#39;&#x2F;^php$&#x2F;im&#39;, $a))&#123;</span><br><span class="line">    if(preg_match(&#39;&#x2F;^php$&#x2F;i&#39;, $a))&#123;</span><br><span class="line">        echo &#39;hacker&#39;;</span><br><span class="line">    &#125;</span><br><span class="line">    else&#123;</span><br><span class="line">        echo $flag;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">else&#123;</span><br><span class="line">    echo &#39;nonononono&#39;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/04/15/PHP-%E6%AD%A3%E5%88%99%E7%9A%84-m%E5%A4%9A%E8%A1%8C%E6%A8%A1%E5%BC%8F/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2021/04/14/vulnstack-ATT-CK%E5%AE%9E%E6%88%98%E7%B3%BB%E5%88%97-%E7%BA%A2%E9%98%9F%E5%AE%9E%E6%88%98%EF%BC%88%E4%B8%80%EF%BC%89/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/1.jpg">
-      <meta itemprop="name" content="信安小蚂蚁">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="信安小蚂蚁">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/04/14/vulnstack-ATT-CK%E5%AE%9E%E6%88%98%E7%B3%BB%E5%88%97-%E7%BA%A2%E9%98%9F%E5%AE%9E%E6%88%98%EF%BC%88%E4%B8%80%EF%BC%89/" class="post-title-link" itemprop="url">vulnstack-ATT&CK实战系列 红队实战（一）</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-04-14 20:46:10 / 修改时间：20:47:02" itemprop="dateCreated datePublished" datetime="2021-04-14T20:46:10+08:00">2021-04-14</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%86%85%E7%BD%91%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index">
-                    <span itemprop="name">内网学习</span>
-                  </a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-file-word-o"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>12k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-clock-o"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>29 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>&emsp;前面内网基础知识也是学了些了，感觉还是需要做系统点的实验，于是找到了<a href="http://vulnstack.qiyuanxuetang.net/vuln/?page=2" target="_blank" rel="noopener">【红日安全的红队实战系列】</a>就先从一开始吧，加油加油。</p>
-<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><p>&emsp;测试时我宿主机一直无法ping通win7，后面发现是防火墙给了限制，应该是题目环境需要特意禁用的。这里我为了方便就把他打开了。开启如下规则即可：<br><img data-src="//tva1.sinaimg.cn/large/006Glg0Bgy1gpft6n9f98j312s0kmmzw.jpg" alt=""><br>下面开始介绍环境：<br>靶机下载可以到官网下载：<br><a href="http://vulnstack.qiyuanxuetang.net/vuln/detail/2/" target="_blank" rel="noopener">【详情】</a><br>所有主机密码为：<strong>hongrisec@2019</strong><br><img data-src="//tva1.sinaimg.cn/large/006Glg0Bgy1gpft93unslj30xs0g70zt.jpg" alt="拓扑图"></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/04/14/vulnstack-ATT-CK%E5%AE%9E%E6%88%98%E7%B3%BB%E5%88%97-%E7%BA%A2%E9%98%9F%E5%AE%9E%E6%88%98%EF%BC%88%E4%B8%80%EF%BC%89/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mayi077.github.io/2021/04/09/%E5%9F%9F%E5%86%85%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/1.jpg">
-      <meta itemprop="name" content="信安小蚂蚁">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="信安小蚂蚁">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/04/09/%E5%9F%9F%E5%86%85%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8/" class="post-title-link" itemprop="url">域内横向移动</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-04-09 15:56:53 / 修改时间：15:59:13" itemprop="dateCreated datePublished" datetime="2021-04-09T15:56:53+08:00">2021-04-09</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%86%85%E7%BD%91%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index">
-                    <span itemprop="name">内网学习</span>
-                  </a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-file-word-o"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>16k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-clock-o"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>41 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>&emsp;域内横向移动技术，是在复杂的内网攻击中被广泛使用的一种技术，尤其是在高及持续威胁（APT）中。攻击者会利用该技术，以被攻陷的系统为跳板，访问其它域内主机，扩大资产范围（包括跳板机中的文档和存储的凭证，以及通过跳板机连接的数据库、域控制器或其他重要资产)。<br>&emsp;通过此类攻击手段，攻击者最终获取域控制器的访问权限，甚至完全控制基于windows操作系统的基础设施和业务相关的账户。因此，必须使用强口令来保护特权用户不被横向移动攻击，从而避免域内其他机器沦陷。建议系统管理员定期修改密码，从而使攻击者获取的权限失效。  </p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/04/09/%E5%9F%9F%E5%86%85%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-  </div>
-
-  
-  <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
-  </nav>
-
-
-
-          </div>
-          
-
-<script>
-  window.addEventListener('tabs:register', () => {
-    let activeClass = CONFIG.comments.activeClass;
-    if (CONFIG.comments.storage) {
-      activeClass = localStorage.getItem('comments_active') || activeClass;
-    }
-    if (activeClass) {
-      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
-      if (activeTab) {
-        activeTab.click();
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
       }
     }
-  });
-  if (CONFIG.comments.storage) {
-    window.addEventListener('tabs:click', event => {
-      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
-      let commentClass = event.target.classList[1];
-      localStorage.setItem('comments_active', commentClass);
-    });
-  }
-</script>
 
-        </div>
-          
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
   
-  <div class="toggle sidebar-toggle">
-    <span class="toggle-line toggle-line-first"></span>
-    <span class="toggle-line toggle-line-middle"></span>
-    <span class="toggle-line toggle-line-last"></span>
-  </div>
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
 
-  <aside class="sidebar">
-    <div class="sidebar-inner">
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
 
-      <ul class="sidebar-nav motion-element">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
-      </ul>
-
-      <!--noindex-->
-      <div class="post-toc-wrap sidebar-panel">
-      </div>
-      <!--/noindex-->
-
-      <div class="site-overview-wrap sidebar-panel">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <img class="site-author-image" itemprop="image" alt="信安小蚂蚁"
-      src="/images/1.jpg">
-  <p class="site-author-name" itemprop="name">信安小蚂蚁</p>
-  <div class="site-description" itemprop="description"></div>
-</div>
-<div class="site-state-wrap motion-element">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-          <a href="/archives">
-          <span class="site-state-item-count">135</span>
-          <span class="site-state-item-name">日志</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-categories">
-            <a href="/categories/">
-        <span class="site-state-item-count">11</span>
-        <span class="site-state-item-name">分类</span></a>
-      </div>
-      <div class="site-state-item site-state-tags">
-            <a href="/tags/">
-        <span class="site-state-item-count">86</span>
-        <span class="site-state-item-name">标签</span></a>
-      </div>
-  </nav>
-</div>
-  <div class="links-of-author motion-element">
-      <span class="links-of-author-item">
-        <a href="/487280636@qq.com" title="E-Mail → 487280636@qq.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
-      </span>
-      <span class="links-of-author-item">
-        <a href="http://wpa.qq.com/msgrd?v=3&uin=487280636&site=qq&menu=yes" title="QQ → http:&#x2F;&#x2F;wpa.qq.com&#x2F;msgrd?v&#x3D;3&amp;uin&#x3D;487280636&amp;site&#x3D;qq&amp;menu&#x3D;yes" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>QQ</a>
-      </span>
-  </div>
-  <div class="cc-license motion-element" itemprop="license">
-    <a href="https://creativecommons.org/publicdomain/zero/1.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-zero.svg" alt="Creative Commons"></a>
-  </div>
-
-
-
-      </div>
-
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '信安小蚂蚁',
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: 'home'
+}</script><meta name="generator" content="Hexo 5.4.0"></head><body><div class="page" id="body-wrap"><header class="full_page" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">信安小蚂蚁</span></a></span><div id="menus"></div></nav><div id="site-info"><h1 id="site-title">信安小蚂蚁</h1></div><div id="scroll-down"><i class="fas fa-angle-down scroll-down-effects"></i></div></header><main class="layout" id="content-inner"><div class="recent-posts nc" id="recent-posts"><div class="recent-post-items"><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2026/04/20/2026-04-20-TLS%E5%8A%A0%E5%AF%86%E5%A5%97%E4%BB%B6/" title="TLS加密套件">TLS加密套件</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2026-04-20T14:30:00.000Z" title="发表于 2026-04-20 22:30:00">2026-04-20</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/">密码学</a></span></div><div class="content"> SSL/TLS 握手过程首先得完成传输层的握手，然后进入SSL握手阶段：  客户端发送Client Hello Message，表明自己可以使用的SSL版本（从高到低尝试）、加密套件及相应参数如：  client_version(SSL版本)：TLS1.2 random：客户端随机数，用于后续协商密钥。 cipher_suites：支持的加密套件列表（由高到低排序）。 compression_methods：压缩算法列表（由高到低排序）。为null，表示不要压缩   服务器接收到ClientHello后，会返回ServerHello。服务器从客户端在ClientHello中提供的密码套件、SSL/TLS版本、压缩算法列表里选择它所支持的项，并把它的选择包含在ServerHello中告知客户端。  服务器也用TLS 1.2；提供服务器随机数；没有找到这个客户端的SessionID，所以填入了新的SessionID；选择了TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA384加密套件；同意不压缩数据；   Server -&gt; Client：Certific...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2026/04/20/2026-04-20-AI-Agent-%E6%9E%B6%E6%9E%84/" title="AI Agent 架构">AI Agent 架构</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2026-04-19T16:00:00.000Z" title="发表于 2026-04-20 00:00:00">2026-04-20</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/AI/">AI</a></span></div><div class="content">AI Agent 架构 四种模式对比表   维度 单步响应 ReAct 规划-执行 多 Agent    复杂度 低 中 中高 高   是否用工具 ❌ ✅ ✅ ✅   决策方式 一次性 边做边想 先想后做 协商决策   适合任务 简单问答 探索性问题 流程明确的多步任务 复杂协作项目   典型框架 基础 LLM API LangChain Agent LangGraph, TOT AutoGen, CrewAI   AI Agent 的四种主流工作模式模式一：单步响应模式（Basic LLM）工作原理 用户提问 → LLM 直接回答，一次性完成 特点  没有外部工具，纯靠模型内部知识 速度快，成本低 无法获取实时信息，不能执行实际操作  适用场景 简单问答、创意写作、代码解释 一句话总结 “只会动脑子，不会动手，也不会查资料”  模式二：ReAct 模式（推理+行动循环）工作原理 1思考（Thought）→ 决定行动（Action）→ 观察结果（Observation）→ 再思考...  特点  LLM 边想边做，根据工具返回的结果调整下一步 形成”思考-行动-观察”的循环 能处...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2021/04/15/PHP-%E6%AD%A3%E5%88%99%E7%9A%84-m%E5%A4%9A%E8%A1%8C%E6%A8%A1%E5%BC%8F/" title="PHP 正则的 m多行模式">PHP 正则的 m多行模式</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2021-04-15T00:54:31.000Z" title="发表于 2021-04-15 08:54:31">2021-04-15</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/">基础积累</a></span></div><div class="content">一个很小很小的知识点，题目源码： 123456789101112131415&lt;?phpshow_source(__FILE__);include(&#x27;flag.php&#x27;);$a=$_GET[&#x27;cmd&#x27;];if(preg_match(&#x27;/^php$/im&#x27;, $a))&#123;    if(preg_match(&#x27;/^php$/i&#x27;, $a))&#123;        echo &#x27;hacker&#x27;;    &#125;    else&#123;        echo $flag;    &#125;&#125;else&#123;    echo &#x27;nonononono&#x27;;&#125;   这里第一个preg_match 里的正则模式i m 表示不区分大小写和多行模式。测试如下： 12345678&lt;?php$a=&quot;php\n&quot;;echo preg_match(&#x27;/^php$/im&#x27;, $a);// 1$a=&...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2021/04/14/vulnstack-ATT-CK%E5%AE%9E%E6%88%98%E7%B3%BB%E5%88%97-%E7%BA%A2%E9%98%9F%E5%AE%9E%E6%88%98%EF%BC%88%E4%B8%80%EF%BC%89/" title="vulnstack-ATT&amp;CK实战系列 红队实战（一）">vulnstack-ATT&amp;CK实战系列 红队实战（一）</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2021-04-14T12:46:10.000Z" title="发表于 2021-04-14 20:46:10">2021-04-14</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E5%86%85%E7%BD%91%E5%AD%A6%E4%B9%A0/">内网学习</a></span></div><div class="content">前言&emsp;前面内网基础知识也是学了些了，感觉还是需要做系统点的实验，于是找到了【红日安全的红队实战系列】就先从一开始吧，加油加油。 环境搭建&emsp;测试时我宿主机一直无法ping通win7，后面发现是防火墙给了限制，应该是题目环境需要特意禁用的。这里我为了方便就把他打开了。开启如下规则即可：下面开始介绍环境：靶机下载可以到官网下载：【详情】所有主机密码为：hongrisec@2019  VM1 也就是 win7首先我们知道他是一个web服务器拥有2张网卡，一个可以设置为net，一个设置为仅主机。默认只有一个网卡设备需要我们在vmware中添加，仅主机对应的是VMnet1我们可以在宿主机上找到网卡VMnet1指定好他的ip等，他的ip就是选用仅主机模式网卡的网关地址这里我设置的是192.168.52.2。还有就是我们有要求内网网段可以到vmware中的虚拟网络编辑器进行修改如图：   我将其设置为了52网段与前面设置的网关相匹配。&emsp;随后我们进入win7系统，配置特定的ip地址网关等。但是有多个网卡驱动我们需要找到对应的根据mac地址（具体不说了，懂的都懂）然后进...</div></div></div><div class="recent-post-item"><div class="recent-post-info no-cover"><a class="article-title" href="/2021/04/09/%E5%9F%9F%E5%86%85%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8/" title="域内横向移动">域内横向移动</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2021-04-09T07:56:53.000Z" title="发表于 2021-04-09 15:56:53">2021-04-09</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><a class="article-meta__categories" href="/categories/%E5%86%85%E7%BD%91%E5%AD%A6%E4%B9%A0/">内网学习</a></span></div><div class="content">&emsp;域内横向移动技术，是在复杂的内网攻击中被广泛使用的一种技术，尤其是在高及持续威胁（APT）中。攻击者会利用该技术，以被攻陷的系统为跳板，访问其它域内主机，扩大资产范围（包括跳板机中的文档和存储的凭证，以及通过跳板机连接的数据库、域控制器或其他重要资产)。&emsp;通过此类攻击手段，攻击者最终获取域控制器的访问权限，甚至完全控制基于windows操作系统的基础设施和业务相关的账户。因此，必须使用强口令来保护特权用户不被横向移动攻击，从而避免域内其他机器沦陷。建议系统管理员定期修改密码，从而使攻击者获取的权限失效。    0x01 常用 Windows 远程连接和相关命令&emsp; 在渗透测试中，拿到目标计算机的用户明文密码或者NTLM Hash后，可以通过PTH (Pass the Hash，凭据传递）的方法,将散列值或明文密码传送到目标机器中进行验证。与目标机器建立连接后，可以使用相关方法在远程Windows操作系统中执行命令。在多层代理环境中进行渗透测试时，由于网络条件较差，无法使用图形化界面连接远程主机。此时，可以使用命令行的方式连接远程主机(最好使用Wind...</div></div></div></div><nav id="pagination"><div class="pagination"><span class="page-number current">1</span><a class="page-number" href="/page/2/#content-inner">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/#content-inner">27</a><a class="extend next" rel="next" href="/page/2/#content-inner"><i class="fas fa-chevron-right fa-fw"></i></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/images/1.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">信安小蚂蚁</div><div class="author-info-description"></div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">135</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">86</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/mayi077"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">2020–2021，这里记录了 100+ 篇文字。
+后来因工作入职，暂时搁笔。
+2026，重新起航。
+继续写下去。
+</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/04/20/2026-04-20-TLS%E5%8A%A0%E5%AF%86%E5%A5%97%E4%BB%B6/" title="TLS加密套件">TLS加密套件</a><time datetime="2026-04-20T14:30:00.000Z" title="发表于 2026-04-20 22:30:00">2026-04-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/04/20/2026-04-20-AI-Agent-%E6%9E%B6%E6%9E%84/" title="AI Agent 架构">AI Agent 架构</a><time datetime="2026-04-19T16:00:00.000Z" title="发表于 2026-04-20 00:00:00">2026-04-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2021/04/15/PHP-%E6%AD%A3%E5%88%99%E7%9A%84-m%E5%A4%9A%E8%A1%8C%E6%A8%A1%E5%BC%8F/" title="PHP 正则的 m多行模式">PHP 正则的 m多行模式</a><time datetime="2021-04-15T00:54:31.000Z" title="发表于 2021-04-15 08:54:31">2021-04-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2021/04/14/vulnstack-ATT-CK%E5%AE%9E%E6%88%98%E7%B3%BB%E5%88%97-%E7%BA%A2%E9%98%9F%E5%AE%9E%E6%88%98%EF%BC%88%E4%B8%80%EF%BC%89/" title="vulnstack-ATT&amp;CK实战系列 红队实战（一）">vulnstack-ATT&amp;CK实战系列 红队实战（一）</a><time datetime="2021-04-14T12:46:10.000Z" title="发表于 2021-04-14 20:46:10">2021-04-14</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2021/04/09/%E5%9F%9F%E5%86%85%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8/" title="域内横向移动">域内横向移动</a><time datetime="2021-04-09T07:56:53.000Z" title="发表于 2021-04-09 15:56:53">2021-04-09</time></div></div></div></div><div class="card-widget card-categories"><div class="item-headline">
+            <i class="fas fa-folder-open"></i>
+            <span>分类</span>
+            <a class="card-more-btn" href="/categories/" title="查看更多">
+      <i class="fas fa-angle-right"></i></a>
+          </div>
+          <ul class="card-category-list" id="aside-cat-list">
+            <li class="card-category-list-item "><a class="card-category-list-link" href="/categories/AI/"><span class="card-category-list-name">AI</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/CTF%E5%A4%8D%E7%8E%B0/"><span class="card-category-list-name">CTF复现</span><span class="card-category-list-count">55</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/sqli-labs/"><span class="card-category-list-name">sqli-labs</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E5%85%B6%E5%AE%83%E7%9F%A5%E8%AF%86/"><span class="card-category-list-name">其它知识</span><span class="card-category-list-count">3</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E5%86%85%E7%BD%91%E5%AD%A6%E4%B9%A0/"><span class="card-category-list-name">内网学习</span><span class="card-category-list-count">13</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E5%9F%BA%E7%A1%80%E7%A7%AF%E7%B4%AF/"><span class="card-category-list-name">基础积累</span><span class="card-category-list-count">40</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/"><span class="card-category-list-name">密码学</span><span class="card-category-list-count">1</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E6%8E%A8%E8%8D%90/"><span class="card-category-list-name">推荐</span><span class="card-category-list-count">2</span></a></li>
+          </ul></div><div class="card-widget card-tags"><div class="item-headline"><i class="fas fa-tags"></i><span>标签</span></div><div class="card-tag-cloud"><a href="/tags/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 1.1em; color: #999">环境搭建</a> <a href="/tags/%E5%86%85%E7%BD%91%E9%9D%B6%E5%9C%BA/" style="font-size: 1.1em; color: #999">内网靶场</a> <a href="/tags/eregi/" style="font-size: 1.1em; color: #999">eregi</a> <a href="/tags/%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E/" style="font-size: 1.2em; color: #999da3">序列化漏洞</a> <a href="/tags/with-rollup/" style="font-size: 1.1em; color: #999">with rollup</a> <a href="/tags/shell%E7%9B%B2%E6%B3%A8/" style="font-size: 1.1em; color: #999">shell盲注</a> <a href="/tags/SSRF/" style="font-size: 1.2em; color: #999da3">SSRF</a> <a href="/tags/%E4%BA%8C%E6%AC%A1%E6%B3%A8%E5%85%A5/" style="font-size: 1.3em; color: #99a1ac">二次注入</a> <a href="/tags/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%A7%AF%E7%B4%AF/" style="font-size: 1.1em; color: #999">基础知识积累</a> <a href="/tags/unserialize/" style="font-size: 1.2em; color: #999da3">unserialize</a> <a href="/tags/escapeshellcmd/" style="font-size: 1.1em; color: #999">escapeshellcmd</a> <a href="/tags/%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/" style="font-size: 1.1em; color: #999">内网渗透</a> <a href="/tags/%E4%B8%8A%E4%BC%A0%E6%BC%8F%E6%B4%9E/" style="font-size: 1.1em; color: #999">上传漏洞</a> <a href="/tags/gopher/" style="font-size: 1.1em; color: #999">gopher</a> <a href="/tags/session%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" style="font-size: 1.1em; color: #999">session反序列化</a> <a href="/tags/postgresql/" style="font-size: 1.1em; color: #999">postgresql</a> <a href="/tags/%E4%BC%AA%E5%8D%8F%E8%AE%AE/" style="font-size: 1.2em; color: #999da3">伪协议</a> <a href="/tags/php%E5%BC%B1%E6%AF%94%E8%BE%83/" style="font-size: 1.1em; color: #999">php弱比较</a> <a href="/tags/PHP%E5%8F%AF%E5%8F%98%E5%8F%98%E9%87%8F/" style="font-size: 1.1em; color: #999">PHP可变变量</a> <a href="/tags/%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8/" style="font-size: 1.1em; color: #999">横向移动</a> <a href="/tags/php%E7%BB%95%E8%BF%87/" style="font-size: 1.1em; color: #999">php绕过</a> <a href="/tags/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/" style="font-size: 1.3em; color: #99a1ac">文件包含</a> <a href="/tags/CobaltStrike%E5%AD%A6%E4%B9%A0/" style="font-size: 1.1em; color: #999">CobaltStrike学习</a> <a href="/tags/basename/" style="font-size: 1.1em; color: #999">basename</a> <a href="/tags/sql%E6%B3%A8%E5%85%A5/" style="font-size: 1.4em; color: #99a5b6">sql注入</a> <a href="/tags/%E5%88%B7%E9%A2%98/" style="font-size: 1.1em; color: #999">刷题</a> <a href="/tags/pin%E7%A0%81/" style="font-size: 1.1em; color: #999">pin码</a> <a href="/tags/intval/" style="font-size: 1.1em; color: #999">intval</a> <a href="/tags/IP%E6%94%B6%E9%9B%86/" style="font-size: 1.1em; color: #999">IP收集</a> <a href="/tags/redis/" style="font-size: 1.1em; color: #999">redis</a> <a href="/tags/SQL%E6%B3%A8%E5%85%A5/" style="font-size: 1.1em; color: #999">SQL注入</a> <a href="/tags/%E5%BA%8F%E5%88%97%E5%8C%96/" style="font-size: 1.2em; color: #999da3">序列化</a> <a href="/tags/MD5%E7%BB%95%E8%BF%87/" style="font-size: 1.1em; color: #999">MD5绕过</a> <a href="/tags/node-js/" style="font-size: 1.1em; color: #999">node.js</a> <a href="/tags/buuctf/" style="font-size: 1.5em; color: #99a9bf">buuctf</a> <a href="/tags/%E6%8E%A8%E8%8D%90/" style="font-size: 1.2em; color: #999da3">推荐</a> <a href="/tags/php-filter/" style="font-size: 1.1em; color: #999">php://filter</a> <a href="/tags/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/" style="font-size: 1.1em; color: #999">文件上传</a> <a href="/tags/%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E7%9B%B2%E6%B3%A8/" style="font-size: 1.1em; color: #999">命令执行盲注</a> <a href="/tags/%E7%AB%AF%E5%8F%A3%E6%94%B6%E9%9B%86/" style="font-size: 1.1em; color: #999">端口收集</a></div></div><div class="card-widget card-archives">
+    <div class="item-headline">
+      <i class="fas fa-archive"></i>
+      <span>归档</span>
+      <a class="card-more-btn" href="/archives/"
+            title="查看更多">
+            <i class="fas fa-angle-right"></i>
+          </a>
     </div>
-  </aside>
-  <div id="sidebar-dimmer"></div>
-
-
-      </div>
-    </main>
-
-    <footer class="footer">
-      <div class="footer-inner">
-        
-
-<div class="copyright">
   
-  &copy; 
-  <span itemprop="copyrightYear">2026</span>
-  <span class="with-love">
-    <i class="fa fa-user"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">信安小蚂蚁</span>
-</div>
-
-
-
-
-
-
-
-
-
-        
-<div class="busuanzi-count">
-  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-</div>
-
-
-
-
-
-
-
-
-      </div>
-    </footer>
-  </div>
-
-  
-  <script src="/lib/anime.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
-  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
-  <script src="/lib/velocity/velocity.min.js"></script>
-  <script src="/lib/velocity/velocity.ui.min.js"></script>
-
-<script src="/js/utils.js"></script>
-
-<script src="/js/motion.js"></script>
-
-
-<script src="/js/schemes/muse.js"></script>
-
-
-<script src="/js/next-boot.js"></script>
-
-
-
-
-  
-
-
-
-
-  
-<script src="/js/local-search.js"></script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-
-  
-
-
-</body>
-</html>
+    <ul class="card-archive-list">
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2026/04/">
+            <span class="card-archive-list-date">
+              四月 2026
+            </span>
+            <span class="card-archive-list-count">2</span>
+          </a>
+        </li>
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2021/04/">
+            <span class="card-archive-list-date">
+              四月 2021
+            </span>
+            <span class="card-archive-list-count">8</span>
+          </a>
+        </li>
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2021/03/">
+            <span class="card-archive-list-date">
+              三月 2021
+            </span>
+            <span class="card-archive-list-count">6</span>
+          </a>
+        </li>
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2021/01/">
+            <span class="card-archive-list-date">
+              一月 2021
+            </span>
+            <span class="card-archive-list-count">1</span>
+          </a>
+        </li>
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2020/11/">
+            <span class="card-archive-list-date">
+              十一月 2020
+            </span>
+            <span class="card-archive-list-count">3</span>
+          </a>
+        </li>
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2020/10/">
+            <span class="card-archive-list-date">
+              十月 2020
+            </span>
+            <span class="card-archive-list-count">3</span>
+          </a>
+        </li>
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2020/09/">
+            <span class="card-archive-list-date">
+              九月 2020
+            </span>
+            <span class="card-archive-list-count">1</span>
+          </a>
+        </li>
+      
+        <li class="card-archive-list-item">
+          <a class="card-archive-list-link" href="/archives/2020/08/">
+            <span class="card-archive-list-date">
+              八月 2020
+            </span>
+            <span class="card-archive-list-count">11</span>
+          </a>
+        </li>
+      
+    </ul>
+  </div><div class="card-widget card-webinfo"><div class="item-headline"><i class="fas fa-chart-line"></i><span>网站信息</span></div><div class="webinfo"><div class="webinfo-item"><div class="item-name">文章数目 :</div><div class="item-count">135</div></div><div class="webinfo-item"><div class="item-name">本站访客数 :</div><div class="item-count" id="busuanzi_value_site_uv"><i class="fa-solid fa-spinner fa-spin"></i></div></div><div class="webinfo-item"><div class="item-name">本站总浏览量 :</div><div class="item-count" id="busuanzi_value_site_pv"><i class="fa-solid fa-spinner fa-spin"></i></div></div><div class="webinfo-item"><div class="item-name">最后更新时间 :</div><div class="item-count" id="last-push-date" data-lastPushDate="2026-04-21T14:51:06.724Z"><i class="fa-solid fa-spinner fa-spin"></i></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 信安小蚂蚁</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 5.4.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.5-b1</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.5-b1"></script><script src="/js/main.js?v=5.5.5-b1"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
